@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>About SpotGH | Ghana's Business Discovery & Website Platform</title>
+  <meta name="description" content="Why SpotGH exists, our mission, and how we help Ghanaian businesses get discovered and grow online.">
+  <link rel="canonical" href="/pages/about.html">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#4E0DAD">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><link rel="icon" type="image/png" sizes="192x192" href="/assets/images/icon-192.png"><link rel="apple-touch-icon" href="/assets/images/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <script src="/assets/js/theme.js"></script>
+  <script src="/assets/js/ga.js"></script>
+  <style>
+    .about-hero{background:linear-gradient(135deg,var(--clr-primary),var(--clr-primary-dark));color:#fff;padding:4rem 0 5rem;text-align:center}
+    .about-hero h1{color:#fff;font-size:clamp(1.9rem,4.5vw,3rem);margin-bottom:1rem}
+    .about-hero p{opacity:.92;font-size:1.05rem;max-width:600px;margin:0 auto}
+    .about-wrap{max-width:820px;margin:0 auto;padding:3.5rem 1rem 5rem}
+    .about-wrap h2{font-family:var(--font-display);font-size:1.5rem;font-weight:800;margin:2.5rem 0 .9rem}
+    .about-wrap p{color:var(--clr-text-2);line-height:1.75;font-size:.98rem;margin-bottom:1rem}
+    .value-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem;margin-top:1.5rem}
+    .value-card{background:var(--clr-surface-2);border:1px solid var(--clr-border);border-radius:var(--radius-md,12px);padding:1.5rem}
+    .value-card i{color:var(--clr-primary);font-size:1.4rem;margin-bottom:.75rem;display:block}
+    .value-card h3{font-size:1rem;font-weight:700;margin-bottom:.4rem}
+    .value-card p{font-size:.85rem;margin:0}
+    .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1.5rem;text-align:center;margin:2rem 0}
+    .stat-row div strong{display:block;font-size:1.6rem;font-weight:800;color:var(--clr-primary)}
+    .stat-row div span{font-size:.8rem;color:var(--clr-text-3)}
+  </style>
+</head>
+<body>
+  <header class="navbar" id="navbar">
+    <div class="container navbar__inner">
+      <a href="/" class="navbar__logo"><img src="/assets/images/icon-192.png" alt="SpotGH"> Spot<span>GH</span></a>
+      <div class="navbar__search hidden-mobile">
+        <div class="search-bar-nav">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="navSearch" placeholder="Search businesses..." autocomplete="off">
+          <div id="navSuggestions" class="suggestions-dropdown" hidden></div>
+        </div>
+      </div>
+      <nav class="navbar__actions">
+        <a href="/pages/categories.html" class="navbar__link hidden-mobile" data-i18n="nav.categories">Categories</a>
+        <a href="/pages/directory.html" class="navbar__link hidden-mobile" data-i18n="nav.directory">Directory</a>
+        <a href="/pages/pricing.html" class="navbar__link hidden-mobile" data-i18n="nav.pricing">Pricing</a>
+        <a href="/pages/deals.html" class="navbar__link hidden-mobile" data-i18n="nav.deals">🎉 Deals</a>
+        <a href="/pages/events.html" class="navbar__link hidden-mobile">Events</a>
+        <a href="/pages/blog.html" class="navbar__link hidden-mobile">Blog</a>
+        <a href="/pages/map.html" class="navbar__link hidden-mobile"><i class="fa-solid fa-map"></i></a>
+        <select id="langSwitcher" onchange="setLanguage(this.value)" style="background:none;border:1px solid var(--clr-border);border-radius:8px;padding:.3rem .4rem;font-size:.75rem;color:var(--clr-text-2);cursor:pointer" title="Language"><option value="en">EN</option><option value="tw">TW</option><option value="ga">GA</option></select>
+        <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
+        <button class="near-me-btn hidden-mobile" onclick="searchNearMe()"><i class="fa-solid fa-location-crosshairs"></i></button>
+        <div id="authNav"></div>
+        <button class="navbar__hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+      </nav>
+    </div>
+    <div class="mobile-menu" id="mobileMenu" hidden>
+      <input type="text" id="mobileSearch" placeholder="Search..." class="mobile-search-input">
+      <nav class="mobile-nav">
+        <a href="/">Home</a>
+        <a href="/pages/categories.html">Categories</a>
+        <a href="/pages/directory.html">Directory</a>
+        <a href="/pages/pricing.html">Pricing</a>
+        <a href="/pages/deals.html">Deals</a>
+        <a href="/pages/map.html">Map</a>
+        <div id="mobileAuthLinks"></div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="about-hero">
+      <div class="container">
+        <h1>Every business deserves to be found</h1>
+        <p>SpotGH exists so that a hairdresser in Kumasi, a chop bar in Tamale, and a boutique hotel in Accra can all be discovered online, trusted by customers, and given the tools to grow — without needing a developer or a big marketing budget.</p>
+      </div>
+    </div>
+
+    <div class="about-wrap">
+      <h2>Why we started SpotGH</h2>
+      <p>Most Ghanaian businesses are easy to find in person but nearly invisible online. A customer moving to a new area, a tourist looking for somewhere to eat, or someone searching "salon near me" too often comes up empty — not because the business isn't good, but because it was never listed anywhere searchable. Meanwhile, getting a proper website built usually means hiring a developer, paying upfront, and waiting weeks.</p>
+      <p>SpotGH closes that gap. Any business can create a searchable, professional listing in minutes — complete with a free mini-website if they don't already have one — and start showing up where customers are already looking.</p>
+
+      <h2>Our mission</h2>
+      <p>To make it possible for every business in Ghana, regardless of size or budget, to be discoverable, credible, and easy to reach online. We measure success not by how many listings exist, but by how many real customer connections — calls, WhatsApp messages, bookings, orders — those listings generate.</p>
+
+      <h2>Why businesses trust SpotGH</h2>
+      <div class="value-grid">
+        <div class="value-card"><i class="fa-solid fa-shield-check"></i><h3>Verification, not just sign-up</h3><p>Verified businesses go through an identity check, so the badge on a listing actually means something to customers.</p></div>
+        <div class="value-card"><i class="fa-solid fa-comments"></i><h3>Real reviews only</h3><p>Reviews come from real users and can be flagged and moderated — we don't manufacture or sell reputation.</p></div>
+        <div class="value-card"><i class="fa-solid fa-lock"></i><h3>No lock-in</h3><p>You own your content. If you already have a website, we link to it and charge you less for the privilege — we're not trying to replace it.</p></div>
+        <div class="value-card"><i class="fa-solid fa-hand-holding-dollar"></i><h3>Transparent pricing</h3><p>Plans are published, prices don't hide fees, and Standard is a one-time payment with no surprise auto-renewal.</p></div>
+      </div>
+
+      <h2>How SpotGH helps you grow</h2>
+      <p>Beyond a listing, SpotGH gives business owners the tools that usually cost extra elsewhere: a health score that tells you exactly what to improve, analytics that show what's working, AI-assisted descriptions and replies, a lead marketplace, deals and events promotion, and a referral program that rewards you for bringing in other businesses. All of it is built to save time, not add another dashboard to babysit.</p>
+
+      <h2>Where we're headed</h2>
+      <p>We're starting in Ghana because that's where we understand the market best — but the platform is built with expansion in mind. As SpotGH grows, the goal stays the same: make it as easy as possible for a real business to be found by a real customer.</p>
+
+      <div style="text-align:center;margin-top:3rem;padding:2rem;background:var(--clr-surface-2);border-radius:var(--radius-md,12px)">
+        <h3 style="margin-bottom:.5rem">Ready to be found?</h3>
+        <p style="margin-bottom:1.25rem">List your business free, or upgrade for a mini-website and more visibility.</p>
+        <a href="/pages/register.html" class="btn btn--primary btn--lg">Get Started Free</a>
+      </div>
+    </div>
+  </main>
+
+  <footer style="background:#070E1A;color:rgba(255,255,255,.7);padding:3rem 0">
+    <div class="container">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2rem;margin-bottom:2rem">
+        <div><a href="/" style="font-family:var(--font-display);font-size:1.25rem;font-weight:800;color:#fff">🏙️ Spot<span style="color:var(--clr-primary)">GH</span></a><p style="font-size:.875rem;margin-top:.75rem">Discover trusted businesses across Ghana, or build your own business website in minutes. Made with ❤️ in Ghana.</p></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Explore</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/directory.html">Directory</a></li><li><a href="/pages/pricing.html">Pricing</a></li><li><a href="/pages/deals.html">Deals</a></li><li><a href="/pages/map.html">Map View</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Company</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/about.html">About Us</a></li><li><a href="/pages/help.html">Help Centre</a></li><li><a href="/pages/status.html">System Status</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Legal</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/terms.html">Terms of Service</a></li><li><a href="/pages/privacy.html">Privacy Policy</a></li><li><a href="/pages/refund-policy.html">Refund Policy</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Support</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="mailto:support@spotgh.com">Contact Us</a></li><li><a href="/pages/pricing.html">Plans & Pricing</a></li></ul></div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:1.5rem;text-align:center;font-size:.8rem">© 2026 SpotGH · 🇬🇭 Supporting Ghanaian Businesses</div>
+    </div>
+  </footer>
+
+  <div id="toastContainer"></div>
+  <button class="scroll-top-btn" id="scrollTopBtn"><span aria-hidden="true" style="font-weight:700;font-size:1.2rem;line-height:1">&uarr;</span></button>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/main.js"></script>
+  <script src="/assets/js/i18n.js"></script>
+  <script>loadComponents();</script>
+</body>
+</html>

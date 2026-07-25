@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Terms of Service | SpotGH</title>
+  <meta name="description" content="Terms of Service for SpotGH — Ghana's business directory and mini-website platform.">
+  <link rel="canonical" href="/pages/terms.html">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#4E0DAD">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><link rel="icon" type="image/png" sizes="192x192" href="/assets/images/icon-192.png"><link rel="apple-touch-icon" href="/assets/images/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <script src="/assets/js/theme.js"></script>
+  <script src="/assets/js/ga.js"></script>
+  <style>
+    .legal-wrap{max-width:820px;margin:0 auto;padding:3rem 1rem 5rem}
+    .legal-wrap h1{font-family:var(--font-display);font-size:clamp(1.75rem,4vw,2.5rem);font-weight:800;margin-bottom:.5rem}
+    .legal-updated{color:var(--clr-text-3);font-size:.875rem;margin-bottom:2.5rem}
+    .legal-wrap h2{font-family:var(--font-display);font-size:1.25rem;font-weight:700;margin:2.25rem 0 .75rem}
+    .legal-wrap p,.legal-wrap li{color:var(--clr-text-2);line-height:1.7;font-size:.95rem}
+    .legal-wrap ul,.legal-wrap ol{padding-left:1.25rem;margin-bottom:1rem}
+    .legal-wrap li{margin-bottom:.4rem}
+    .legal-wrap a{color:var(--clr-primary)}
+    .legal-notice{background:var(--clr-surface-2);border:1px solid var(--clr-border);border-radius:var(--radius-md,12px);padding:1rem 1.25rem;font-size:.85rem;color:var(--clr-text-2);margin-bottom:2rem}
+  </style>
+</head>
+<body>
+  <header class="navbar" id="navbar">
+    <div class="container navbar__inner">
+      <a href="/" class="navbar__logo"><img src="/assets/images/icon-192.png" alt="SpotGH"> Spot<span>GH</span></a>
+      <div class="navbar__search hidden-mobile">
+        <div class="search-bar-nav">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="navSearch" placeholder="Search businesses..." autocomplete="off">
+          <div id="navSuggestions" class="suggestions-dropdown" hidden></div>
+        </div>
+      </div>
+      <nav class="navbar__actions">
+        <a href="/pages/categories.html" class="navbar__link hidden-mobile" data-i18n="nav.categories">Categories</a>
+        <a href="/pages/directory.html" class="navbar__link hidden-mobile" data-i18n="nav.directory">Directory</a>
+        <a href="/pages/pricing.html" class="navbar__link hidden-mobile" data-i18n="nav.pricing">Pricing</a>
+        <a href="/pages/deals.html" class="navbar__link hidden-mobile" data-i18n="nav.deals">🎉 Deals</a>
+        <a href="/pages/events.html" class="navbar__link hidden-mobile">Events</a>
+        <a href="/pages/blog.html" class="navbar__link hidden-mobile">Blog</a>
+        <a href="/pages/map.html" class="navbar__link hidden-mobile"><i class="fa-solid fa-map"></i></a>
+        <select id="langSwitcher" onchange="setLanguage(this.value)" style="background:none;border:1px solid var(--clr-border);border-radius:8px;padding:.3rem .4rem;font-size:.75rem;color:var(--clr-text-2);cursor:pointer" title="Language"><option value="en">EN</option><option value="tw">TW</option><option value="ga">GA</option></select>
+        <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
+        <button class="near-me-btn hidden-mobile" onclick="searchNearMe()"><i class="fa-solid fa-location-crosshairs"></i></button>
+        <div id="authNav"></div>
+        <button class="navbar__hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+      </nav>
+    </div>
+    <div class="mobile-menu" id="mobileMenu" hidden>
+      <input type="text" id="mobileSearch" placeholder="Search..." class="mobile-search-input">
+      <nav class="mobile-nav">
+        <a href="/">Home</a>
+        <a href="/pages/categories.html">Categories</a>
+        <a href="/pages/directory.html">Directory</a>
+        <a href="/pages/pricing.html">Pricing</a>
+        <a href="/pages/deals.html">Deals</a>
+        <a href="/pages/map.html">Map</a>
+        <div id="mobileAuthLinks"></div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="legal-wrap">
+      <h1>Terms of Service</h1>
+      <p class="legal-updated">Last updated: July 2026</p>
+
+      <div class="legal-notice">
+        <i class="fa-solid fa-circle-info"></i>
+        This is a starting template, not legal advice. Have a Ghana-qualified lawyer review and adapt it — especially the company details, dispute-resolution, and liability sections — before relying on it for a live, paying platform.
+      </div>
+
+      <p>These Terms of Service ("Terms") govern your access to and use of SpotGH (the "Platform"), operated by <strong>[Your Registered Company Name]</strong> ("SpotGH", "we", "us"). By creating an account, listing a business, or otherwise using the Platform, you agree to these Terms.</p>
+
+      <h2>1. Who Can Use SpotGH</h2>
+      <p>You must be at least 18 years old, or the age of majority in your jurisdiction, and able to form a binding contract to create an account. You're responsible for the accuracy of the information you provide and for keeping your login credentials secure.</p>
+
+      <h2>2. Business Listings & Mini-Websites</h2>
+      <ul>
+        <li>You must be an owner, employee, or authorized representative of any business you list.</li>
+        <li>You're responsible for the accuracy of your business information, pricing, products, and photos, and for keeping them up to date.</li>
+        <li>We may reject, suspend, or remove a listing that's fraudulent, misleading, violates the law, or infringes someone else's rights.</li>
+        <li>Content you upload (photos, descriptions, product listings) must be yours to use or properly licensed.</li>
+      </ul>
+
+      <h2>3. Subscription Plans, Pricing & Free Trials</h2>
+      <ul>
+        <li>Plan features, limits, and prices are listed on our <a href="/pages/pricing.html">Pricing page</a> and may change from time to time; changes won't reduce what you've already paid for during your current billing period.</li>
+        <li>Paid plans are billed for a fixed period (monthly or yearly) and do not auto-renew — your listing simply reverts to the Free tier at the end of the period until you renew or upgrade.</li>
+        <li>New business owners may be eligible for a one-time 30-day free trial of Starter-tier features. Trials are limited to one per account and may be modified or discontinued at any time.</li>
+        <li>All prices are in Ghana Cedis (GHS) unless stated otherwise.</li>
+      </ul>
+
+      <h2>4. Payments</h2>
+      <p>Payments are processed by our third-party payment processor, Paystack. We don't store your full card details. By making a payment you agree to Paystack's own terms in addition to ours. See our <a href="/pages/refund-policy.html">Refund Policy</a> for cancellation and refund terms.</p>
+
+      <h2>5. Acceptable Use</h2>
+      <p>You agree not to:</p>
+      <ul>
+        <li>Post false, misleading, or fraudulent business information or reviews;</li>
+        <li>Attempt to interfere with, disrupt, or gain unauthorized access to the Platform;</li>
+        <li>Scrape, harvest, or resell data from the Platform without our written permission;</li>
+        <li>Use the Platform to harass, defame, or infringe on the rights of others.</li>
+      </ul>
+
+      <h2>6. Reviews</h2>
+      <p>Reviews must reflect a genuine experience with the business. Fake, incentivized, or defamatory reviews may be removed, and repeat offenders may lose posting privileges.</p>
+
+      <h2>7. Intellectual Property</h2>
+      <p>The SpotGH name, logo, and platform software are owned by us. Content you upload remains yours, but by posting it you grant us a license to display, distribute, and promote it as part of operating the Platform.</p>
+
+      <h2>8. Termination</h2>
+      <p>You may close your account at any time from your dashboard settings. We may suspend or terminate accounts that violate these Terms, with or without notice, depending on severity.</p>
+
+      <h2>9. Disclaimers & Limitation of Liability</h2>
+      <p>The Platform is provided "as is." We don't guarantee that listings are accurate, that businesses will fulfil orders or bookings made through the Platform, or that the service will be uninterrupted or error-free. To the extent permitted by Ghanaian law, SpotGH isn't liable for indirect, incidental, or consequential damages arising from your use of the Platform.</p>
+
+      <h2>10. Changes to These Terms</h2>
+      <p>We may update these Terms from time to time. Continued use of the Platform after changes take effect means you accept the updated Terms.</p>
+
+      <h2>11. Governing Law</h2>
+      <p>These Terms are governed by the laws of the Republic of Ghana. Any disputes will be subject to the exclusive jurisdiction of the courts of Ghana, unless otherwise required by applicable consumer-protection law.</p>
+
+      <h2>12. Contact</h2>
+      <p>Questions about these Terms? Reach us at <a href="mailto:support@spotgh.com">support@spotgh.com</a>.</p>
+    </div>
+  </main>
+
+  <footer style="background:#070E1A;color:rgba(255,255,255,.7);padding:3rem 0">
+    <div class="container">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2rem;margin-bottom:2rem">
+        <div><a href="/" style="font-family:var(--font-display);font-size:1.25rem;font-weight:800;color:#fff">🏙️ Spot<span style="color:var(--clr-primary)">GH</span></a><p style="font-size:.875rem;margin-top:.75rem">Discover trusted businesses across Ghana, or build your own business website in minutes. Made with ❤️ in Ghana.</p></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Explore</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/directory.html">Directory</a></li><li><a href="/pages/pricing.html">Pricing</a></li><li><a href="/pages/deals.html">Deals</a></li><li><a href="/pages/map.html">Map View</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Company</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/about.html">About Us</a></li><li><a href="/pages/help.html">Help Center</a></li><li><a href="/pages/status.html">System Status</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Legal</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/terms.html">Terms of Service</a></li><li><a href="/pages/privacy.html">Privacy Policy</a></li><li><a href="/pages/refund-policy.html">Refund Policy</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Support</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="mailto:support@spotgh.com">Contact Us</a></li><li><a href="/pages/pricing.html">Plans & Pricing</a></li></ul></div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:1.5rem;text-align:center;font-size:.8rem">© 2026 SpotGH · 🇬🇭 Supporting Ghanaian Businesses</div>
+    </div>
+  </footer>
+
+  <div id="toastContainer"></div>
+  <button class="scroll-top-btn" id="scrollTopBtn"><span aria-hidden="true" style="font-weight:700;font-size:1.2rem;line-height:1">&uarr;</span></button>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/main.js"></script>
+  <script src="/assets/js/i18n.js"></script>
+  <script>loadComponents();</script>
+</body>
+</html>

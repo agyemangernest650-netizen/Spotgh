@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /pages/dashboard.html
+Disallow: /pages/business-edit.html
+Disallow: /pages/admin.html
+Disallow: /pages/checkout.html
+
+Sitemap: https://spotgh.com/sitemap.xml

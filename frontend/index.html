@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>SpotGH - Discover Trusted Businesses in Ghana or Build Your Business Website</title>
+  <meta name="description" content="Discover trusted businesses across Ghana, or create your own professional business website in minutes. Browse restaurants, salons, hotels, fashion and more — or list your own business for free.">
+  <link rel="canonical" href="https://spotgh.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SpotGH">
+  <meta property="og:title" content="SpotGH — Discover Trusted Businesses or Build Your Business Website">
+  <meta property="og:description" content="Discover trusted businesses across Ghana, or create your own professional business website in minutes. Browse restaurants, salons, hotels, fashion and more — or list your own business for free.">
+  <meta property="og:url" content="https://spotgh.com/">
+  <meta property="og:image" content="https://spotgh.com/assets/images/og-default.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SpotGH — Discover Trusted Businesses or Build Your Business Website">
+  <meta name="twitter:description" content="Discover trusted businesses across Ghana, or create your own professional business website in minutes.">
+  <meta name="twitter:image" content="https://spotgh.com/assets/images/og-default.png">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "SpotGH",
+    "url": "https://spotgh.com/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://spotgh.com/pages/directory.html?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "SpotGH",
+    "url": "https://spotgh.com/",
+    "description": "Ghana's business directory — find and connect with businesses across Ghana."
+  }
+  </script>
+  <link rel="manifest" href="/manifest.json"><meta name="theme-color" content="#4E0DAD">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><link rel="icon" type="image/png" sizes="192x192" href="/assets/images/icon-192.png"><link rel="apple-touch-icon" href="/assets/images/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <script src="/assets/js/theme.js"></script>
+  <script src="/assets/js/ga.js"></script>
+  <script src="/assets/js/ads.js"></script>
+</head>
+<body>
+  <header class="navbar" id="navbar">
+    <div class="container navbar__inner">
+      <a href="/" class="navbar__logo"><img src="/assets/images/icon-192.png" alt="SpotGH"> Spot<span>GH</span></a>
+      <div class="navbar__search hidden-mobile"><div class="search-bar-nav"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="navSearch" placeholder="Search businesses..." autocomplete="off"><div id="navSuggestions" class="suggestions-dropdown" hidden></div></div></div>
+      <nav class="navbar__actions">
+        <a href="/pages/categories.html" class="navbar__link hidden-mobile" data-i18n="nav.categories">Categories</a>
+        <a href="/pages/directory.html" class="navbar__link hidden-mobile" data-i18n="nav.directory">Directory</a>
+        <a href="/pages/pricing.html" class="navbar__link hidden-mobile" data-i18n="nav.pricing">Pricing</a>
+        <a href="/pages/leads.html" class="navbar__link hidden-mobile">📢 Leads</a>
+        <a href="/pages/deals.html" class="navbar__link hidden-mobile" data-i18n="nav.deals">🎉 Deals</a>
+        <a href="/pages/events.html" class="navbar__link hidden-mobile">Events</a>
+        <a href="/pages/blog.html" class="navbar__link hidden-mobile">Blog</a>
+        <a href="/pages/map.html" class="navbar__link hidden-mobile"><i class="fa-solid fa-map"></i></a>
+        <select id="langSwitcher" onchange="setLanguage(this.value)" style="background:none;border:1px solid var(--clr-border);border-radius:8px;padding:.3rem .4rem;font-size:.75rem;color:var(--clr-text-2);cursor:pointer" title="Language"><option value="en">EN</option><option value="tw">TW</option><option value="ga">GA</option></select>
+        <button class="theme-toggle-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
+        <button class="near-me-btn hidden-mobile" onclick="searchNearMe()"><i class="fa-solid fa-location-crosshairs"></i></button>
+        <div id="authNav"></div>
+        <button class="navbar__hamburger" id="hamburger"><span></span><span></span><span></span></button>
+      </nav>
+    </div>
+    <div class="mobile-menu" id="mobileMenu" hidden>
+      <input type="text" id="mobileSearch" class="mobile-search-input" placeholder="Search...">
+      <nav class="mobile-nav"><a href="/">Home</a><a href="/pages/categories.html">Categories</a><a href="/pages/directory.html">Directory</a><a href="/pages/pricing.html">Pricing</a><a href="/pages/deals.html">Deals</a><a href="/pages/map.html">Map</a><div id="mobileAuthLinks"></div></nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero__pattern"></div>
+    <div class="container"><div class="hero__content">
+      <div class="hero__eyebrow">🇬🇭 Ghana's #1 Business Platform</div>
+      <h1 class="hero__title">Find Trusted Businesses<span>Across Ghana</span></h1>
+      <p class="hero__subtitle">Discover trusted businesses near you — or create your own professional business website in minutes.</p>
+      <div class="hero-search">
+        <div class="hero-search__input"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="heroSearch" placeholder="What are you looking for?"></div>
+        <div class="hero-search__divider hidden-mobile"></div>
+        <select class="hero-search__select hidden-mobile" id="heroCategory"><option value="">All Categories</option></select>
+        <div class="hero-search__divider hidden-mobile"></div>
+        <div class="hero-search__input hidden-mobile"><i class="fa-solid fa-location-dot"></i><input type="text" id="heroLocation" placeholder="Accra, Ghana"></div>
+        <button class="near-me-btn" onclick="searchNearMe()"><i class="fa-solid fa-location-crosshairs"></i></button>
+        <button class="btn btn--primary" id="heroSearchBtn"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+      </div>
+      <div class="hero__popular">
+        <span>Popular Searches:</span>
+        <a href="/pages/directory.html?category=restaurants">Restaurants</a>
+        <a href="/pages/directory.html?category=beauty-salons">Salons</a>
+        <a href="/pages/directory.html?category=automotive">Car Dealers</a>
+        <a href="/pages/directory.html?category=trades">Plumbers</a>
+        <a href="/pages/directory.html?category=fitness">Gyms</a>
+      </div>
+    </div></div>
+    <div class="container">
+      <div class="hero__trustbar">
+        <div class="trust-item"><div class="trust-item__icon" style="background:var(--clr-primary-10);color:var(--clr-primary)"><i class="fa-solid fa-shield-halved"></i></div><div class="trust-item__text"><b>Verified Businesses</b><span>All businesses are verified</span></div></div>
+        <div class="trust-item"><div class="trust-item__icon" style="background:rgba(245,158,11,.12);color:var(--clr-secondary-dark)"><i class="fa-solid fa-star"></i></div><div class="trust-item__text"><b>Customer Reviews</b><span>Real reviews from real people</span></div></div>
+        <div class="trust-item"><div class="trust-item__icon" style="background:rgba(34,197,94,.12);color:var(--clr-success)"><i class="fa-solid fa-location-dot"></i></div><div class="trust-item__text"><b>GPS Location</b><span>Find businesses near you</span></div></div>
+        <div class="trust-item"><div class="trust-item__icon" style="background:rgba(37,211,102,.12);color:#25D366"><i class="fa-brands fa-whatsapp"></i></div><div class="trust-item__text"><b>WhatsApp Support</b><span>Chat with businesses easily</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="container">
+      <div class="section__header"><div class="section__eyebrow">Browse by Category</div><h2 class="section__title">What Are You Looking For?</h2></div>
+      <div class="categories-grid" id="categoriesGrid">
+        <div class="skeleton" style="height:110px;border-radius:12px"></div><div class="skeleton" style="height:110px;border-radius:12px"></div>
+        <div class="skeleton" style="height:110px;border-radius:12px"></div><div class="skeleton" style="height:110px;border-radius:12px"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="trendingSection" style="display:none">
+    <div class="container"><div class="section__header"><div class="section__eyebrow">🔥 Trending</div><h2 class="section__title">Popular This Week</h2></div><div class="grid grid--3" id="trendingGrid"></div></div>
+  </section>
+
+  <div class="container"><div id="homeAdSlot1"></div></div>
+
+  <section class="section section--tint">
+    <div class="container"><div class="section__header"><div class="section__eyebrow">⭐ Featured</div><h2 class="section__title">Top Businesses in Ghana</h2></div>
+    <div class="grid grid--3" id="featuredGrid"><div class="skeleton" style="height:320px;border-radius:16px"></div><div class="skeleton" style="height:320px;border-radius:16px"></div><div class="skeleton" style="height:320px;border-radius:16px"></div></div>
+    <div style="text-align:center;margin-top:2rem"><a href="/pages/directory.html" class="btn btn--outline btn--lg">View All Businesses</a></div></div>
+  </section>
+
+  <section class="section">
+    <div class="container"><div class="section__header"><div class="section__eyebrow">🏆 Top Rated</div><h2 class="section__title">Highest Rated on SpotGH</h2></div>
+    <div class="grid grid--3" id="topRatedGrid"><div class="skeleton" style="height:320px;border-radius:16px"></div><div class="skeleton" style="height:320px;border-radius:16px"></div><div class="skeleton" style="height:320px;border-radius:16px"></div></div></div>
+  </section>
+
+  <section class="section">
+    <div class="container"><div class="section__header"><div class="section__eyebrow">Get Started</div><h2 class="section__title">Your Business Online in Minutes</h2></div>
+    <div class="grid grid--3" style="gap:2rem">
+      <div style="text-align:center;padding:2rem"><div class="step-icon">🏷️</div><h3>Pick a Category</h3><p style="color:var(--clr-text-2);font-size:.875rem;margin-top:.5rem">Choose what you do — restaurant, salon, shop — and we set up your mini-website's template and colours to match.</p></div>
+      <div style="text-align:center;padding:2rem"><div class="step-icon">💳</div><h3>Choose a Plan</h3><p style="color:var(--clr-text-2);font-size:.875rem;margin-top:.5rem">Pay once for your first month with Paystack — cards, MTN MoMo, Vodafone. No surprise renewals.</p></div>
+      <div style="text-align:center;padding:2rem"><div class="step-icon">🚀</div><h3>Get Your Mini-Website</h3><p style="color:var(--clr-text-2);font-size:.875rem;margin-top:.5rem">Go live with your own page, manage it from your dashboard, and reach customers across Ghana.</p></div>
+    </div>
+    <div style="text-align:center;margin-top:2rem"><a href="/pages/register.html" class="btn btn--primary btn--lg">List Your Business Free <i class="fa-solid fa-arrow-right"></i></a></div></div>
+  </section>
+
+  <section class="section" id="dealsSection" style="display:none">
+    <div class="container"><div class="section__header"><div class="section__eyebrow">🏷️ Deals</div><h2 class="section__title">Live Deals Right Now</h2></div>
+    <div class="grid grid--3" id="dealsGrid"></div>
+    <div style="text-align:center;margin-top:2rem"><a href="/pages/deals.html" class="btn btn--outline btn--lg">View All Deals</a></div></div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="container"><div class="section__header"><div class="section__eyebrow">🆕 New</div><h2 class="section__title">Recently Added</h2></div>
+    <div class="grid grid--3" id="recentGrid"><div class="skeleton" style="height:320px;border-radius:16px"></div><div class="skeleton" style="height:320px;border-radius:16px"></div><div class="skeleton" style="height:320px;border-radius:16px"></div></div></div>
+  </section>
+
+  <section class="section" id="blogSection" style="display:none">
+    <div class="container"><div class="section__header"><div class="section__eyebrow">📰 From the Blog</div><h2 class="section__title">Tips & Local Business News</h2></div>
+    <div class="grid grid--3" id="blogGrid"></div>
+    <div style="text-align:center;margin-top:2rem"><a href="/pages/blog.html" class="btn btn--outline btn--lg">Read More</a></div></div>
+  </section>
+
+  <section class="section" id="testimonialsSection" style="display:none">
+    <div class="container"><div class="section__header"><div class="section__eyebrow">💬 Real Reviews</div><h2 class="section__title">What People Are Saying</h2></div>
+    <div class="grid grid--3" id="testimonialsGrid"></div></div>
+  </section>
+
+  <section style="background:linear-gradient(135deg,var(--clr-primary),var(--clr-primary-dark));color:#fff;padding:5rem 0;text-align:center">
+    <div class="container">
+      <h2 style="color:#fff;font-size:clamp(1.75rem,4vw,3rem);margin-bottom:1rem">Ready to Grow Your Business? 🚀</h2>
+      <p style="opacity:.9;font-size:1.1rem;margin-bottom:2rem;max-width:500px;margin-inline:auto">Join thousands of Ghanaian businesses on SpotGH.</p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+        <a href="/pages/register.html" class="btn btn--lg" style="background:#fff;color:var(--clr-primary)">Get Started Free</a>
+        <a href="/pages/pricing.html" class="btn btn--lg" style="background:transparent;border:2px solid rgba(255,255,255,.5);color:#fff">View Plans</a>
+      </div>
+    </div>
+  </section>
+
+  <footer style="background:#070E1A;color:rgba(255,255,255,.7);padding:3rem 0">
+    <div class="container">
+      <div style="max-width:480px;margin:0 auto 2.5rem;text-align:center">
+        <h4 style="color:#fff;margin-bottom:.5rem">📬 Get new businesses & deals in your inbox</h4>
+        <form id="newsletterForm" style="display:flex;gap:.5rem;margin-top:1rem">
+          <input type="email" id="newsletterEmail" placeholder="you@example.com" required style="flex:1;padding:.65rem 1rem;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:#fff">
+          <button type="submit" class="btn btn--primary btn--sm">Subscribe</button>
+        </form>
+        <p id="newsletterMsg" style="font-size:.8rem;margin-top:.5rem"></p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2rem;margin-bottom:2rem">
+        <div><a href="/" style="font-family:var(--font-display);font-size:1.25rem;font-weight:800;color:#fff">🏙️ Spot<span style="color:var(--clr-primary)">GH</span></a><p style="font-size:.875rem;margin-top:.75rem">Discover trusted businesses across Ghana, or build your own business website in minutes. Made with ❤️ in Ghana.</p></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Explore</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/directory.html">Directory</a></li><li><a href="/pages/pricing.html">Pricing</a></li><li><a href="/pages/deals.html">Deals</a></li><li><a href="/pages/map.html">Map View</a></li><li><a href="/pages/blog.html">Blog</a></li><li><a href="/pages/smart-search.html">AI Search</a></li><li><a href="/pages/compare.html">Compare</a></li><li><a href="/pages/support.html">Support</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Categories</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/directory.html?category=restaurants">🍽️ Restaurants</a></li><li><a href="/pages/directory.html?category=beauty-salons">💄 Salons</a></li><li><a href="/pages/directory.html?category=hotels">🏨 Hotels</a></li><li><a href="/pages/directory.html?category=fashion">👗 Fashion</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Cities</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/directory.html?location=Accra">Accra</a></li><li><a href="/pages/directory.html?location=Kumasi">Kumasi</a></li><li><a href="/pages/directory.html?location=Takoradi">Takoradi</a></li><li><a href="/pages/directory.html?location=Tamale">Tamale</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Company</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/about.html">About Us</a></li><li><a href="/pages/help.html">Help Center</a></li><li><a href="/pages/status.html">System Status</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Legal</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/terms.html">Terms of Service</a></li><li><a href="/pages/privacy.html">Privacy Policy</a></li><li><a href="/pages/refund-policy.html">Refund Policy</a></li></ul></div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:1.5rem;text-align:center;font-size:.8rem">© 2026 SpotGH · 🇬🇭 Supporting Ghanaian Businesses</div>
+    </div>
+  </footer>
+
+  <div id="toastContainer"></div>
+  <button class="scroll-top-btn" id="scrollTopBtn"><span aria-hidden="true" style="font-weight:700;font-size:1.2rem;line-height:1">&uarr;</span></button>
+
+  <script src="/assets/js/api.js"></script><script src="/assets/js/auth.js"></script><script src="/assets/js/main.js"></script>
+  <script src="/assets/js/i18n.js"></script>
+  <script>
+    loadComponents();
+    async function init() {
+      try {
+        const [cats,featured,recent,trending,topRated,deals,testimonials,blog] = await Promise.all([
+          API.get('/categories'), API.get('/businesses?featured=true&limit=6'),
+          API.get('/businesses?limit=6'), API.get('/businesses/trending'),
+          API.get('/businesses?sort=rating&min_rating=4&limit=6'),
+          API.get('/deals?limit=3'),
+          API.get('/reviews/featured?limit=6'),
+          API.get('/blog?limit=3'),
+        ]);
+        document.getElementById('categoriesGrid').innerHTML = (cats.categories||[]).map(c =>
+          `<a href="/pages/directory.html?category=${c.slug}" class="category-card"><div class="category-card__icon">${c.icon}</div><div class="category-card__name">${c.name}</div></a>`).join('');
+        const heroCat = document.getElementById('heroCategory');
+        if (heroCat) heroCat.innerHTML += (cats.categories||[]).map(c => `<option value="${c.slug}">${c.name}</option>`).join('');
+        renderBusinessGrid('featuredGrid', featured.businesses||[]);
+        renderBusinessGrid('recentGrid', recent.businesses||[]);
+        if ((trending.businesses||[]).length > 0) {
+          document.getElementById('trendingSection').style.display = 'block';
+          renderBusinessGrid('trendingGrid', trending.businesses||[]);
+        }
+        if ((topRated.businesses||[]).length > 0) {
+          renderBusinessGrid('topRatedGrid', topRated.businesses||[]);
+        } else {
+          document.getElementById('topRatedGrid').closest('.section').style.display = 'none';
+        }
+        if ((blog.posts||[]).length > 0) {
+          document.getElementById('blogSection').style.display = 'block';
+          document.getElementById('blogGrid').innerHTML = blog.posts.map(p => `
+            <a href="/pages/blog-post.html?slug=${p.slug}" class="card" style="padding:0;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column">
+              ${p.cover_url ? `<img src="${p.cover_url}" alt="${p.title}" style="width:100%;height:160px;object-fit:cover">` : `<div style="width:100%;height:160px;background:var(--clr-surface-2);display:flex;align-items:center;justify-content:center;font-size:2rem">📰</div>`}
+              <div style="padding:1.1rem;flex:1;display:flex;flex-direction:column">
+                <div style="font-weight:700;font-size:.95rem;margin-bottom:.4rem">${p.title}</div>
+                ${p.excerpt ? `<p style="font-size:.82rem;color:var(--clr-text-2);line-height:1.5;flex:1">${p.excerpt}</p>` : ''}
+                ${p.published_at ? `<div style="font-size:.72rem;color:var(--clr-text-3);margin-top:.6rem">${timeAgo(p.published_at)}</div>` : ''}
+              </div>
+            </a>`).join('');
+        }
+        if ((testimonials.reviews||[]).length > 0) {
+          document.getElementById('testimonialsSection').style.display = 'block';
+          document.getElementById('testimonialsGrid').innerHTML = testimonials.reviews.map(r => {
+            const biz = r.businesses || {};
+            const reviewer = r.users || {};
+            const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+            return `
+              <div class="card" style="padding:1.5rem;display:flex;flex-direction:column;gap:.75rem">
+                <div style="color:var(--clr-gold);font-size:.9rem">${stars}</div>
+                ${r.title ? `<div style="font-weight:700;font-size:.95rem">${r.title}</div>` : ''}
+                <p style="font-size:.875rem;color:var(--clr-text-2);line-height:1.6;flex:1">"${r.content}"</p>
+                <div style="display:flex;align-items:center;gap:.6rem;padding-top:.5rem;border-top:1px solid var(--clr-border)">
+                  <div style="width:32px;height:32px;border-radius:50%;background:var(--clr-primary-10);color:var(--clr-primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;overflow:hidden">
+                    ${reviewer.avatar_url ? `<img src="${reviewer.avatar_url}" style="width:100%;height:100%;object-fit:cover">` : (reviewer.full_name||'?')[0].toUpperCase()}
+                  </div>
+                  <div>
+                    <div style="font-size:.8rem;font-weight:600">${reviewer.full_name || 'SpotGH User'}</div>
+                    <div style="font-size:.72rem;color:var(--clr-text-3)">on ${biz.name || 'a SpotGH business'}</div>
+                  </div>
+                </div>
+              </div>`;
+          }).join('');
+        }
+        if ((deals.deals||[]).length > 0) {
+          document.getElementById('dealsSection').style.display = 'block';
+          document.getElementById('dealsGrid').innerHTML = deals.deals.map(d => {
+            const biz = d.businesses || {};
+            const expires = new Date(d.expires_at);
+            const hoursLeft = Math.max(0, Math.floor((expires - Date.now()) / 3600000));
+            const urgent = hoursLeft < 24;
+            return `
+              <a href="/pages/business.html?slug=${biz.slug||''}" class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;text-decoration:none;color:inherit">
+                <div style="background:linear-gradient(135deg,var(--clr-primary),#e55a2b);padding:1.25rem;color:#fff;position:relative">
+                  ${d.discount_text ? `<div style="font-size:1.75rem;font-weight:800;margin-bottom:.25rem">${d.discount_text}</div>` : ''}
+                  <div style="font-weight:700;font-size:1rem">${d.title}</div>
+                  <div style="font-size:.8rem;opacity:.85;margin-top:.25rem">${biz.name || ''}</div>
+                  ${urgent ? `<span style="position:absolute;top:.75rem;right:.75rem;background:rgba(255,255,255,.2);color:#fff;padding:.2rem .5rem;border-radius:20px;font-size:.7rem;font-weight:700">🔥 ${hoursLeft}h left</span>` : ''}
+                </div>
+                <div style="padding:1rem;flex:1">
+                  ${d.description ? `<p style="font-size:.875rem;color:var(--clr-text-2);margin:0">${d.description}</p>` : ''}
+                  ${biz.city ? `<div style="font-size:.75rem;color:var(--clr-text-3);margin-top:.5rem">📍 ${biz.city}</div>` : ''}
+                </div>
+              </a>`;
+          }).join('');
+        }
+      } catch(e) { console.error(e); }
+    }
+    document.getElementById('heroSearchBtn').onclick = () => {
+      const q = document.getElementById('heroSearch').value;
+      const loc = document.getElementById('heroLocation')?.value || '';
+      const cat = document.getElementById('heroCategory')?.value || '';
+      window.location.href = `/pages/directory.html?q=${encodeURIComponent(q)}&location=${encodeURIComponent(loc)}${cat ? `&category=${encodeURIComponent(cat)}` : ''}`;
+    };
+    ['heroSearch','heroLocation'].forEach(id => {
+      document.getElementById(id)?.addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('heroSearchBtn').click(); });
+    });
+    init();
+  </script>  <script>window.addEventListener('load', () => insertAdSlot('homeAdSlot1', '1111111111'));</script>
+  <script>
+    document.getElementById('newsletterForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('newsletterMsg');
+      try {
+        await API.post('/newsletter/subscribe', { email: document.getElementById('newsletterEmail').value });
+        msg.style.color = '#4ADE80'; msg.textContent = 'Subscribed! Watch your inbox.';
+        document.getElementById('newsletterEmail').value = '';
+      } catch (err) { msg.style.color = '#F87171'; msg.textContent = err.message || 'Something went wrong'; }
+    });
+  </script>
+</body>
+</html>

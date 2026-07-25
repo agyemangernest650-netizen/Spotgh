@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>System Status | SpotGH</title>
+  <meta name="description" content="Current operational status of SpotGH's website, API, and payments — plus any planned maintenance.">
+  <link rel="canonical" href="/pages/status.html">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#4E0DAD">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><link rel="icon" type="image/png" sizes="192x192" href="/assets/images/icon-192.png"><link rel="apple-touch-icon" href="/assets/images/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <script src="/assets/js/theme.js"></script>
+  <script src="/assets/js/ga.js"></script>
+  <style>
+    .status-wrap{max-width:720px;margin:0 auto;padding:3rem 1rem 5rem}
+    .status-wrap h1{font-family:var(--font-display);font-size:clamp(1.75rem,4vw,2.5rem);font-weight:800;margin-bottom:.5rem}
+    .status-banner{display:flex;align-items:center;gap:.75rem;padding:1.1rem 1.25rem;border-radius:var(--radius-md,12px);margin:1.5rem 0 2rem;font-weight:700}
+    .status-banner.ok{background:rgba(34,197,94,.1);border:1px solid var(--clr-success);color:var(--clr-success)}
+    .status-row{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border:1px solid var(--clr-border);border-radius:var(--radius-md,12px);margin-bottom:.75rem;background:var(--clr-surface-1)}
+    .status-row__name{font-weight:600;font-size:.92rem}
+    .status-row__desc{font-size:.78rem;color:var(--clr-text-3);margin-top:.15rem}
+    .status-dot{display:inline-flex;align-items:center;gap:.4rem;font-size:.8rem;font-weight:700;color:var(--clr-success)}
+    .status-dot::before{content:'';width:9px;height:9px;border-radius:50%;background:var(--clr-success);box-shadow:0 0 0 3px rgba(34,197,94,.2)}
+    .status-section-title{font-size:1.1rem;font-weight:700;margin:2.5rem 0 1rem}
+    .incident-empty{text-align:center;padding:2.5rem 1rem;color:var(--clr-text-3);font-size:.9rem;background:var(--clr-surface-2);border-radius:var(--radius-md,12px)}
+    .subscribe-box{display:flex;gap:.6rem;margin-top:.5rem}
+    .subscribe-box input{flex:1;padding:.65rem 1rem;border-radius:8px;border:1px solid var(--clr-border);background:var(--clr-surface-1);color:var(--clr-text-1)}
+  </style>
+</head>
+<body>
+  <header class="navbar" id="navbar">
+    <div class="container navbar__inner">
+      <a href="/" class="navbar__logo"><img src="/assets/images/icon-192.png" alt="SpotGH"> Spot<span>GH</span></a>
+      <div class="navbar__search hidden-mobile">
+        <div class="search-bar-nav">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="navSearch" placeholder="Search businesses..." autocomplete="off">
+          <div id="navSuggestions" class="suggestions-dropdown" hidden></div>
+        </div>
+      </div>
+      <nav class="navbar__actions">
+        <a href="/pages/categories.html" class="navbar__link hidden-mobile" data-i18n="nav.categories">Categories</a>
+        <a href="/pages/directory.html" class="navbar__link hidden-mobile" data-i18n="nav.directory">Directory</a>
+        <a href="/pages/pricing.html" class="navbar__link hidden-mobile" data-i18n="nav.pricing">Pricing</a>
+        <a href="/pages/deals.html" class="navbar__link hidden-mobile" data-i18n="nav.deals">🎉 Deals</a>
+        <a href="/pages/events.html" class="navbar__link hidden-mobile">Events</a>
+        <a href="/pages/blog.html" class="navbar__link hidden-mobile">Blog</a>
+        <a href="/pages/map.html" class="navbar__link hidden-mobile"><i class="fa-solid fa-map"></i></a>
+        <select id="langSwitcher" onchange="setLanguage(this.value)" style="background:none;border:1px solid var(--clr-border);border-radius:8px;padding:.3rem .4rem;font-size:.75rem;color:var(--clr-text-2);cursor:pointer" title="Language"><option value="en">EN</option><option value="tw">TW</option><option value="ga">GA</option></select>
+        <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
+        <button class="near-me-btn hidden-mobile" onclick="searchNearMe()"><i class="fa-solid fa-location-crosshairs"></i></button>
+        <div id="authNav"></div>
+        <button class="navbar__hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+      </nav>
+    </div>
+    <div class="mobile-menu" id="mobileMenu" hidden>
+      <input type="text" id="mobileSearch" placeholder="Search..." class="mobile-search-input">
+      <nav class="mobile-nav">
+        <a href="/">Home</a>
+        <a href="/pages/categories.html">Categories</a>
+        <a href="/pages/directory.html">Directory</a>
+        <a href="/pages/pricing.html">Pricing</a>
+        <a href="/pages/deals.html">Deals</a>
+        <a href="/pages/map.html">Map</a>
+        <div id="mobileAuthLinks"></div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="status-wrap">
+      <h1>System Status</h1>
+      <p style="color:var(--clr-text-2);font-size:.9rem">Live status of SpotGH's core services. This page is updated manually by our team when something changes.</p>
+
+      <div class="status-banner ok" id="overallBanner">
+        <i class="fa-solid fa-circle-check" style="font-size:1.2rem"></i>
+        <span id="overallText">All Systems Operational</span>
+      </div>
+
+      <div class="status-row">
+        <div>
+          <div class="status-row__name">Website & Business Listings</div>
+          <div class="status-row__desc">Homepage, directory search, and business pages</div>
+        </div>
+        <span class="status-dot">Operational</span>
+      </div>
+      <div class="status-row">
+        <div>
+          <div class="status-row__name">API</div>
+          <div class="status-row__desc">Backend services powering the dashboard and mobile experience</div>
+        </div>
+        <span class="status-dot">Operational</span>
+      </div>
+      <div class="status-row">
+        <div>
+          <div class="status-row__name">Payments (Paystack)</div>
+          <div class="status-row__desc">Subscription checkout, renewals, and order payments</div>
+        </div>
+        <span class="status-dot">Operational</span>
+      </div>
+      <div class="status-row">
+        <div>
+          <div class="status-row__name">Notifications & Email</div>
+          <div class="status-row__desc">In-app alerts, review/booking emails, and reminders</div>
+        </div>
+        <span class="status-dot">Operational</span>
+      </div>
+      <div class="status-row">
+        <div>
+          <div class="status-row__name">Image Uploads (Cloudinary)</div>
+          <div class="status-row__desc">Logo, gallery, and product photo uploads</div>
+        </div>
+        <span class="status-dot">Operational</span>
+      </div>
+
+      <div class="status-section-title">Past Incidents & Maintenance</div>
+      <div class="incident-empty" id="incidentLog">
+        <i class="fa-solid fa-mug-hot" style="font-size:1.4rem;margin-bottom:.5rem;display:block;color:var(--clr-text-3)"></i>
+        No incidents reported. When we run planned maintenance or something goes wrong, we'll post details here — including what happened, what we did, and when it was resolved.
+      </div>
+
+      <div class="status-section-title">Stay Informed</div>
+      <p style="color:var(--clr-text-2);font-size:.9rem">Get an email the moment something changes here.</p>
+      <div class="subscribe-box">
+        <input type="email" id="statusSubEmail" placeholder="you@example.com">
+        <button class="btn btn--primary" id="statusSubBtn">Subscribe</button>
+      </div>
+      <p id="statusSubMsg" style="font-size:.8rem;margin-top:.5rem;color:var(--clr-text-3)"></p>
+
+      <p style="font-size:.78rem;color:var(--clr-text-3);margin-top:2.5rem;text-align:center">Experiencing an issue not shown here? <a href="mailto:support@spotgh.com" style="color:var(--clr-primary)">Let us know</a> or visit our <a href="/pages/help.html" style="color:var(--clr-primary)">Help Centre</a>.</p>
+    </div>
+  </main>
+
+  <footer style="background:#070E1A;color:rgba(255,255,255,.7);padding:3rem 0">
+    <div class="container">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2rem;margin-bottom:2rem">
+        <div><a href="/" style="font-family:var(--font-display);font-size:1.25rem;font-weight:800;color:#fff">🏙️ Spot<span style="color:var(--clr-primary)">GH</span></a><p style="font-size:.875rem;margin-top:.75rem">Discover trusted businesses across Ghana, or build your own business website in minutes. Made with ❤️ in Ghana.</p></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Explore</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/directory.html">Directory</a></li><li><a href="/pages/pricing.html">Pricing</a></li><li><a href="/pages/deals.html">Deals</a></li><li><a href="/pages/map.html">Map View</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Company</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/about.html">About Us</a></li><li><a href="/pages/help.html">Help Centre</a></li><li><a href="/pages/status.html">System Status</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Legal</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/terms.html">Terms of Service</a></li><li><a href="/pages/privacy.html">Privacy Policy</a></li><li><a href="/pages/refund-policy.html">Refund Policy</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Support</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="mailto:support@spotgh.com">Contact Us</a></li><li><a href="/pages/pricing.html">Plans & Pricing</a></li></ul></div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:1.5rem;text-align:center;font-size:.8rem">© 2026 SpotGH · 🇬🇭 Supporting Ghanaian Businesses</div>
+    </div>
+  </footer>
+
+  <div id="toastContainer"></div>
+  <button class="scroll-top-btn" id="scrollTopBtn"><span aria-hidden="true" style="font-weight:700;font-size:1.2rem;line-height:1">&uarr;</span></button>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/main.js"></script>
+  <script src="/assets/js/i18n.js"></script>
+  <script>
+    loadComponents();
+    // Reuses the existing newsletter subscription endpoint (same one the
+    // homepage footer uses) rather than a separate, unmaintained list.
+    document.getElementById('statusSubBtn').addEventListener('click', async () => {
+      const email = document.getElementById('statusSubEmail').value.trim();
+      const msg = document.getElementById('statusSubMsg');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = 'Enter a valid email address.'; msg.style.color = 'var(--clr-danger)'; return; }
+      try {
+        await API.post('/newsletter/subscribe', { email });
+        msg.textContent = "You're subscribed to status updates.";
+        msg.style.color = 'var(--clr-success)';
+        document.getElementById('statusSubEmail').value = '';
+      } catch (e) {
+        msg.textContent = e.message || 'Could not subscribe right now — try again later.';
+        msg.style.color = 'var(--clr-danger)';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "SpotGH",
+  "short_name": "SpotGH",
+  "description": "Ghana's Premier Business Directory",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8F7F4",
+  "theme_color": "#4E0DAD",
+  "icons": [
+    { "src": "/assets/images/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/assets/images/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

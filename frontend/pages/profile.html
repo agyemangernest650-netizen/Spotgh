@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Profile | SpotGH</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#4E0DAD">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><link rel="icon" type="image/png" sizes="192x192" href="/assets/images/icon-192.png"><link rel="apple-touch-icon" href="/assets/images/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <script src="/assets/js/theme.js"></script>
+  <script src="/assets/js/ga.js"></script>
+</head>
+<body>
+  <header class="navbar" id="navbar">
+    <div class="container navbar__inner">
+      <a href="/" class="navbar__logo"><img src="/assets/images/icon-192.png" alt="SpotGH"> Spot<span>GH</span></a>
+      <div class="navbar__search hidden-mobile">
+        <div class="search-bar-nav">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="navSearch" placeholder="Search businesses..." autocomplete="off">
+          <div id="navSuggestions" class="suggestions-dropdown" hidden></div>
+        </div>
+      </div>
+      <nav class="navbar__actions">
+        <a href="/pages/categories.html" class="navbar__link hidden-mobile" data-i18n="nav.categories">Categories</a>
+        <a href="/pages/directory.html" class="navbar__link hidden-mobile" data-i18n="nav.directory">Directory</a>
+        <a href="/pages/pricing.html" class="navbar__link hidden-mobile" data-i18n="nav.pricing">Pricing</a>
+        <a href="/pages/deals.html" class="navbar__link hidden-mobile" data-i18n="nav.deals">🎉 Deals</a>
+        <a href="/pages/events.html" class="navbar__link hidden-mobile">Events</a>
+        <a href="/pages/blog.html" class="navbar__link hidden-mobile">Blog</a>
+        <a href="/pages/map.html" class="navbar__link hidden-mobile"><i class="fa-solid fa-map"></i></a>
+        <select id="langSwitcher" onchange="setLanguage(this.value)" style="background:none;border:1px solid var(--clr-border);border-radius:8px;padding:.3rem .4rem;font-size:.75rem;color:var(--clr-text-2);cursor:pointer" title="Language"><option value="en">EN</option><option value="tw">TW</option><option value="ga">GA</option></select>
+        <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
+        <button class="near-me-btn hidden-mobile" onclick="searchNearMe()"><i class="fa-solid fa-location-crosshairs"></i></button>
+        <div id="authNav"></div>
+        <button class="navbar__hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+      </nav>
+    </div>
+    <div class="mobile-menu" id="mobileMenu" hidden>
+      <input type="text" id="mobileSearch" placeholder="Search..." class="mobile-search-input">
+      <nav class="mobile-nav">
+        <a href="/">Home</a>
+        <a href="/pages/categories.html">Categories</a>
+        <a href="/pages/directory.html">Directory</a>
+        <a href="/pages/pricing.html">Pricing</a>
+        <a href="/pages/deals.html">Deals</a>
+        <a href="/pages/map.html">Map</a>
+        <div id="mobileAuthLinks"></div>
+      </nav>
+    </div>
+  </header>
+  <main id="pageMain"></main>
+  <div id="toastContainer"></div>
+  <button class="scroll-top-btn" id="scrollTopBtn"><span aria-hidden="true" style="font-weight:700;font-size:1.2rem;line-height:1">&uarr;</span></button>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/main.js"></script>
+  <script src="/assets/js/i18n.js"></script>
+  <script src="/assets/js/profile.js"></script>
+</body>
+</html>

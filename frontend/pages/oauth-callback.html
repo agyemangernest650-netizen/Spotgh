@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Signing you in… | SpotGH</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><link rel="icon" type="image/png" sizes="192x192" href="/assets/images/icon-192.png"><link rel="apple-touch-icon" href="/assets/images/icon-192.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <script src="/assets/js/theme.js"></script>
+  <script src="/assets/js/ga.js"></script>
+</head>
+<body>
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;text-align:center;padding:1.5rem">
+    <div id="oauthSpinner" style="font-size:2rem"><i class="fa-solid fa-spinner fa-spin" style="color:var(--clr-primary)"></i></div>
+    <p id="oauthStatus" style="color:var(--clr-text-2)">Signing you in…</p>
+    <div id="oauthError" style="display:none">
+      <a href="/pages/login.html" class="btn btn--primary">Back to Sign In</a>
+    </div>
+  </div>
+
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/oauth.js"></script>
+  <script>
+    (async () => {
+      const statusEl = document.getElementById('oauthStatus');
+      const errEl = document.getElementById('oauthError');
+      try {
+        const cfg = await fetch('/api/config').then(r => r.json());
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
+          s.onload = resolve; s.onerror = reject;
+          document.head.appendChild(s);
+        });
+        const client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+
+        // The Supabase SDK auto-parses the OAuth redirect (code/hash) on
+        // load and establishes a session — this can take a moment.
+        let session = null;
+        for (let i = 0; i < 20 && !session; i++) {
+          const { data } = await client.auth.getSession();
+          session = data?.session;
+          if (!session) await new Promise(r => setTimeout(r, 250));
+        }
+        if (!session) throw new Error('No session — the sign-in may have been cancelled.');
+
+        const { token, user } = await API.post('/auth/oauth/exchange', { access_token: session.access_token });
+        Auth.save(token, user);
+
+        statusEl.textContent = 'Success! Redirecting…';
+        const next = sessionStorage.getItem('oauth_next') || '/pages/dashboard.html';
+        sessionStorage.removeItem('oauth_next');
+        window.location.href = next;
+      } catch (err) {
+        document.getElementById('oauthSpinner').innerHTML = '<i class="fa-solid fa-circle-exclamation" style="color:var(--clr-danger)"></i>';
+        statusEl.textContent = err.message || 'Sign-in failed. Please try again.';
+        errEl.style.display = 'block';
+      }
+    })();
+  </script>
+</body>
+</html>
