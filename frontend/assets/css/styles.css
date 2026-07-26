@@ -1,3 +1,4 @@
+
 /* SpotGH - Complete Design System */
 :root {
   --clr-primary:#0F766E;--clr-primary-dark:#0B5C56;--clr-primary-light:#14B8A6;
@@ -275,6 +276,7 @@ h3{font-size:clamp(1.2rem,2.5vw,1.75rem)}
 
 /* Dashboard */
 .dashboard{display:flex;min-height:calc(100vh - var(--navbar-h))}
+@media(max-width:1023px){.dashboard{flex-direction:column;min-height:0}}
 .sidebar{width:260px;flex-shrink:0;background:var(--clr-surface);border-right:1px solid var(--clr-border);padding:1.5rem;position:sticky;top:var(--navbar-h);height:calc(100vh - var(--navbar-h));overflow-y:auto}
 @media(max-width:1023px){
   .sidebar{
@@ -483,4 +485,11 @@ h3{font-size:clamp(1.2rem,2.5vw,1.75rem)}
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.25rem;
+}
+
+@media(max-width:480px){
+  #notifDropdown{
+    position:fixed !important;top:calc(var(--navbar-h) + .5rem) !important;
+    right:.75rem !important;left:.75rem !important;width:auto !important;
+  }
 }
