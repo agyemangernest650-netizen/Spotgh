@@ -17,7 +17,7 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET' || e.request.url.includes('/api/')) return;
   if (new URL(e.request.url).origin !== self.location.origin) return; // let cross-origin CDN requests go straight to network, untouched by the SW
   e.respondWith(
-    fetch(e.request).then(r => {
+    fetch(e.request, { cache: 'no-store' }).then(r => {
       const toCache = (r && r.status === 200 && r.type !== 'opaque') ? r.clone() : null; // clone synchronously, before the body can be consumed elsewhere
       if (toCache) caches.open(CACHE).then(c => c.put(e.request, toCache));
       return r;

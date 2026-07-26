@@ -179,6 +179,15 @@ app.get('/pages/business.html', async (req, res, next) => {
 });
 
 // ── Static Frontend ───────────────────────────────────────
+// sw.js must never be cached by the browser — service workers can only detect
+// updates by re-fetching this exact file, and a stale cached copy (e.g. from
+// the maxAge:'7d' below) means the browser never even asks the server if
+// anything changed, so a new deploy silently never takes effect on normal loads.
+app.get('/sw.js', (req, res) => {
+  res.set('Cache-Control', 'no-cache');
+  res.sendFile(path.join(__dirname, '../frontend/sw.js'));
+});
+
 app.use(express.static(path.join(__dirname, '../frontend'), {
   maxAge: env.IS_PROD ? '7d' : '0',
   etag: true,
