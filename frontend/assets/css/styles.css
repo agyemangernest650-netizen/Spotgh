@@ -71,8 +71,15 @@ h3{font-size:clamp(1.2rem,2.5vw,1.75rem)}
 .navbar__link{font-weight:500;font-size:.875rem;color:var(--clr-text-2);padding:.5rem .75rem;border-radius:var(--radius-sm);transition:all .15s}
 .navbar__link:hover{color:var(--clr-primary);background:var(--clr-primary-10)}
 .navbar__actions{display:flex;align-items:center;gap:.75rem;margin-left:auto}
-.navbar__hamburger{display:flex;flex-direction:column;gap:5px;padding:.5rem;border-radius:var(--radius-sm)}
+.navbar__hamburger{display:flex;flex-direction:column;gap:5px;padding:.5rem;border-radius:var(--radius-sm);flex-shrink:0}
 @media(min-width:1024px){.navbar__hamburger{display:none}}
+@media(max-width:400px){
+  .navbar__inner{gap:.4rem}
+  #langSwitcher{padding:.2rem .25rem !important;font-size:.68rem !important}
+  .theme-toggle-btn{width:32px;height:32px}
+  #authNav .btn{padding:.4rem .6rem;font-size:.72rem}
+  #authNav{flex-shrink:0}
+}
 .navbar__hamburger span{display:block;width:22px;height:2px;background:var(--clr-text);border-radius:2px;transition:all .25s}
 .navbar__hamburger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
 .navbar__hamburger.active span:nth-child(2){opacity:0}

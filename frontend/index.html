@@ -61,7 +61,7 @@
         <a href="/pages/events.html" class="navbar__link hidden-mobile">Events</a>
         <a href="/pages/blog.html" class="navbar__link hidden-mobile">Blog</a>
         <a href="/pages/map.html" class="navbar__link hidden-mobile"><i class="fa-solid fa-map"></i></a>
-        <select id="langSwitcher" onchange="setLanguage(this.value)" style="background:none;border:1px solid var(--clr-border);border-radius:8px;padding:.3rem .4rem;font-size:.75rem;color:var(--clr-text-2);cursor:pointer" title="Language"><option value="en">EN</option><option value="tw">TW</option><option value="ga">GA</option></select>
+        <select id="langSwitcher" onchange="setLanguage(this.value)" style="background:none;border:1px solid var(--clr-border);border-radius:8px;padding:.3rem .4rem;font-size:.75rem;color:var(--clr-text-2);cursor:pointer" title="Language"><option value="en">EN</option></select>
         <button class="theme-toggle-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
         <button class="near-me-btn hidden-mobile" onclick="searchNearMe()"><i class="fa-solid fa-location-crosshairs"></i></button>
         <div id="authNav"></div>
@@ -86,7 +86,7 @@
         <select class="hero-search__select hidden-mobile" id="heroCategory"><option value="">All Categories</option></select>
         <div class="hero-search__divider hidden-mobile"></div>
         <div class="hero-search__input hidden-mobile"><i class="fa-solid fa-location-dot"></i><input type="text" id="heroLocation" placeholder="Accra, Ghana"></div>
-        <button class="near-me-btn" onclick="searchNearMe()"><i class="fa-solid fa-location-crosshairs"></i></button>
+        <button class="near-me-btn hidden-mobile" onclick="searchNearMe()"><i class="fa-solid fa-location-crosshairs"></i></button>
         <button class="btn btn--primary" id="heroSearchBtn"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
       </div>
       <div class="hero__popular">

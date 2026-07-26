@@ -564,10 +564,10 @@ window.loadComponents = () => {
     const widget = document.createElement('div');
     widget.id = 'helpWidget';
     widget.innerHTML = `
-      <button id="helpWidgetBtn" aria-label="Help" style="position:fixed;bottom:5.5rem;right:1.25rem;z-index:9998;width:52px;height:52px;border-radius:50%;background:var(--clr-primary);color:#fff;border:none;box-shadow:var(--shadow-lg,0 8px 24px rgba(0,0,0,.2));cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center">
+      <button id="helpWidgetBtn" aria-label="Help" style="position:fixed;top:calc(var(--navbar-h) + .6rem);right:1rem;z-index:9998;width:38px;height:38px;border-radius:50%;background:var(--clr-primary);color:#fff;border:none;box-shadow:var(--shadow-lg,0 8px 24px rgba(0,0,0,.2));cursor:pointer;font-size:.95rem;display:flex;align-items:center;justify-content:center">
         <i class="fa-solid fa-comment-dots"></i>
       </button>
-      <div id="helpWidgetPanel" style="display:none;position:fixed;bottom:9.5rem;right:1.25rem;z-index:9998;width:min(320px,calc(100vw - 2rem));max-height:60vh;background:var(--clr-surface-1);border:1px solid var(--clr-border);border-radius:var(--radius-lg,16px);box-shadow:var(--shadow-lg,0 8px 24px rgba(0,0,0,.25));flex-direction:column;overflow:hidden">
+      <div id="helpWidgetPanel" style="display:none;position:fixed;top:calc(var(--navbar-h) + 3.1rem);right:1rem;z-index:9998;width:min(320px,calc(100vw - 2rem));max-height:min(60vh,420px);background:var(--clr-surface-1);border:1px solid var(--clr-border);border-radius:var(--radius-lg,16px);box-shadow:var(--shadow-lg,0 8px 24px rgba(0,0,0,.25));flex-direction:column;overflow:hidden">
         <div style="background:var(--clr-primary);color:#fff;padding:.9rem 1.1rem;position:relative">
           <button id="helpWidgetClose" aria-label="Close" style="position:absolute;top:.6rem;right:.6rem;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.2);color:#fff;border:none;font-size:1.1rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:400">&times;</button>
           <div style="font-weight:700;font-size:.9rem;padding-right:1.75rem">Need a hand?</div>
