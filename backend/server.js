@@ -192,6 +192,15 @@ app.use(express.static(path.join(__dirname, '../frontend'), {
   maxAge: env.IS_PROD ? '7d' : '0',
   etag: true,
   index: 'index.html',
+  setHeaders: (res, filePath) => {
+    // HTML pages must always be revalidated — CSP headers and any other
+    // per-response changes ship as part of this same cached response, so a
+    // long maxAge here means browsers can silently keep serving stale pages
+    // (and stale security headers) for up to 7 days after every deploy.
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  },
 }));
 
 const { notify } = require('./services/supabase.service');
