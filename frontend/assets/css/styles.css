@@ -73,7 +73,7 @@ h3{font-size:clamp(1.2rem,2.5vw,1.75rem)}
 .navbar__hamburger{display:flex;flex-direction:column;gap:5px;padding:.5rem;border-radius:var(--radius-sm);flex-shrink:0}
 @media(min-width:1024px){.navbar__hamburger{display:none}}
 @media(max-width:1023px){
-  #langSwitcher, .theme-toggle-btn{display:none}
+  #langSwitcher, .theme-toggle-btn{display:none !important}
 }
 @media(max-width:400px){
   .navbar__inner{gap:.4rem}
