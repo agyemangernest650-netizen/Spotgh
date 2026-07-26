@@ -39,8 +39,8 @@ exports.getReferralCode = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-const SIGNUP_REFERRAL_CREDIT = 10;   // GHS, awarded when the referred person signs up
-const FIRST_ORDER_REFERRAL_BONUS = 20; // GHS, awarded when their business's first order completes
+const SIGNUP_REFERRAL_CREDIT = 5;   // GHS, awarded when the referred person signs up
+const FIRST_ORDER_REFERRAL_BONUS = 10; // GHS, awarded when their business's first order completes
 
 exports.applyReferral = async (req, res, next) => {
   try {

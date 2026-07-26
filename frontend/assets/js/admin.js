@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadComponents();
   if (!Auth.requireAuth()) return;
   const user = Auth.getUser();
-  if (!user?.role === 'creator') {
+  if (user?.role !== 'creator') {
     document.getElementById('pageMain').innerHTML = `<div style="text-align:center;padding:5rem 1rem">
       <div style="font-size:3rem;margin-bottom:1rem">🚫</div><h2>Access Denied</h2>
       <p style="color:var(--clr-text-2)">Admin access required.</p>

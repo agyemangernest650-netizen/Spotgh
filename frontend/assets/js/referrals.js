@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       <div class="card" style="padding:2rem;text-align:center;margin-bottom:1.5rem;background:linear-gradient(135deg,var(--clr-primary),#e55a2b);color:#fff;border:none">
         <div style="font-size:3rem;margin-bottom:.75rem">🤝</div>
         <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:.5rem">Earn Rewards for Referrals</h2>
-        <p style="opacity:.9;max-width:380px;margin:0 auto">Invite friends & businesses to SpotGH. Earn <strong>GHS 10 credit</strong> when they sign up, plus <strong>GHS 20 more</strong> when their business gets its first order — automatically applied to your next plan payment.</p>
+        <p style="opacity:.9;max-width:380px;margin:0 auto">Invite friends & businesses to SpotGH. Earn <strong>GHS 5 credit</strong> when they sign up, plus <strong>GHS 10 more</strong> when their business gets its first order — automatically applied to your next plan payment.</p>
       </div>
 
       <!-- Referral code -->
@@ -35,8 +35,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div style="display:flex;flex-direction:column;gap:1rem">
           ${[
             { n:'1', icon:'📤', title:'Share your code', desc:'Send your unique link to friends, business owners, or post on social media.' },
-            { n:'2', icon:'👤', title:'They sign up', desc:'When someone registers using your code, you instantly earn GHS 10 credit.' },
-            { n:'3', icon:'💰', title:'They order, you earn more', desc:'When their business gets its first order, you earn another GHS 20 credit.' },
+            { n:'2', icon:'👤', title:'They sign up', desc:'When someone registers using your code, you instantly earn GHS 5 credit.' },
+            { n:'3', icon:'💰', title:'They order, you earn more', desc:'When their business gets its first order, you earn another GHS 10 credit.' },
           ].map(s => `
             <div style="display:flex;gap:1rem;align-items:flex-start">
               <div style="width:36px;height:36px;border-radius:50%;background:var(--clr-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0">${s.n}</div>

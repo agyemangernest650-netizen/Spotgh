@@ -5,7 +5,7 @@ const { verifyToken, requireOwnership, optionalAuth } = require('../middleware/a
 const { notify } = require('../services/supabase.service');
 const limits = require('../middleware/rateLimit.middleware');
 const { v4: uuidv4 } = require('uuid');
-const FIRST_ORDER_REFERRAL_BONUS = 20; // GHS — mirrors the constant in user.controller.js#applyReferral
+const FIRST_ORDER_REFERRAL_BONUS = 10; // GHS — mirrors the constant in user.controller.js#applyReferral
 
 // POST /api/orders/checkout — turn a cart into an order
 router.post('/checkout', optionalAuth, limits.orders, async (req, res, next) => {
