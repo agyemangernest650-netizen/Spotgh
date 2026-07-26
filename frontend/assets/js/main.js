@@ -445,6 +445,19 @@ window.loadComponents = () => {
     ham.setAttribute('aria-expanded', String(open));
   });
 
+  // ── Move language + theme controls into the mobile menu (hidden from the
+  // top navbar row on mobile so that row never overflows on narrow phones)
+  if (mob && !document.getElementById('mobileMenuControls')) {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const row = document.createElement('div');
+    row.id = 'mobileMenuControls';
+    row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.75rem 0;border-top:1px solid var(--clr-border);margin-top:.75rem';
+    row.innerHTML = `
+      <select id="mobileLangSwitcher" onchange="setLanguage(this.value)" style="background:none;border:1px solid var(--clr-border);border-radius:8px;padding:.4rem .5rem;font-size:.85rem;color:var(--clr-text-2)"><option value="en">EN</option></select>
+      <button type="button" onclick="toggleTheme()" style="background:var(--clr-surface-2);border:1.5px solid var(--clr-border);border-radius:var(--radius-md);width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--clr-text-2)"><i class="fa-solid ${isDark ? 'fa-sun' : 'fa-moon'}"></i></button>`;
+    mob.appendChild(row);
+  }
+
   // ── Mobile search
   const mobileSearch = document.getElementById('mobileSearch');
   mobileSearch?.addEventListener('keydown', e => {
