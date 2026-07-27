@@ -20,6 +20,18 @@ const app = express();
 // the same "client" (the proxy's IP), breaking per-user rate limits.
 if (env.IS_PROD) app.set('trust proxy', 1);
 
+// Express enables weak ETags globally by default, which was silently
+// applying to every /api/* JSON response too — not just the static files
+// below that explicitly opt into it. A dynamic, per-user API response
+// (e.g. GET /api/businesses/my) has no business being conditionally
+// cached like a static asset: when the browser sent a matching
+// If-None-Match header, Express returned an empty 304 body instead of
+// JSON, which broke frontend code expecting to always parse a response
+// body — with no server-side exception, so nothing appeared in the logs
+// either. Disabled globally; the static file middleware further down
+// still sets its own etag:true, which is unaffected by this.
+app.disable('etag');
+
 // ── Security ──────────────────────────────────────────────
 app.use(helmet({
   contentSecurityPolicy: {
@@ -221,6 +233,8 @@ app.get('/api/config', (req, res) => res.json({ supabaseUrl: env.SUPABASE_URL, s
 
 // ── API Routes ────────────────────────────────────────────
 app.use('/api',          limits.global);
+app.use('/api', (req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
+
 app.use('/api/auth',     require('./routes/auth.routes'));
 app.use('/api/businesses', require('./routes/business.routes'));
 app.use('/api/upload',   require('./routes/upload.routes'));
