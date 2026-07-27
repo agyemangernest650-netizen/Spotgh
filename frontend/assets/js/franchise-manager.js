@@ -64,7 +64,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function renderList() {
     main.innerHTML = `<div class="container" style="max-width:900px;margin:0 auto;padding:2rem 1rem 4rem"><div class="skeleton" style="height:200px;border-radius:16px"></div></div>`;
     let franchises = [];
-    try { ({ franchises } = await API.get('/franchises/mine')); } catch { toast.error('Failed to load franchises'); }
+    try { ({ franchises } = await API.get('/franchises/mine')); }
+    catch {
+      toast.error('Failed to load franchises');
+      main.innerHTML = `<div class="container" style="max-width:900px;margin:0 auto;padding:2rem 1rem 4rem">
+        <div class="empty-state"><div class="empty-state__icon">⚠️</div>
+          <p>Couldn't load your franchises. <a href="#" onclick="location.reload();return false">Try again</a></p>
+        </div></div>`;
+      return;
+    }
 
     main.innerHTML = `
       <div class="container" style="max-width:900px;margin:0 auto;padding:2rem 1rem 4rem">

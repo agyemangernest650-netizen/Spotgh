@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!Auth.requireAuth()) return;
   const user = Auth.getUser();
 
+  const initialTab = new URLSearchParams(location.search).get('tab');
+
   document.getElementById('pageMain').innerHTML = `
     <div class="dashboard">
       <aside class="sidebar">
@@ -24,9 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
           <p style="color:var(--clr-text-2)">Welcome back, <strong>${user?.full_name?.split(' ')[0] || 'there'}</strong> 👋</p>
         </div>
         <div id="planBanner"></div>
-        <div class="stat-grid" id="statGrid">
+        ${!initialTab ? `<div class="stat-grid" id="statGrid">
           ${['Businesses','Total Views','WhatsApp Clicks','Avg Rating'].map(() => '<div class="stat-card skeleton" style="height:130px"></div>').join('')}
-        </div>
+        </div>` : ''}
         <div id="dashContent">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
             <h2 style="font-size:1.25rem;font-weight:700">My Businesses</h2>
@@ -40,11 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>`;
 
-  loadDashboard();
-  loadPlanBanner();
-  const tab = new URLSearchParams(location.search).get('tab');
+  const tab = initialTab;
   if (tab === 'new') loadNewBusinessTab();
-  if (tab === 'subscription') loadSubscriptionTab();
+  else if (tab === 'subscription') loadSubscriptionTab();
+  else loadDashboard();
+  loadPlanBanner();
 
   async function loadNewBusinessTab() {
     const content = document.getElementById('dashContent');
