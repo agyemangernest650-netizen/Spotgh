@@ -216,28 +216,10 @@ exports.create = async (req, res, next) => {
 
     // Check business limit from subscription
     const plan = req.plan;
-    let grantTrial = false;
-    let starterPlanId = null;
 
     if (plan && plan.max_businesses !== 999) {
       const { count } = await supabaseAdmin.from('businesses').select('id', { count: 'exact' }).eq('owner_id', req.user.id).neq('status', 'rejected');
-
-      // Every brand-new owner's very first business gets a free 30-day
-      // Starter trial (mini-website, AI tools, analytics) — not just as a
-      // fallback once they hit the Free cap. This is what actually lets
-      // someone try the mini-website before paying; previously a first-ever
-      // listing on Free (max_businesses now 1) would never trip this
-      // because count(0) >= max(1) was false, so the trial never fired
-      // until a 2nd business.
-      const { data: userRow } = await supabaseAdmin.from('users').select('trial_used').eq('id', req.user.id).single();
-      if (plan.tier === 'free' && count === 0 && !userRow?.trial_used) {
-        const { data: sp } = await supabaseAdmin.from('plans').select('id').eq('tier', 'starter').single();
-        if (sp) { grantTrial = true; starterPlanId = sp.id; }
-      }
-
-      if (!grantTrial && count >= plan.max_businesses) {
-        // No paid capacity left and no trial available (already used, or
-        // this isn't their first business) — block as before.
+      if (count >= plan.max_businesses) {
         return res.status(403).json({ error: `Your ${plan.name} plan allows ${plan.max_businesses} business(es). Upgrade to add more.`, code: 'LIMIT_REACHED', redirect: '/pricing' });
       }
     }
@@ -261,26 +243,10 @@ exports.create = async (req, res, next) => {
       meta_title: meta_title || null, meta_description: meta_description || null,
       ...(operating_hours ? { operating_hours } : {}),
       ...(amenities ? { amenities } : {}),
-      subscription_tier: grantTrial ? 'starter' : (req.plan?.tier || 'starter'),
+      subscription_tier: req.plan?.tier || 'free',
       status: 'pending',
     }).select().single();
     if (error) throw error;
-
-    if (grantTrial) {
-      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-      // Reuses the same subscriptions table / expiry cron that paid plans
-      // use, so trial expiry, downgrade-to-free, and the renewal-reminder
-      // notification all just work with no extra scheduling logic needed.
-      await supabaseAdmin.from('subscriptions').insert({
-        business_id: business.id, user_id: req.user.id, plan_id: starterPlanId,
-        tier: 'starter', status: 'active', amount_paid: 0, billing_cycle: 'monthly',
-        started_at: new Date().toISOString(), expires_at: expiresAt, is_trial: true,
-      });
-      await supabaseAdmin.from('users').update({ trial_used: true }).eq('id', req.user.id);
-      await notify(req.user.id, 'success', '🎉 Your free mini-website month has started!',
-        `${business.name} now has full Starter-plan access — mini-website, AI content tools, and analytics — free for 30 days. No payment required. After that it reverts to a basic listing unless you upgrade.`,
-        `/pages/dashboard.html?tab=businesses`);
-    }
 
     if (req.user.role === 'user')
       await supabaseAdmin.from('users').update({ role: 'business_owner' }).eq('id', req.user.id);

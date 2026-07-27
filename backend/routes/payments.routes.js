@@ -66,32 +66,47 @@ router.post('/initialize', verifyToken, limits.payments, async (req, res, next) 
         amount = Math.max(0, amount-discount);
       }
     }
+    // First month free on Starter — the ONE point where the free trial is
+    // granted (previously this fired silently on a user's first business
+    // creation regardless of which plan they picked; now it only fires when
+    // someone explicitly chooses Starter, and only for monthly billing).
+    let isTrial = false;
+    const { data: buyer } = await supabaseAdmin.from('users').select('referral_credit_ghs,trial_used').eq('id', req.user.id).single();
+    if (plan_tier === 'starter' && billing_cycle === 'monthly' && !buyer?.trial_used) {
+      isTrial = true;
+      amount = 0;
+    }
     // Auto-apply any referral credit the user has earned (from referring
     // signups or their referrals' first orders — see applyReferral and
     // orders.routes.js), on top of any promo code above. Capped at the
     // remaining amount so credit can never make a plan go negative.
     let creditApplied = 0;
-    const { data: buyer } = await supabaseAdmin.from('users').select('referral_credit_ghs').eq('id', req.user.id).single();
     const availableCredit = Number(buyer?.referral_credit_ghs || 0);
-    if (availableCredit > 0 && amount > 0) {
+    if (!isTrial && availableCredit > 0 && amount > 0) {
       creditApplied = Math.min(availableCredit, amount);
       amount = Math.max(0, amount - creditApplied);
       await supabaseAdmin.from('users').update({ referral_credit_ghs: availableCredit - creditApplied }).eq('id', req.user.id);
     }
     const reference = `SGH-${uuidv4().replace(/-/g,'').slice(0,16).toUpperCase()}`;
 
-    // Fully covered by referral credit — sending a ₵0 amount to Paystack's
-    // API isn't reliable, so skip it entirely and activate the
-    // subscription directly, mirroring what /verify/:reference does for
-    // a real payment.
+    // Fully covered by referral credit (or a free trial) — sending a ₵0
+    // amount to Paystack's API isn't reliable, so skip it entirely and
+    // activate the subscription directly, mirroring what /verify/:reference
+    // does for a real payment.
     if (amount <= 0) {
       const now = new Date(); const exp = new Date(now);
       billing_cycle === 'yearly' ? exp.setFullYear(exp.getFullYear() + 1) : exp.setMonth(exp.getMonth() + 1);
-      await supabaseAdmin.from('payments').insert({ user_id: req.user.id, business_id: business_id || null, plan_id: plan.id, amount: 0, currency: 'GHS', status: 'paid', paid_at: now.toISOString(), paystack_reference: reference, description: `SpotGH ${plan.name} - ${billing_cycle} (fully covered by referral credit)`, metadata: { plan_tier, billing_cycle, promo_code: promo_code || null, discount_amount: discount, referral_credit_applied: creditApplied, claimed_own_website: business_id ? null : !!has_own_website, claimed_website: business_id ? null : (website || null) } });
-      await supabaseAdmin.from('subscriptions').insert({ user_id: req.user.id, business_id: business_id || null, plan_id: plan.id, tier: plan_tier, status: 'active', amount_paid: 0, billing_cycle, paystack_reference: reference, started_at: now.toISOString(), expires_at: exp.toISOString() });
+      const description = isTrial
+        ? `SpotGH ${plan.name} - ${billing_cycle} (first month free trial)`
+        : `SpotGH ${plan.name} - ${billing_cycle} (fully covered by referral credit)`;
+      await supabaseAdmin.from('payments').insert({ user_id: req.user.id, business_id: business_id || null, plan_id: plan.id, amount: 0, currency: 'GHS', status: 'paid', paid_at: now.toISOString(), paystack_reference: reference, description, metadata: { plan_tier, billing_cycle, promo_code: promo_code || null, discount_amount: discount, referral_credit_applied: creditApplied, is_trial: isTrial, claimed_own_website: business_id ? null : !!has_own_website, claimed_website: business_id ? null : (website || null) } });
+      await supabaseAdmin.from('subscriptions').insert({ user_id: req.user.id, business_id: business_id || null, plan_id: plan.id, tier: plan_tier, status: 'active', amount_paid: 0, billing_cycle, paystack_reference: reference, started_at: now.toISOString(), expires_at: exp.toISOString(), is_trial: isTrial });
       if (business_id) await supabaseAdmin.from('businesses').update({ subscription_tier: plan_tier, subscription_expires_at: exp.toISOString(), status: 'pending' }).eq('id', business_id);
-      await notify(req.user.id, 'success', '🎉 Plan activated with referral credit!', `Your ${plan.name} plan is now active — fully covered by your referral credit, no payment needed.`, '/pages/dashboard.html');
-      return res.json({ fully_covered: true, redirect: `/pages/dashboard.html?payment=success&plan=${plan_tier}`, referral_credit_applied: creditApplied, plan: plan.name });
+      if (isTrial) await supabaseAdmin.from('users').update({ trial_used: true }).eq('id', req.user.id);
+      const notifTitle = isTrial ? '🎉 Your free Starter month has started!' : '🎉 Plan activated with referral credit!';
+      const notifBody = isTrial ? `Your Starter mini-website is live free for the next 30 days — no payment needed.` : `Your ${plan.name} plan is now active — fully covered by your referral credit, no payment needed.`;
+      await notify(req.user.id, 'success', notifTitle, notifBody, '/pages/dashboard.html');
+      return res.json({ fully_covered: true, is_trial: isTrial, redirect: `/pages/dashboard.html?payment=success&plan=${plan_tier}`, referral_credit_applied: creditApplied, plan: plan.name });
     }
 
     await supabaseAdmin.from('payments').insert({ user_id: req.user.id, business_id: business_id||null, plan_id: plan.id, amount, currency:'GHS', status:'pending', paystack_reference: reference, description:`SpotGH ${plan.name} - ${billing_cycle}`, metadata:{ plan_tier, billing_cycle, promo_code:promo_code||null, discount_amount:discount, referral_credit_applied:creditApplied, claimed_own_website: business_id ? null : !!has_own_website, claimed_website: business_id ? null : (website || null) } });

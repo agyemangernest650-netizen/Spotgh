@@ -6,6 +6,57 @@ document.addEventListener('DOMContentLoaded', async () => {
   const franchiseId = new URLSearchParams(location.search).get('id');
   const main = document.getElementById('pageMain');
 
+  // These must be registered BEFORE the branching below — they were
+  // previously defined after an early `return`, so they never actually
+  // ran and every button on this page threw "not defined" when clicked.
+  window.toggleCreateForm = () => { document.getElementById('createForm').hidden = !document.getElementById('createForm').hidden; };
+
+  window.createFranchise = async () => {
+    const name = document.getElementById('fName').value.trim();
+    if (!name) return toast.warning('Franchise name is required');
+    try {
+      const { franchise } = await API.post('/franchises', { name, description: document.getElementById('fDesc').value.trim() || undefined });
+      toast.success('Franchise created!');
+      location.href = `/pages/franchise-manager.html?id=${franchise.id}`;
+    } catch (err) { toast.error(err.message || 'Failed to create franchise'); }
+  };
+
+  window.uploadFranchiseLogo = async (input) => {
+    if (!input.files[0]) return;
+    try {
+      const fd = new FormData(); fd.append('logo', input.files[0]);
+      const { franchise } = await API.upload(`/franchises/${franchiseId}/logo`, fd);
+      document.getElementById('fLogoPreview').innerHTML = `<img src="${franchise.logo_url}" style="width:100%;height:100%;object-fit:cover">`;
+      toast.success('Logo updated');
+    } catch { toast.error('Failed to upload logo'); }
+  };
+
+  window.applyBranding = async () => {
+    if (!confirm('Apply this franchise\'s logo/theme color to every location? This will overwrite each business\'s current logo/theme.')) return;
+    try {
+      const { updated_count } = await API.post(`/franchises/${franchiseId}/apply-branding`, {});
+      toast.success(`Branding applied to ${updated_count} location${updated_count===1?'':'s'}`);
+    } catch (err) { toast.error(err.message || 'Failed to apply branding'); }
+  };
+
+  window.deleteFranchise = async () => {
+    if (!confirm('Delete this franchise? Locations will not be deleted, just ungrouped.')) return;
+    try { await API.delete(`/franchises/${franchiseId}`); toast.success('Franchise deleted'); location.href = '/pages/franchise-manager.html'; }
+    catch { toast.error('Failed to delete'); }
+  };
+
+  window.addLocation = async () => {
+    const businessId = document.getElementById('addBizSelect').value;
+    try { await API.post(`/franchises/${franchiseId}/businesses`, { business_id: businessId }); toast.success('Location added'); renderDetail(franchiseId); }
+    catch (err) { toast.error(err.message || 'Failed to add location'); }
+  };
+
+  window.removeLocation = async (businessId) => {
+    if (!confirm('Remove this location from the franchise?')) return;
+    try { await API.delete(`/franchises/${franchiseId}/businesses/${businessId}`); document.querySelector(`[data-biz-id="${businessId}"]`)?.remove(); toast.success('Removed'); }
+    catch { toast.error('Failed to remove'); }
+  };
+
   if (franchiseId) return renderDetail(franchiseId);
   return renderList();
 
@@ -59,17 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       </a>`;
   }
 
-  window.toggleCreateForm = () => { document.getElementById('createForm').hidden = !document.getElementById('createForm').hidden; };
-
-  window.createFranchise = async () => {
-    const name = document.getElementById('fName').value.trim();
-    if (!name) return toast.warning('Franchise name is required');
-    try {
-      const { franchise } = await API.post('/franchises', { name, description: document.getElementById('fDesc').value.trim() || undefined });
-      toast.success('Franchise created!');
-      location.href = `/pages/franchise-manager.html?id=${franchise.id}`;
-    } catch (err) { toast.error(err.message || 'Failed to create franchise'); }
-  };
+  // (toggleCreateForm/createFranchise now defined earlier, before the branching)
 
   // ── Detail view: one franchise's locations + management tools ───────
   async function renderDetail(id) {
@@ -139,39 +180,5 @@ document.addEventListener('DOMContentLoaded', async () => {
       </div>`;
   }
 
-  window.uploadFranchiseLogo = async (input) => {
-    if (!input.files[0]) return;
-    try {
-      const fd = new FormData(); fd.append('logo', input.files[0]);
-      const { franchise } = await API.upload(`/franchises/${franchiseId}/logo`, fd);
-      document.getElementById('fLogoPreview').innerHTML = `<img src="${franchise.logo_url}" style="width:100%;height:100%;object-fit:cover">`;
-      toast.success('Logo updated');
-    } catch { toast.error('Failed to upload logo'); }
-  };
-
-  window.applyBranding = async () => {
-    if (!confirm('Apply this franchise\'s logo/theme color to every location? This will overwrite each business\'s current logo/theme.')) return;
-    try {
-      const { updated_count } = await API.post(`/franchises/${franchiseId}/apply-branding`, {});
-      toast.success(`Branding applied to ${updated_count} location${updated_count===1?'':'s'}`);
-    } catch (err) { toast.error(err.message || 'Failed to apply branding'); }
-  };
-
-  window.deleteFranchise = async () => {
-    if (!confirm('Delete this franchise? Locations will not be deleted, just ungrouped.')) return;
-    try { await API.delete(`/franchises/${franchiseId}`); toast.success('Franchise deleted'); location.href = '/pages/franchise-manager.html'; }
-    catch { toast.error('Failed to delete'); }
-  };
-
-  window.addLocation = async () => {
-    const businessId = document.getElementById('addBizSelect').value;
-    try { await API.post(`/franchises/${franchiseId}/businesses`, { business_id: businessId }); toast.success('Location added'); renderDetail(franchiseId); }
-    catch (err) { toast.error(err.message || 'Failed to add location'); }
-  };
-
-  window.removeLocation = async (businessId) => {
-    if (!confirm('Remove this location from the franchise?')) return;
-    try { await API.delete(`/franchises/${franchiseId}/businesses/${businessId}`); document.querySelector(`[data-biz-id="${businessId}"]`)?.remove(); toast.success('Removed'); }
-    catch { toast.error('Failed to remove'); }
-  };
+  // (uploadFranchiseLogo/applyBranding/deleteFranchise/addLocation/removeLocation now defined earlier, before the branching)
 });
