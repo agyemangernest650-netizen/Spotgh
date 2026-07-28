@@ -257,12 +257,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   window.selectPlan = async (subscriptionType, planKey, price, name) => {
-    if (subscriptionType === 'directory' && planKey === 'free') {
+    const bizId = params.get('business_id') || null;
+
+    if (subscriptionType === 'directory' && planKey === 'free' && !bizId) {
       window.location.href = Auth.isLoggedIn() ? '/pages/dashboard.html?tab=new&signup_type=directory' : '/pages/register.html';
       return;
     }
     if (!Auth.requireAuth()) return;
-    const bizId = params.get('business_id') || null;
+
+    // A subscription always attaches to a business — if the person doesn't
+    // have one selected yet, there's nothing to check out. Send them to
+    // create one first (with the right signup wizard for this product),
+    // and finish checkout automatically once it exists (see dashboard.js).
+    if (!bizId) {
+      sessionStorage.setItem('spotgh_pending_plan', JSON.stringify({ subscription_type: subscriptionType, plan_key: planKey, billing }));
+      const signupType = subscriptionType === 'directory' ? 'directory' : subscriptionType === 'website' ? 'website' : 'both';
+      window.location.href = `/pages/dashboard.html?tab=new&signup_type=${signupType}`;
+      return;
+    }
+
     try {
       const btn = event.currentTarget;
       setLoading(btn, true, 'Redirecting…');

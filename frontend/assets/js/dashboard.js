@@ -333,6 +333,42 @@ document.addEventListener('DOMContentLoaded', () => {
           signup_type: signupType || 'both',
         });
         sessionStorage.removeItem('spotgh_own_website_choice');
+
+        // If they arrived here from the pricing page choosing a specific
+        // paid plan, finish that checkout now that a business exists to
+        // attach it to. Skip it if the business creation itself already
+        // covered it for free (Directory Free always does; Starter Website
+        // does too, unless their once-per-account trial was already used
+        // — in which case this really does need payment now).
+        const pendingRaw = sessionStorage.getItem('spotgh_pending_plan');
+        if (pendingRaw) {
+          sessionStorage.removeItem('spotgh_pending_plan');
+          const pending = JSON.parse(pendingRaw);
+          let needsCheckout = true;
+          if (pending.subscription_type === 'directory' && pending.plan_key === 'free') {
+            needsCheckout = false; // every business gets this automatically
+          } else if (pending.subscription_type === 'website' && pending.plan_key === 'starter') {
+            try {
+              const status = await API.get(`/subscriptions/status-v2?business_id=${business.id}`);
+              if (status.website) needsCheckout = false; // trial was granted just now
+            } catch { /* if we can't tell, fall through and try checkout */ }
+          }
+          if (needsCheckout) {
+            try {
+              const res = await API.post('/payments/v2/initialize', {
+                subscription_type: pending.subscription_type, plan_key: pending.plan_key,
+                billing_cycle: pending.billing || 'monthly', business_id: business.id,
+              });
+              if (res.fully_covered) {
+                toast.success(res.is_trial ? '🎉 Your free month has started!' : '🎉 Plan activated!');
+              } else if (res.authorization_url) {
+                window.location.href = res.authorization_url;
+                return;
+              }
+            } catch { toast.warning(`${business.name} was created, but activating the plan failed — you can subscribe from your dashboard.`); }
+          }
+        }
+
         document.getElementById('newBizForm').style.display = 'none';
         document.getElementById('newBizSuccessTitle').textContent = `${business.name} submitted!`;
         document.getElementById('newBizSuccessEditLink').href = `/pages/business-edit.html?id=${business.id}`;
@@ -441,7 +477,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      list.innerHTML = businesses.map(b => `
+      list.innerHTML = businesses.map(b => {
+        const hasWebsite = !!b.website_tier;
+        const websiteIcons = hasWebsite ? `
+            <a href="/pages/gallery.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Gallery"><i class="fa-solid fa-images"></i></a>
+            <a href="/pages/products.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Products"><i class="fa-solid fa-box"></i></a>
+            <a href="/pages/bookings.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Bookings"><i class="fa-solid fa-calendar"></i></a>
+            <a href="/pages/business-orders.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Orders"><i class="fa-solid fa-bag-shopping"></i></a>`
+          : `<a href="/pages/pricing.html?tab=website&business_id=${b.id}" class="btn btn--outline btn--sm" title="Add a Mini-Website to unlock Gallery, Products, Bookings & Orders"><i class="fa-solid fa-globe"></i> Add Website</a>`;
+        return `
         <div class="card" style="padding:1.25rem;display:flex;align-items:center;gap:1.25rem;margin-bottom:.75rem;flex-wrap:wrap">
           ${b.logo_url
             ? `<img src="${b.logo_url}" style="width:64px;height:64px;object-fit:cover;border-radius:10px;flex-shrink:0">`
@@ -451,6 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <strong style="font-size:1rem">${b.name}</strong>
               <span class="badge ${b.status==='active'?'badge--success':b.status==='pending'?'badge--warning':'badge--danger'}">${b.status}</span>
               ${b.is_featured ? '<span class="badge badge--primary">⭐ Featured</span>' : ''}
+              ${hasWebsite ? '<span class="badge badge--primary" title="Has an active Website subscription"><i class="fa-solid fa-globe"></i></span>' : ''}
             </div>
             <div style="font-size:.825rem;color:var(--clr-text-2)">${b.category_name||''} ${b.city?' · '+b.city:''}</div>
             <div style="font-size:.75rem;color:var(--clr-text-3);margin-top:.25rem">
@@ -461,10 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ${b.status==='active' ? `<a href="/pages/business.html?slug=${b.slug}" class="btn btn--ghost btn--sm" target="_blank"><i class="fa-solid fa-eye"></i></a>` : ''}
             <a href="/pages/business-edit.html?id=${b.id}" class="btn btn--outline btn--sm"><i class="fa-solid fa-pen"></i> Edit</a>
             <a href="/pages/analytics.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Analytics"><i class="fa-solid fa-chart-line"></i></a>
-            <a href="/pages/gallery.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Gallery"><i class="fa-solid fa-images"></i></a>
-            <a href="/pages/products.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Products"><i class="fa-solid fa-box"></i></a>
-            <a href="/pages/bookings.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Bookings"><i class="fa-solid fa-calendar"></i></a>
-            <a href="/pages/business-orders.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Orders"><i class="fa-solid fa-bag-shopping"></i></a>
+            ${websiteIcons}
             <a href="/pages/messages.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Messages"><i class="fa-solid fa-comment"></i></a>
             <a href="/pages/deals-manager.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Deals & Coupons"><i class="fa-solid fa-tags"></i></a>
             <a href="/pages/events-manager.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Events"><i class="fa-solid fa-champagne-glasses"></i></a>
@@ -472,7 +514,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <a href="/pages/health.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Health Score"><i class="fa-solid fa-heart-pulse"></i></a>
             <a href="/pages/pricing.html?business_id=${b.id}" class="btn btn--ghost btn--sm" title="Manage Plan"><i class="fa-solid fa-credit-card"></i></a>
           </div>
-        </div>`).join('');
+        </div>`;
+      }).join('');
 
       // Start tour for new users
       if (!localStorage.getItem('sgh_tour_done')) {
