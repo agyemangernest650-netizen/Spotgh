@@ -99,18 +99,21 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <div class="wiz-step" data-step="4" style="display:none">
-          <h3 style="font-size:1rem;margin-bottom:1rem">Website or SpotGH Website?</h3>
-          <label class="form-label">Do you already have a website? *</label>
-          <div style="display:flex;gap:1.25rem;margin-bottom:.5rem">
+          <h3 style="font-size:1rem;margin-bottom:1rem">What do you want on SpotGH?</h3>
+          <label class="form-label">Choose one *</label>
+          <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:.5rem">
             <label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;cursor:pointer">
-              <input type="radio" name="bizHasWebsite" value="yes"> Yes, I have one
+              <input type="radio" name="bizWebsiteChoice" value="own"> Yes, I already have my own website
             </label>
             <label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;cursor:pointer">
-              <input type="radio" name="bizHasWebsite" value="no"> No — build me a free SpotGH mini-website
+              <input type="radio" name="bizWebsiteChoice" value="mini"> No — build me a SpotGH mini-website
+            </label>
+            <label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;cursor:pointer">
+              <input type="radio" name="bizWebsiteChoice" value="none"> No thanks — just list my business
             </label>
           </div>
           <input id="bizWebsite" class="form-input" type="url" placeholder="https://yourwebsite.com" style="display:none">
-          <div style="font-size:.73rem;color:var(--clr-text-3);margin-top:.3rem">We'll link to it from your listing and check that it's live. If you don't have one yet, SpotGH builds and hosts a mini-website for you instead.</div>
+          <div id="bizWebsiteChoiceNote" style="font-size:.73rem;color:var(--clr-text-3);margin-top:.3rem"></div>
         </div>
 
         <div class="wiz-step" data-step="5" style="display:none">
@@ -139,18 +142,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // If the user answered "already have a website?" on the pricing page
     // before subscribing (see pricing.js), pre-fill it here so they don't
     // have to answer twice — it's still editable.
-    document.querySelectorAll('input[name="bizHasWebsite"]').forEach(r => {
+    const WEBSITE_CHOICE_NOTES = {
+      own: "We'll link to it from your listing and check that it's live.",
+      mini: 'SpotGH builds and hosts a mini-website for you — starts with a free 30-day Standard trial (one-time), then continues on the Standard plan.',
+      none: "Your business still gets a full directory listing — photos, hours, contact info, and reviews — just without a dedicated website page.",
+    };
+    document.querySelectorAll('input[name="bizWebsiteChoice"]').forEach(r => {
       r.addEventListener('change', () => {
-        document.getElementById('bizWebsite').style.display = r.value === 'yes' ? 'block' : 'none';
+        document.getElementById('bizWebsite').style.display = r.value === 'own' ? 'block' : 'none';
+        document.getElementById('bizWebsiteChoiceNote').textContent = WEBSITE_CHOICE_NOTES[r.value] || '';
       });
     });
     try {
       const stored = JSON.parse(sessionStorage.getItem('spotgh_own_website_choice') || 'null');
       if (stored) {
-        const radio = document.querySelector(`input[name="bizHasWebsite"][value="${stored.has_own_website ? 'yes' : 'no'}"]`);
+        const value = stored.has_own_website ? 'own' : 'mini';
+        const radio = document.querySelector(`input[name="bizWebsiteChoice"][value="${value}"]`);
         if (radio) {
           radio.checked = true;
-          document.getElementById('bizWebsite').style.display = stored.has_own_website ? 'block' : 'none';
+          document.getElementById('bizWebsite').style.display = value === 'own' ? 'block' : 'none';
+          document.getElementById('bizWebsiteChoiceNote').textContent = WEBSITE_CHOICE_NOTES[value] || '';
           if (stored.website) document.getElementById('bizWebsite').value = stored.website;
         }
       }
@@ -203,9 +214,9 @@ document.addEventListener('DOMContentLoaded', () => {
         toast.warning('Business name is required'); return false;
       }
       if (n === 4) {
-        const checked = document.querySelector('input[name="bizHasWebsite"]:checked');
-        if (!checked) { toast.warning('Please tell us whether you already have a website'); return false; }
-        if (checked.value === 'yes' && !/^https?:\/\/.+\..+/.test(document.getElementById('bizWebsite').value.trim())) {
+        const checked = document.querySelector('input[name="bizWebsiteChoice"]:checked');
+        if (!checked) { toast.warning('Please choose one of the website options'); return false; }
+        if (checked.value === 'own' && !/^https?:\/\/.+\..+/.test(document.getElementById('bizWebsite').value.trim())) {
           toast.warning('Please enter a valid website URL, including https://'); return false;
         }
       }
@@ -213,15 +224,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderReview() {
-      const checked = document.querySelector('input[name="bizHasWebsite"]:checked');
-      const website = checked?.value === 'yes' ? document.getElementById('bizWebsite').value.trim() : null;
+      const checked = document.querySelector('input[name="bizWebsiteChoice"]:checked');
+      const website = checked?.value === 'own' ? document.getElementById('bizWebsite').value.trim() : null;
+      const websiteSummary = { own: website, mini: 'SpotGH mini-website', none: 'Listing only — no website' }[checked?.value] || '—';
       document.getElementById('wizReview').innerHTML = `
         <div><strong>Category:</strong> ${document.getElementById('bizCategoryName').value || '—'}</div>
         <div><strong>Name:</strong> ${document.getElementById('bizName').value.trim() || '—'}</div>
         <div><strong>Tagline:</strong> ${document.getElementById('bizTagline').value.trim() || '—'}</div>
         <div><strong>Location:</strong> ${[document.getElementById('bizCity').value.trim(), document.getElementById('bizRegion').value.trim()].filter(Boolean).join(', ') || '—'}</div>
         <div><strong>Contact:</strong> ${[document.getElementById('bizWhatsapp').value.trim(), document.getElementById('bizPhone').value.trim()].filter(Boolean).join(' / ') || '—'}</div>
-        <div><strong>Website:</strong> ${website || (checked?.value === 'no' ? 'SpotGH mini-website' : '—')}</div>`;
+        <div><strong>Website:</strong> ${websiteSummary}</div>`;
     }
 
     window.showStep = (n) => {
@@ -249,9 +261,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const btn = document.getElementById('submitBizBtn');
       const name = document.getElementById('bizName').value.trim();
       if (!name) return toast.warning('Business name is required');
-      const hasWebsiteChecked = document.querySelector('input[name="bizHasWebsite"]:checked');
-      if (!hasWebsiteChecked) return toast.warning('Please tell us whether you already have a website');
-      const hasOwnWebsite = hasWebsiteChecked.value === 'yes';
+      const websiteChoiceChecked = document.querySelector('input[name="bizWebsiteChoice"]:checked');
+      if (!websiteChoiceChecked) return toast.warning('Please choose one of the website options');
+      const websiteChoice = websiteChoiceChecked.value; // 'own' | 'mini' | 'none'
+      const hasOwnWebsite = websiteChoice === 'own';
+      const wantsMiniWebsite = websiteChoice === 'mini';
       const websiteUrl = document.getElementById('bizWebsite').value.trim();
       if (hasOwnWebsite && !/^https?:\/\/.+\..+/.test(websiteUrl)) {
         return toast.warning('Please enter a valid website URL, including https://');
@@ -270,17 +284,19 @@ document.addEventListener('DOMContentLoaded', () => {
           template_key: document.getElementById('bizTemplateKey').value,
           theme_color: document.getElementById('bizThemeColor').value,
           has_own_website: hasOwnWebsite,
+          wants_website: wantsMiniWebsite,
           website: hasOwnWebsite ? websiteUrl : '',
         });
         sessionStorage.removeItem('spotgh_own_website_choice');
         document.getElementById('newBizForm').style.display = 'none';
         document.getElementById('newBizSuccessTitle').textContent = `${business.name} submitted!`;
         document.getElementById('newBizSuccessEditLink').href = `/pages/business-edit.html?id=${business.id}`;
+        document.getElementById('newBizSuccessEditLink').textContent = wantsMiniWebsite ? 'Build Your Mini-Website' : 'Add Logo & Photos';
         document.getElementById('newBizSuccess').style.display = 'block';
       } catch (err) {
         setLoading(btn, false);
-        if (err.code === 'LIMIT_REACHED' || err.redirect) {
-          toast.warning(err.error || 'Upgrade your plan to add more businesses');
+        if (err.code === 'LIMIT_REACHED' || err.code === 'UPGRADE_REQUIRED' || err.redirect) {
+          toast.warning(err.error || 'Upgrade your plan for a SpotGH mini-website');
           setTimeout(() => window.location.href = '/pages/pricing.html', 1200);
         } else toast.error(err.message || 'Failed to create business');
       }

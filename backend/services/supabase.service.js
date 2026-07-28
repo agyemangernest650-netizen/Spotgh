@@ -86,6 +86,22 @@ const calcHealthScore = (biz) => {
 const sanitizeSearchTerm = (term) =>
   String(term).replace(/[,().]/g, ' ').trim().slice(0, 200);
 
+// ── Featured Placement Sync ────────────────────────────────
+// Premium ("pro") is the only tier that includes automatic top-of-list
+// placement (is_featured). Call this every time a business's
+// subscription_tier changes — on upgrade, renewal, downgrade, or expiry —
+// so the two stay in sync instead of relying on an admin to flip
+// is_featured by hand. featured_until mirrors the subscription's expiry so
+// the existing daily cleanup job (server.js) still un-features it if this
+// call is ever missed for some reason.
+const syncFeaturedForTier = async (businessId, tier, expiresAt = null) => {
+  if (tier === 'pro') {
+    await supabaseAdmin.from('businesses').update({ is_featured: true, featured_until: expiresAt }).eq('id', businessId);
+  } else {
+    await supabaseAdmin.from('businesses').update({ is_featured: false, featured_until: null }).eq('id', businessId);
+  }
+};
+
 // ── Pagination Helper ─────────────────────────────────────
 const paginate = (page = 1, limit = 12) => {
   const p   = Math.max(1, parseInt(page));
@@ -94,4 +110,4 @@ const paginate = (page = 1, limit = 12) => {
   return { page: p, limit: l, offset, from: offset, to: offset + l - 1 };
 };
 
-module.exports = { generateSlug, notify, audit, calcHealthScore, paginate, sanitizeSearchTerm, supabaseAdmin };
+module.exports = { generateSlug, notify, audit, calcHealthScore, paginate, sanitizeSearchTerm, supabaseAdmin, syncFeaturedForTier };

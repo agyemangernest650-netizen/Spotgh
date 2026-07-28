@@ -175,6 +175,8 @@ exports.getById = async (req, res, next) => {
   try {
     const { data, error } = await supabaseAdmin.from('businesses_with_stats').select('*').eq('id', req.params.id).single();
     if (error || !data) return res.status(404).json({ error: 'Business not found' });
+    const { data: planFlags } = await supabaseAdmin.from('plans').select('has_website').eq('tier', data.subscription_tier).maybeSingle();
+    data.has_website = !!planFlags?.has_website;
     res.json({ business: data });
   } catch (err) { next(err); }
 };
@@ -208,7 +210,7 @@ async function checkUrlReachable(url) {
 // POST /api/businesses
 exports.create = async (req, res, next) => {
   try {
-    const { name, tagline, description, phone, whatsapp, email, website, has_own_website,
+    const { name, tagline, description, phone, whatsapp, email, website, has_own_website, wants_website,
             address, city, region, country, category_id, social_links,
             theme_color, template_key, meta_title, meta_description,
             operating_hours, amenities } = req.body;
@@ -216,6 +218,7 @@ exports.create = async (req, res, next) => {
 
     // Check business limit from subscription
     const plan = req.plan;
+    const tier = plan?.tier || 'free';
 
     if (plan && plan.max_businesses !== 999) {
       const { count } = await supabaseAdmin.from('businesses').select('id', { count: 'exact' }).eq('owner_id', req.user.id).neq('status', 'rejected');
@@ -226,6 +229,32 @@ exports.create = async (req, res, next) => {
 
     const ownsWebsite = has_own_website === true || has_own_website === 'true';
     const ownWebsiteVerified = ownsWebsite ? await checkUrlReachable(website) : null;
+
+    // A mini-website is a Starter-plan feature. A Free-tier signup who asks
+    // for one gets auto-enrolled in the one-time free Starter month (same
+    // trial offered on the pricing page) so they can go straight to
+    // building it — no manual checkout needed. Once that trial has been
+    // used, later requests fall back to the normal upgrade-and-pay flow.
+    const wantsMiniWebsite = !ownsWebsite && (wants_website === true || wants_website === 'true');
+    let businessTier = tier;
+    let trialGranted = null;
+    if (wantsMiniWebsite && tier === 'free') {
+      const { data: buyer } = await supabaseAdmin.from('users').select('trial_used').eq('id', req.user.id).single();
+      if (buyer?.trial_used) {
+        return res.status(403).json({
+          error: "A SpotGH mini-website needs the Standard plan — you've already used your free trial month, so this one needs a paid subscription. You can still list your business for free without a website.",
+          code: 'UPGRADE_REQUIRED', redirect: '/pricing',
+        });
+      }
+      const { data: starterPlan } = await supabaseAdmin.from('plans').select('*').eq('tier', 'starter').single();
+      if (!starterPlan) {
+        return res.status(500).json({ error: 'Starter plan is not configured.' });
+      }
+      businessTier = 'starter';
+      const now = new Date();
+      const exp = new Date(now); exp.setDate(exp.getDate() + 30);
+      trialGranted = { plan: starterPlan, startedAt: now, expiresAt: exp };
+    }
 
     const slug = await generateSlug(name);
     const { data: business, error } = await supabaseAdmin.from('businesses').insert({
@@ -243,10 +272,20 @@ exports.create = async (req, res, next) => {
       meta_title: meta_title || null, meta_description: meta_description || null,
       ...(operating_hours ? { operating_hours } : {}),
       ...(amenities ? { amenities } : {}),
-      subscription_tier: req.plan?.tier || 'free',
+      subscription_tier: businessTier,
+      ...(trialGranted ? { subscription_expires_at: trialGranted.expiresAt.toISOString() } : {}),
       status: 'pending',
     }).select().single();
     if (error) throw error;
+
+    if (trialGranted) {
+      await supabaseAdmin.from('subscriptions').insert({
+        user_id: req.user.id, business_id: business.id, plan_id: trialGranted.plan.id, tier: 'starter',
+        status: 'active', amount_paid: 0, billing_cycle: 'monthly',
+        started_at: trialGranted.startedAt.toISOString(), expires_at: trialGranted.expiresAt.toISOString(), is_trial: true,
+      });
+      await supabaseAdmin.from('users').update({ trial_used: true }).eq('id', req.user.id);
+    }
 
     if (req.user.role === 'user')
       await supabaseAdmin.from('users').update({ role: 'business_owner' }).eq('id', req.user.id);
@@ -257,7 +296,11 @@ exports.create = async (req, res, next) => {
           ? `We confirmed ${website} is live and linked it to your SpotGH listing.`
           : `We saved ${website} on your listing, but couldn't confirm it responded — double check the link still works.`,
         `/pages/dashboard.html?tab=businesses`);
-    } else {
+    } else if (trialGranted) {
+      await notify(req.user.id, 'info', `🎉 Free ${trialGranted.plan.name} month started!`,
+        `${business.name} is on a free 30-day ${trialGranted.plan.name} trial — your SpotGH mini-website will be ready once approved. No payment needed until it renews.`,
+        `/pages/dashboard.html?tab=businesses`);
+    } else if (wantsMiniWebsite) {
       await notify(req.user.id, 'info', '🌐 Your SpotGH mini-website is being generated',
         `${business.name} will get its own SpotGH mini-website once approved — no external site needed.`,
         `/pages/dashboard.html?tab=businesses`);

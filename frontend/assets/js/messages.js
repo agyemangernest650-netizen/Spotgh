@@ -13,16 +13,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         <a href="/pages/dashboard.html" class="btn btn--ghost btn--sm"><i class="fa-solid fa-arrow-left"></i></a>
         <h1 style="font-size:1.5rem;font-weight:800;margin:0">Messages</h1>
       </div>
-      <div style="display:grid;grid-template-columns:260px 1fr;gap:1.25rem;min-height:500px" id="msgLayout">
+      <div class="msg-layout" id="msgLayout">
         <div class="card" style="padding:0;overflow:hidden">
           <div id="threadList"><div style="padding:1.5rem"><div class="skeleton" style="height:60px;border-radius:12px;margin-bottom:.75rem"></div><div class="skeleton" style="height:60px;border-radius:12px"></div></div></div>
         </div>
-        <div class="card" style="padding:0;display:flex;flex-direction:column" id="threadPanel">
+        <div class="card msg-thread-panel" style="padding:0;display:flex;flex-direction:column" id="threadPanel">
           <div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--clr-text-3)">Select a conversation</div>
         </div>
       </div>
     </div>
-    <style>@media(max-width:640px){#msgLayout{grid-template-columns:1fr}}</style>`;
+    <style>
+      .msg-layout{display:grid;grid-template-columns:260px 1fr;gap:1.25rem;min-height:500px}
+      /* On phones the two-pane layout doesn't fit side by side — the thread
+         list and the open conversation each need the full width in turn.
+         (Previously this was an inline style on #msgLayout, which always
+         beats a stylesheet media query no matter the selector, so the
+         columns never actually collapsed on mobile — this rule is now the
+         only place column count is set.) */
+      @media(max-width:640px){
+        .msg-layout{grid-template-columns:1fr}
+        .msg-layout.msg-layout--open .card:first-child{display:none}
+        .msg-layout:not(.msg-layout--open) .msg-thread-panel{display:none !important}
+      }
+    </style>`;
 
   let threads = [];
   let activeCustomerId = openCustomer || null;
@@ -54,13 +67,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function openThread(customerId) {
     activeCustomerId = customerId;
+    document.getElementById('msgLayout').classList.add('msg-layout--open');
     document.querySelectorAll('.thread-item').forEach(el => el.style.background = el.dataset.customer === customerId ? 'var(--clr-surface-2)' : '');
     const thread = threads.find(t => t.customer_id === customerId);
     if (!thread) return;
     const panel = document.getElementById('threadPanel');
     const sorted = [...thread.messages].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     panel.innerHTML = `
-      <div style="padding:1rem;border-bottom:1px solid var(--clr-border);font-weight:700">${thread.customer_name}</div>
+      <div style="padding:1rem;border-bottom:1px solid var(--clr-border);display:flex;align-items:center;gap:.75rem;font-weight:700">
+        <button type="button" class="btn btn--ghost btn--sm" id="backToThreadsBtn" style="padding:.25rem .5rem"><i class="fa-solid fa-arrow-left"></i></button>
+        ${thread.customer_name}
+      </div>
       <div id="msgScroll" style="flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.6rem;max-height:400px">
         ${sorted.map(m => `
           <div style="align-self:${m.sender_role==='owner'?'flex-end':'flex-start'};max-width:75%">
@@ -73,6 +90,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         <button class="btn btn--primary" type="submit"><i class="fa-solid fa-paper-plane"></i></button>
       </form>`;
     const scroll = document.getElementById('msgScroll'); scroll.scrollTop = scroll.scrollHeight;
+    document.getElementById('backToThreadsBtn').addEventListener('click', () => {
+      document.getElementById('msgLayout').classList.remove('msg-layout--open');
+    });
     document.getElementById('replyForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const input = document.getElementById('replyInput');

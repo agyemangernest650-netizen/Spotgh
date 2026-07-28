@@ -2,7 +2,7 @@
 const router = require('express').Router();
 const { supabaseAdmin } = require('../config/supabase');
 const { verifyToken, requireAdmin, requireCreator, requireOwnership, optionalAuth } = require('../middleware/auth.middleware');
-const { paginate, notify, audit, sanitizeSearchTerm } = require('../services/supabase.service');
+const { paginate, notify, audit, sanitizeSearchTerm, syncFeaturedForTier } = require('../services/supabase.service');
 const limits = require('../middleware/rateLimit.middleware');
 router.use(verifyToken, requireCreator);
 router.get('/dashboard', async (req, res, next) => {
@@ -41,6 +41,12 @@ router.patch('/businesses/:id', async (req, res, next) => {
     if(updates.status==='active')updates.published_at=new Date().toISOString();
     const {data,error}=await supabaseAdmin.from('businesses').update(updates).eq('id',req.params.id).select().single();
     if(error)throw error;
+    // Keep top-of-list placement in sync with the tier — unless the admin
+    // explicitly set is_featured in this same request, in which case that
+    // manual choice wins.
+    if (updates.subscription_tier !== undefined && req.body.is_featured === undefined) {
+      await syncFeaturedForTier(req.params.id, updates.subscription_tier, updates.subscription_expires_at ?? data.subscription_expires_at ?? null);
+    }
     await audit(req.user.id,'business_updated','business',req.params.id,null,updates,req);
     res.json({business:data});
   } catch (err) { next(err); }
@@ -53,6 +59,7 @@ router.post('/businesses/:id/grant-subscription', async (req, res, next) => {
     const {data:plan}=await supabaseAdmin.from('plans').select('id').eq('tier',tier).single();
     await supabaseAdmin.from('subscriptions').insert({business_id:req.params.id,user_id:biz.owner_id,plan_id:plan.id,tier,status:'active',amount_paid:0,billing_cycle:'manual',started_at:new Date().toISOString(),expires_at:exp.toISOString(),metadata:{granted_by:req.user.id,reason}});
     await supabaseAdmin.from('businesses').update({subscription_tier:tier,subscription_expires_at:exp.toISOString()}).eq('id',req.params.id);
+    await syncFeaturedForTier(req.params.id, tier, exp.toISOString());
     await audit(req.user.id,'subscription_granted','business',req.params.id,null,{tier,months},req);
     res.json({message:`${tier} subscription granted for ${months} month(s)`});
   } catch (err) { next(err); }
@@ -228,6 +235,7 @@ router.post('/build-website', async (req, res, next) => {
         metadata: { granted_by: req.user.id, reason: notes || 'Built by creator', no_payment: true },
       });
       await supabaseAdmin.from('businesses').update({ subscription_tier: tier, subscription_expires_at: exp.toISOString() }).eq('id', business.id);
+      await syncFeaturedForTier(business.id, tier, exp.toISOString());
     }
 
     await notify(owner.id, 'success', `🎉 Your business "${business_name}" is live!`,

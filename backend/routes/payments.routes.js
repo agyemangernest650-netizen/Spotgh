@@ -3,7 +3,7 @@ const router = require('express').Router();
 const env = require('../config/env');
 const { supabaseAdmin } = require('../config/supabase');
 const { verifyToken, requireAdmin, requireCreator, requireOwnership, optionalAuth } = require('../middleware/auth.middleware');
-const { paginate, notify, audit } = require('../services/supabase.service');
+const { paginate, notify, audit, syncFeaturedForTier } = require('../services/supabase.service');
 const { sendEmail, wrap } = require('../services/email.service');
 const limits = require('../middleware/rateLimit.middleware');
 const axios = require('axios');
@@ -101,7 +101,10 @@ router.post('/initialize', verifyToken, limits.payments, async (req, res, next) 
         : `SpotGH ${plan.name} - ${billing_cycle} (fully covered by referral credit)`;
       await supabaseAdmin.from('payments').insert({ user_id: req.user.id, business_id: business_id || null, plan_id: plan.id, amount: 0, currency: 'GHS', status: 'paid', paid_at: now.toISOString(), paystack_reference: reference, description, metadata: { plan_tier, billing_cycle, promo_code: promo_code || null, discount_amount: discount, referral_credit_applied: creditApplied, is_trial: isTrial, claimed_own_website: business_id ? null : !!has_own_website, claimed_website: business_id ? null : (website || null) } });
       await supabaseAdmin.from('subscriptions').insert({ user_id: req.user.id, business_id: business_id || null, plan_id: plan.id, tier: plan_tier, status: 'active', amount_paid: 0, billing_cycle, paystack_reference: reference, started_at: now.toISOString(), expires_at: exp.toISOString(), is_trial: isTrial });
-      if (business_id) await supabaseAdmin.from('businesses').update({ subscription_tier: plan_tier, subscription_expires_at: exp.toISOString(), status: 'pending' }).eq('id', business_id);
+      if (business_id) {
+        await supabaseAdmin.from('businesses').update({ subscription_tier: plan_tier, subscription_expires_at: exp.toISOString(), status: 'pending' }).eq('id', business_id);
+        await syncFeaturedForTier(business_id, plan_tier, exp.toISOString());
+      }
       if (isTrial) await supabaseAdmin.from('users').update({ trial_used: true }).eq('id', req.user.id);
       const notifTitle = isTrial ? '🎉 Your free Starter month has started!' : '🎉 Plan activated with referral credit!';
       const notifBody = isTrial ? `Your Starter mini-website is live free for the next 30 days — no payment needed.` : `Your ${plan.name} plan is now active — fully covered by your referral credit, no payment needed.`;
@@ -131,7 +134,10 @@ router.get('/verify/:reference', async (req, res) => {
     await supabaseAdmin.from('payments').update({ status:'paid', paid_at: now.toISOString(), paystack_transaction_id: String(txn.id), channel: txn.channel, authorization_code: authCode }).eq('paystack_reference', req.params.reference);
     const { data: plan } = await supabaseAdmin.from('plans').select('id,name').eq('tier', meta.plan_tier).single();
     await supabaseAdmin.from('subscriptions').insert({ user_id: payment.user_id, business_id: meta.business_id||null, plan_id: plan.id, tier: meta.plan_tier, status:'active', amount_paid: payment.amount, billing_cycle: meta.billing_cycle, paystack_reference: req.params.reference, started_at: now.toISOString(), expires_at: exp.toISOString() });
-    if (meta.business_id) await supabaseAdmin.from('businesses').update({ subscription_tier: meta.plan_tier, subscription_expires_at: exp.toISOString(), status:'pending' }).eq('id', meta.business_id);
+    if (meta.business_id) {
+      await supabaseAdmin.from('businesses').update({ subscription_tier: meta.plan_tier, subscription_expires_at: exp.toISOString(), status:'pending' }).eq('id', meta.business_id);
+      await syncFeaturedForTier(meta.business_id, meta.plan_tier, exp.toISOString());
+    }
     await notify(payment.user_id, 'success', '🎉 Payment Successful!', `Your ${plan.name} plan is now active.`, `/pages/dashboard.html`);
     const { data: u } = await supabaseAdmin.from('users').select('email,full_name').eq('id', payment.user_id).single();
     if (u?.email) {
@@ -197,7 +203,10 @@ router.post('/renew', verifyToken, limits.payments, async (req, res, next) => {
     billing_cycle==='yearly' ? exp.setFullYear(exp.getFullYear()+1) : exp.setMonth(exp.getMonth()+1);
     await supabaseAdmin.from('payments').update({ status:'paid', paid_at: now.toISOString(), paystack_transaction_id: String(txn.id), channel: txn.channel, authorization_code: authCode }).eq('paystack_reference', reference);
     await supabaseAdmin.from('subscriptions').insert({ user_id: req.user.id, business_id: business_id||null, plan_id: plan.id, tier: plan_tier, status:'active', amount_paid: amount, billing_cycle, paystack_reference: reference, started_at: now.toISOString(), expires_at: exp.toISOString() });
-    if (business_id) await supabaseAdmin.from('businesses').update({ subscription_tier: plan_tier, subscription_expires_at: exp.toISOString(), status:'pending' }).eq('id', business_id);
+    if (business_id) {
+      await supabaseAdmin.from('businesses').update({ subscription_tier: plan_tier, subscription_expires_at: exp.toISOString(), status:'pending' }).eq('id', business_id);
+      await syncFeaturedForTier(business_id, plan_tier, exp.toISOString());
+    }
     await notify(req.user.id, 'success', '🎉 Plan Renewed!', `Your ${plan.name} plan is active until ${exp.toDateString()}.`, '/pages/dashboard.html');
     res.json({ message: 'Renewed successfully', expires_at: exp.toISOString() });
   } catch (err) {

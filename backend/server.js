@@ -360,7 +360,7 @@ cron.schedule('0 1 * * *', async () => {
       const bizIds = expiredSubs.filter(s => s.business_id).map(s => s.business_id);
       if (bizIds.length) {
         await supabaseAdmin.from('businesses')
-          .update({ subscription_tier: 'free', status: 'pending', subscription_expires_at: null })
+          .update({ subscription_tier: 'free', status: 'pending', subscription_expires_at: null, is_featured: false, featured_until: null })
           .in('id', bizIds);
       }
       for (const s of expiredSubs) {
