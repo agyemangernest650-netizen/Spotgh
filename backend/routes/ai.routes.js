@@ -13,11 +13,13 @@ router.use(verifyToken, limits.ai);
 async function requireFeature(featureFlag, req, res) {
   const { business_id } = req.body;
   if (!business_id) { res.status(400).json({ error: 'business_id required' }); return null; }
-  const { data: biz } = await supabaseAdmin.from('businesses').select('id,owner_id,subscription_tier').eq('id', business_id).single();
+  const { data: biz } = await supabaseAdmin.from('businesses').select('id,owner_id').eq('id', business_id).single();
   if (!biz) { res.status(404).json({ error: 'Business not found' }); return null; }
   if (biz.owner_id !== req.user.id && req.user.role !== 'creator') { res.status(403).json({ error: 'Not your business' }); return null; }
-  const { data: plan } = await supabaseAdmin.from('plans').select(`${featureFlag},max_ai_generations_per_month`).eq('tier', biz.subscription_tier).single();
-  if (!plan?.[featureFlag]) { res.status(403).json({ error: 'This feature isn\'t included in your current plan.', code: 'FEATURE_NOT_INCLUDED', redirect: '/pricing' }); return null; }
+  const { getWebsiteAccess } = require('../services/planAccess.service');
+  const websiteAccess = await getWebsiteAccess(business_id);
+  const plan = websiteAccess?.plan;
+  if (!plan?.[featureFlag]) { res.status(403).json({ error: 'This feature isn\'t included in your current Website plan.', code: 'FEATURE_NOT_INCLUDED', redirect: '/pricing' }); return null; }
 
   // Each AI call costs real money — even on a plan that includes the
   // feature, cap actual usage per month rather than leaving it unbounded.

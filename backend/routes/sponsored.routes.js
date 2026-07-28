@@ -13,10 +13,10 @@ router.post('/business/:businessId', verifyToken, requireOwnership, async (req, 
     // Featured/sponsored listings are a Pro+ feature — this endpoint had no
     // plan check at all, so any tier (including Free/Starter) could buy a
     // campaign despite the pricing page saying otherwise.
-    const { data: biz } = await supabaseAdmin.from('businesses').select('subscription_tier').eq('id', req.params.businessId).single();
-    const { data: plan } = await supabaseAdmin.from('plans').select('has_priority_listing').eq('tier', biz?.subscription_tier).single();
-    if (!plan?.has_priority_listing)
-      return res.status(403).json({ error: 'Featured/sponsored listings are a Pro plan feature.', code: 'FEATURE_NOT_INCLUDED', redirect: '/pricing' });
+    const { getDirectoryAccess } = require('../services/planAccess.service');
+    const dirAccess = await getDirectoryAccess(req.params.businessId);
+    if (!dirAccess?.plan.has_priority_listing)
+      return res.status(403).json({ error: 'Featured/sponsored listings are a Premium Directory plan feature.', code: 'FEATURE_NOT_INCLUDED', redirect: '/pricing' });
 
     const startsOn = new Date(); const endsOn = new Date(); endsOn.setDate(endsOn.getDate() + Number(days));
 

@@ -26,6 +26,57 @@ router.get('/plans', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// ============================================================
+// v2: independent Directory / Website / Bundle plans (migration 018)
+// ============================================================
+router.get('/directory-plans', async (req, res, next) => {
+  try {
+    const data = await cache.wrap('directory_plans:active', 5 * 60 * 1000, async () => {
+      const { data, error } = await supabaseAdmin.from('directory_plans').select('*').eq('is_active', true).order('sort_order');
+      if (error) throw error;
+      return data || [];
+    });
+    res.json({ plans: data });
+  } catch (err) { next(err); }
+});
+
+router.get('/website-plans', async (req, res, next) => {
+  try {
+    const data = await cache.wrap('website_plans:active', 5 * 60 * 1000, async () => {
+      const { data, error } = await supabaseAdmin.from('website_plans').select('*').eq('is_active', true).order('sort_order');
+      if (error) throw error;
+      return data || [];
+    });
+    res.json({ plans: data });
+  } catch (err) { next(err); }
+});
+
+router.get('/bundles', async (req, res, next) => {
+  try {
+    const data = await cache.wrap('bundles:active', 5 * 60 * 1000, async () => {
+      const { data, error } = await supabaseAdmin.from('bundles').select('*,directory_plans(*),website_plans(*)').eq('is_active', true).order('sort_order');
+      if (error) throw error;
+      return data || [];
+    });
+    res.json({ bundles: data });
+  } catch (err) { next(err); }
+});
+
+// GET /api/subscriptions/status-v2?business_id= — what a specific business
+// currently has on each track, for the dashboard's "Manage Plan" screens.
+router.get('/status-v2', verifyToken, async (req, res, next) => {
+  try {
+    const { getDirectoryAccess, getWebsiteAccess } = require('../services/planAccess.service');
+    const business_id = req.query.business_id;
+    if (!business_id) return res.status(400).json({ error: 'business_id is required' });
+    const [directory, website] = await Promise.all([getDirectoryAccess(business_id), getWebsiteAccess(business_id)]);
+    res.json({
+      directory: directory ? { tier: directory.plan.tier, name: directory.plan.name, expires_at: directory.subscription?.expires_at || null } : null,
+      website: website ? { tier: website.plan.tier, name: website.plan.name, expires_at: website.subscription?.expires_at || null, is_trial: !!website.subscription?.is_trial } : null,
+    });
+  } catch (err) { next(err); }
+});
+
 router.get('/active', verifyToken, async (req, res, next) => {
   try {
     const { data } = await supabaseAdmin.from('subscriptions').select('*,plans(*)').eq('user_id',req.user.id).eq('status','active').gt('expires_at',new Date().toISOString()).order('expires_at',{ascending:false}).limit(1);

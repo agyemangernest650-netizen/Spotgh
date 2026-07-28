@@ -2,7 +2,7 @@
 const router = require('express').Router();
 const { supabaseAdmin } = require('../config/supabase');
 const { verifyToken, requireAdmin, requireCreator, requireOwnership, optionalAuth } = require('../middleware/auth.middleware');
-const { paginate, notify, audit, sanitizeSearchTerm, syncFeaturedForTier } = require('../services/supabase.service');
+const { paginate, notify, audit, sanitizeSearchTerm } = require('../services/supabase.service');
 const limits = require('../middleware/rateLimit.middleware');
 router.use(verifyToken, requireCreator);
 router.get('/dashboard', async (req, res, next) => {
@@ -41,12 +41,6 @@ router.patch('/businesses/:id', async (req, res, next) => {
     if(updates.status==='active')updates.published_at=new Date().toISOString();
     const {data,error}=await supabaseAdmin.from('businesses').update(updates).eq('id',req.params.id).select().single();
     if(error)throw error;
-    // Keep top-of-list placement in sync with the tier — unless the admin
-    // explicitly set is_featured in this same request, in which case that
-    // manual choice wins.
-    if (updates.subscription_tier !== undefined && req.body.is_featured === undefined) {
-      await syncFeaturedForTier(req.params.id, updates.subscription_tier, updates.subscription_expires_at ?? data.subscription_expires_at ?? null);
-    }
     await audit(req.user.id,'business_updated','business',req.params.id,null,updates,req);
     res.json({business:data});
   } catch (err) { next(err); }
@@ -59,7 +53,6 @@ router.post('/businesses/:id/grant-subscription', async (req, res, next) => {
     const {data:plan}=await supabaseAdmin.from('plans').select('id').eq('tier',tier).single();
     await supabaseAdmin.from('subscriptions').insert({business_id:req.params.id,user_id:biz.owner_id,plan_id:plan.id,tier,status:'active',amount_paid:0,billing_cycle:'manual',started_at:new Date().toISOString(),expires_at:exp.toISOString(),metadata:{granted_by:req.user.id,reason}});
     await supabaseAdmin.from('businesses').update({subscription_tier:tier,subscription_expires_at:exp.toISOString()}).eq('id',req.params.id);
-    await syncFeaturedForTier(req.params.id, tier, exp.toISOString());
     await audit(req.user.id,'subscription_granted','business',req.params.id,null,{tier,months},req);
     res.json({message:`${tier} subscription granted for ${months} month(s)`});
   } catch (err) { next(err); }
@@ -127,6 +120,58 @@ router.patch('/plans/:id', async (req, res, next) => {
     res.json({plan:data});
   } catch (err) { next(err); }
 });
+// ── v2: independent Directory / Website / Bundle plan editors ──
+router.get('/directory-plans', async (req, res, next) => {
+  try {
+    const { data } = await supabaseAdmin.from('directory_plans').select('*').order('sort_order');
+    res.json({ plans: data });
+  } catch (err) { next(err); }
+});
+router.patch('/directory-plans/:id', async (req, res, next) => {
+  try {
+    const allowed = ['name','tagline','price_monthly','price_yearly','color','is_popular','is_active','max_businesses','max_photos','has_social_links','has_whatsapp_button','has_business_hours','has_verified_badge','has_better_ranking','has_analytics','has_advanced_analytics','has_featured_offers','has_homepage_featured','has_priority_listing','has_video','has_flash_deals','has_priority_support','has_franchise','has_qr_code','features_list','sort_order'];
+    const updates = {}; allowed.forEach(k => { if (req.body[k] !== undefined) updates[k] = req.body[k]; });
+    const { data, error } = await supabaseAdmin.from('directory_plans').update(updates).eq('id', req.params.id).select().single();
+    if (error) throw error;
+    require('../services/cache.service').invalidate('directory_plans:active');
+    await audit(req.user.id, 'directory_plan_updated', 'directory_plan', req.params.id, null, updates, req);
+    res.json({ plan: data });
+  } catch (err) { next(err); }
+});
+router.get('/website-plans', async (req, res, next) => {
+  try {
+    const { data } = await supabaseAdmin.from('website_plans').select('*').order('sort_order');
+    res.json({ plans: data });
+  } catch (err) { next(err); }
+});
+router.patch('/website-plans/:id', async (req, res, next) => {
+  try {
+    const allowed = ['name','tagline','price_monthly','price_yearly','color','is_popular','is_active','free_trial_days','has_custom_template','has_custom_domain','has_bookings','has_blog','has_testimonials','has_seo_tools','has_analytics','has_multi_page','has_forms','has_google_indexing','has_online_payments','has_product_catalog','has_appointment_scheduling','has_staff_management','has_customer_dashboard','has_email_notifications','has_sms_notifications','has_ai_content','has_priority_support','has_api_access','max_products','max_gallery_photos','max_ai_generations_per_month','features_list','sort_order'];
+    const updates = {}; allowed.forEach(k => { if (req.body[k] !== undefined) updates[k] = req.body[k]; });
+    const { data, error } = await supabaseAdmin.from('website_plans').update(updates).eq('id', req.params.id).select().single();
+    if (error) throw error;
+    require('../services/cache.service').invalidate('website_plans:active');
+    await audit(req.user.id, 'website_plan_updated', 'website_plan', req.params.id, null, updates, req);
+    res.json({ plan: data });
+  } catch (err) { next(err); }
+});
+router.get('/bundles', async (req, res, next) => {
+  try {
+    const { data } = await supabaseAdmin.from('bundles').select('*,directory_plans(name,tier),website_plans(name,tier)').order('sort_order');
+    res.json({ bundles: data });
+  } catch (err) { next(err); }
+});
+router.patch('/bundles/:id', async (req, res, next) => {
+  try {
+    const allowed = ['name','tagline','discount_percent','is_popular','is_active','sort_order'];
+    const updates = {}; allowed.forEach(k => { if (req.body[k] !== undefined) updates[k] = req.body[k]; });
+    const { data, error } = await supabaseAdmin.from('bundles').update(updates).eq('id', req.params.id).select().single();
+    if (error) throw error;
+    require('../services/cache.service').invalidate('bundles:active');
+    res.json({ bundle: data });
+  } catch (err) { next(err); }
+});
+
 router.get('/promo-codes', async (req, res, next) => {
   try {
     const {data}=await supabaseAdmin.from('promo_codes').select('*').order('created_at',{ascending:false});
@@ -235,7 +280,6 @@ router.post('/build-website', async (req, res, next) => {
         metadata: { granted_by: req.user.id, reason: notes || 'Built by creator', no_payment: true },
       });
       await supabaseAdmin.from('businesses').update({ subscription_tier: tier, subscription_expires_at: exp.toISOString() }).eq('id', business.id);
-      await syncFeaturedForTier(business.id, tier, exp.toISOString());
     }
 
     await notify(owner.id, 'success', `🎉 Your business "${business_name}" is live!`,

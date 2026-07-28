@@ -1,12 +1,13 @@
 // backend/routes/apiV1.routes.js
-// Public, read-only API for Enterprise-plan businesses. Authenticated via
-// an `X-API-Key` header (generated from the dashboard — see
-// business.controller.js createApiKey). A key can only ever read the one
-// business it was issued for.
+// Public, read-only API for Business Pro Website-plan businesses.
+// Authenticated via an `X-API-Key` header (generated from the dashboard —
+// see business.controller.js createApiKey). A key can only ever read the
+// one business it was issued for.
 const router = require('express').Router();
 const crypto = require('crypto');
 const { supabaseAdmin } = require('../config/supabase');
 const limits = require('../middleware/rateLimit.middleware');
+const { getWebsiteAccess } = require('../services/planAccess.service');
 
 async function apiKeyAuth(req, res, next) {
   try {
@@ -17,11 +18,11 @@ async function apiKeyAuth(req, res, next) {
     if (!key) return res.status(401).json({ error: 'Invalid or revoked API key' });
 
     // Re-check on every request, not just at key-creation time — a business
-    // that's since downgraded off Enterprise (or been suspended) shouldn't
+    // that's since downgraded off Business Pro (or been suspended) shouldn't
     // keep working just because its key hasn't been explicitly revoked.
-    const { data: biz } = await supabaseAdmin.from('businesses').select('subscription_tier,status').eq('id', key.business_id).single();
-    const { data: plan } = await supabaseAdmin.from('plans').select('has_api_access').eq('tier', biz?.subscription_tier).single();
-    if (!plan?.has_api_access) return res.status(403).json({ error: 'This business\'s plan no longer includes API access.' });
+    const { data: biz } = await supabaseAdmin.from('businesses').select('status').eq('id', key.business_id).single();
+    const websiteAccess = await getWebsiteAccess(key.business_id);
+    if (!websiteAccess?.plan.has_api_access) return res.status(403).json({ error: 'This business\'s plan no longer includes API access.' });
     if (biz?.status !== 'active') return res.status(403).json({ error: 'This business is not currently active.' });
 
     supabaseAdmin.from('api_keys').update({ last_used_at: new Date().toISOString() }).eq('id', key.id).then(() => {}, () => {});

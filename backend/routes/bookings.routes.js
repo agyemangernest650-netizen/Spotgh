@@ -11,10 +11,11 @@ router.post('/', optionalAuth, async (req, res, next) => {
   try {
     const { business_id, customer_name, customer_phone, booking_date, booking_time, customer_email, service_id, notes } = req.body;
     if (!business_id || !customer_name || !customer_phone || !booking_date || !booking_time) return res.status(400).json({ error: 'Required fields missing' });
-    const { data: biz } = await supabaseAdmin.from('businesses').select('owner_id,name,subscription_tier,phone,google_calendar_connected,google_calendar_refresh_token,google_calendar_id').eq('id', business_id).single();
+    const { data: biz } = await supabaseAdmin.from('businesses').select('owner_id,name,phone,google_calendar_connected,google_calendar_refresh_token,google_calendar_id').eq('id', business_id).single();
     if (!biz) return res.status(404).json({ error: 'Business not found' });
-    const { data: plan } = await supabaseAdmin.from('plans').select('has_bookings').eq('tier', biz.subscription_tier).single();
-    if (!plan?.has_bookings) return res.status(403).json({ error: 'This business has not enabled bookings', code: 'BOOKINGS_NOT_ENABLED' });
+    const { getWebsiteAccess } = require('../services/planAccess.service');
+    const websiteAccess = await getWebsiteAccess(business_id);
+    if (!websiteAccess?.plan.has_bookings) return res.status(403).json({ error: 'This business has not enabled bookings', code: 'BOOKINGS_NOT_ENABLED' });
     const code = uuidv4().slice(0,8).toUpperCase();
     const { data, error } = await supabaseAdmin.from('bookings').insert({ business_id, customer_id: req.user?.id || null, service_id: service_id || null, customer_name, customer_email: customer_email || null, customer_phone, booking_date, booking_time, notes: notes || null, confirmation_code: code, status: 'pending' }).select().single();
     if (error) throw error;

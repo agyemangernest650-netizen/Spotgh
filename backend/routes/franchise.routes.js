@@ -56,15 +56,12 @@ router.post('/', async (req, res, next) => {
     if (!name) return res.status(400).json({ error: 'Franchise name is required' });
 
     if (req.user.role !== 'creator') {
-      const { data: businesses } = await supabaseAdmin.from('businesses').select('subscription_tier').eq('owner_id', req.user.id);
-      const tiers = [...new Set((businesses || []).map(b => b.subscription_tier))];
-      let hasFranchiseFeature = false;
-      if (tiers.length) {
-        const { data: plans } = await supabaseAdmin.from('plans').select('tier,has_franchise').in('tier', tiers);
-        hasFranchiseFeature = (plans || []).some(p => p.has_franchise);
-      }
+      const { getDirectoryAccess } = require('../services/planAccess.service');
+      const { data: businesses } = await supabaseAdmin.from('businesses').select('id').eq('owner_id', req.user.id);
+      const accessChecks = await Promise.all((businesses || []).map(b => getDirectoryAccess(b.id)));
+      const hasFranchiseFeature = accessChecks.some(a => a?.plan.has_franchise);
       if (!hasFranchiseFeature)
-        return res.status(403).json({ error: 'Franchise grouping is a Pro plan feature. Upgrade a business to Pro or higher first.', code: 'FEATURE_NOT_INCLUDED', redirect: '/pricing' });
+        return res.status(403).json({ error: 'Franchise grouping is a Premium Directory plan feature. Upgrade a business to Premium first.', code: 'FEATURE_NOT_INCLUDED', redirect: '/pricing' });
     }
 
     const { data, error } = await supabaseAdmin.from('franchises').insert({ owner_id: req.user.id, name, description: description || null, theme_color: theme_color || null }).select().single();

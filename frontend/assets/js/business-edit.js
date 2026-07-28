@@ -77,20 +77,17 @@ document.addEventListener('DOMContentLoaded', async () => {
           <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Email</label>
             <input id="beEmail" class="input" type="email" placeholder="business@email.com" style="width:100%"></div>
           <div style="grid-column:1/-1">
-            <label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Website *</label>
-            <div style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:.5rem">
+            <label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Do you already have a website? *</label>
+            <div style="display:flex;gap:1.25rem;margin-bottom:.5rem">
               <label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;cursor:pointer">
-                <input type="radio" name="beHasWebsite" value="yes"> Yes, I have my own website
+                <input type="radio" name="beHasWebsite" value="yes"> Yes, I have one
               </label>
               <label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;cursor:pointer">
-                <input type="radio" name="beHasWebsite" value="mini"> No — build me a SpotGH mini-website
-              </label>
-              <label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;cursor:pointer">
-                <input type="radio" name="beHasWebsite" value="no"> No thanks — just list my business
+                <input type="radio" name="beHasWebsite" value="no"> No — build me a free SpotGH mini-website
               </label>
             </div>
             <input id="beWebsite" class="input" type="url" placeholder="https://yourwebsite.com" style="width:100%;display:none">
-            <div id="beWebsiteNote" style="font-size:.73rem;color:var(--clr-text-3);margin-top:.3rem"></div>
+            <div style="font-size:.73rem;color:var(--clr-text-3);margin-top:.3rem">We'll link to it from your listing and check that it's live. If you don't have one yet, SpotGH builds and hosts a mini-website for you instead.</div>
           </div>
           <div style="grid-column:1/-1"><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Address</label>
             <input id="beAddress" class="input" placeholder="Street address" style="width:100%"></div>
@@ -131,7 +128,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           <div style="font-size:.73rem;color:var(--clr-text-3);margin-top:.3rem">Shown as a checklist on your mini-website — especially useful for hotels and guesthouses.</div>
         </div>
 
-        <div id="miniWebsiteExtras">
         <hr style="border:none;border-top:1px solid var(--clr-border);margin:1.5rem 0">
         <h3 style="font-weight:700;margin-bottom:.5rem">Category Extras</h3>
         <p style="font-size:.8rem;color:var(--clr-text-3);margin-bottom:1.25rem">Optional — fill in whichever apply to your business. Each only appears on your mini-website if you add something here.</p>
@@ -171,7 +167,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem"><i class="fab fa-tiktok"></i> TikTok</label>
             <input id="beTiktok" class="input" placeholder="https://tiktok.com/@…" style="width:100%"></div>
         </div>
-        </div><!-- /miniWebsiteExtras -->
 
         <hr style="border:none;border-top:1px solid var(--clr-border);margin:1.5rem 0">
         <h3 style="font-weight:700;margin-bottom:1.25rem">Images</h3>
@@ -214,21 +209,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('charCount').textContent = `${e.target.value.length} / 2000`;
   });
 
-  const WEBSITE_NOTES = {
-    yes: "We'll link to it from your listing and check that it's live.",
-    mini: 'SpotGH builds and hosts a mini-website for you — starts with a free 30-day Standard trial (one-time), then continues on the Standard plan.',
-    no: 'Your business still gets a full directory listing — photos, hours, contact info, and reviews — just without a dedicated website page.',
-  };
-  // Website intent — show the URL field only for "yes", and hide the
-  // mini-website-only sections (Category Extras, SEO, Social Media) when
-  // the owner isn't getting a mini-website at all.
+  // "Do you already have a website?" — show the URL field only when Yes
   document.querySelectorAll('input[name="beHasWebsite"]').forEach(r => {
     r.addEventListener('change', () => {
-      if (!r.checked) return;
-      document.getElementById('beWebsite').style.display = r.value === 'yes' ? 'block' : 'none';
-      document.getElementById('beWebsiteNote').textContent = WEBSITE_NOTES[r.value] || '';
-      const extras = document.getElementById('miniWebsiteExtras');
-      if (extras) extras.style.display = r.value === 'no' ? 'none' : '';
+      if (r.checked) document.getElementById('beWebsite').style.display = r.value === 'yes' ? 'block' : 'none';
     });
   });
 
@@ -252,13 +236,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('beWhatsapp').value = b.whatsapp || '';
       document.getElementById('beEmail').value    = b.email || '';
       document.getElementById('beWebsite').value  = b.website || '';
-      const websiteValue = b.has_own_website ? 'yes' : (b.has_website ? 'mini' : 'no');
-      const hasWebsiteRadio = document.querySelector(`input[name="beHasWebsite"][value="${websiteValue}"]`);
+      const hasWebsiteRadio = document.querySelector(`input[name="beHasWebsite"][value="${b.has_own_website ? 'yes' : 'no'}"]`);
       if (hasWebsiteRadio) hasWebsiteRadio.checked = true;
-      document.getElementById('beWebsite').style.display = websiteValue === 'yes' ? 'block' : 'none';
-      document.getElementById('beWebsiteNote').textContent = WEBSITE_NOTES[websiteValue] || '';
-      const extras = document.getElementById('miniWebsiteExtras');
-      if (extras) extras.style.display = websiteValue === 'no' ? 'none' : '';
+      document.getElementById('beWebsite').style.display = b.has_own_website ? 'block' : 'none';
       document.getElementById('beAddress').value  = b.address || '';
       document.getElementById('beFacebook').value = b.social_links?.facebook || '';
       document.getElementById('beInstagram').value= b.social_links?.instagram || '';

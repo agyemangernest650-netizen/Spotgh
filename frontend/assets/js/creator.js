@@ -22,7 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <a class="sidebar__item" data-tab="businesses"><i class="fa-solid fa-store"></i> Businesses</a>
         <a class="sidebar__item" data-tab="users"><i class="fa-solid fa-users"></i> Users</a>
         <a class="sidebar__item" data-tab="payments"><i class="fa-solid fa-credit-card"></i> Payments</a>
-        <a class="sidebar__item" data-tab="plans"><i class="fa-solid fa-layer-group"></i> Plans</a>
+        <a class="sidebar__item" data-tab="plans"><i class="fa-solid fa-layer-group"></i> Plans (Legacy)</a>
+        <a class="sidebar__item" data-tab="pricingV2"><i class="fa-solid fa-cubes-stacked"></i> Directory &amp; Website Plans</a>
         <a class="sidebar__item" data-tab="promos"><i class="fa-solid fa-tag"></i> Promo Codes</a>
         <a class="sidebar__item" data-tab="moderation"><i class="fa-solid fa-shield-halved"></i> Moderation</a>
         <a class="sidebar__item" data-tab="analytics"><i class="fa-solid fa-chart-bar"></i> Platform Analytics</a>
@@ -54,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadTab(tab) {
     const el = document.getElementById('creatorContent');
     el.innerHTML = `<div class="skeleton" style="height:200px;border-radius:16px;margin-bottom:1rem"></div><div class="skeleton" style="height:300px;border-radius:16px"></div>`;
-    const loaders = { dashboard, build, businesses, users, payments, plans, promos, moderation, analytics, settings, audit };
+    const loaders = { dashboard, build, businesses, users, payments, plans, pricingV2, promos, moderation, analytics, settings, audit };
     await (loaders[tab] || (() => {}))();
   }
 
@@ -494,6 +495,122 @@ document.addEventListener('DOMContentLoaded', () => {
         catch { toast.error('Failed'); }
       };
     } catch { document.getElementById('plansContent').innerHTML = '<p style="color:var(--clr-danger)">Failed to load.</p>'; }
+  }
+
+  // ── Directory / Website / Bundle plan editor (v23 split) ──
+  const DIR_FLAGS = ['has_social_links','has_whatsapp_button','has_business_hours','has_verified_badge','has_better_ranking','has_analytics','has_advanced_analytics','has_featured_offers','has_homepage_featured','has_priority_listing','has_video','has_flash_deals','has_priority_support','has_franchise','has_qr_code'];
+  const WEB_FLAGS = ['has_custom_template','has_custom_domain','has_bookings','has_blog','has_testimonials','has_seo_tools','has_analytics','has_multi_page','has_forms','has_google_indexing','has_online_payments','has_product_catalog','has_appointment_scheduling','has_staff_management','has_customer_dashboard','has_email_notifications','has_sms_notifications','has_ai_content','has_api_access','has_priority_support'];
+  const flagLabel = f => f.replace(/^has_/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+  let pricingV2Sub = 'directory';
+  async function pricingV2() {
+    const el = document.getElementById('creatorContent');
+    el.innerHTML = `
+      <div class="dashboard__header"><h1 class="dashboard__title">Directory &amp; Website Plans</h1></div>
+      <p style="color:var(--clr-text-2);font-size:.85rem;margin-bottom:1rem">These are the two independent subscription products (see CHANGELOG v23). Changes here don't affect the legacy "Plans" tab.</p>
+      <div style="display:inline-flex;background:var(--clr-surface-2);border-radius:40px;padding:.25rem;gap:.25rem;margin-bottom:1.5rem">
+        <button id="pv2Directory" class="btn btn--sm" style="border-radius:40px" onclick="switchPv2('directory')">Directory Plans</button>
+        <button id="pv2Website" class="btn btn--sm" style="border-radius:40px" onclick="switchPv2('website')">Website Plans</button>
+        <button id="pv2Bundles" class="btn btn--sm" style="border-radius:40px" onclick="switchPv2('bundles')">Bundles</button>
+      </div>
+      <div id="pv2Content"><div class="skeleton" style="height:300px;border-radius:16px"></div></div>`;
+
+    window.switchPv2 = (sub) => { pricingV2Sub = sub; renderPv2Tabs(); renderPv2(); };
+    function renderPv2Tabs() {
+      ['directory','website','bundles'].forEach(s => {
+        const b = document.getElementById('pv2' + s.charAt(0).toUpperCase() + s.slice(1));
+        b.className = `btn ${pricingV2Sub === s ? 'btn--primary' : 'btn--ghost'} btn--sm`; b.style.borderRadius = '40px';
+      });
+    }
+    renderPv2Tabs();
+
+    async function renderPv2() {
+      const content = document.getElementById('pv2Content');
+      content.innerHTML = '<div class="skeleton" style="height:300px;border-radius:16px"></div>';
+      try {
+        if (pricingV2Sub === 'bundles') { await renderBundlesAdmin(content); return; }
+        const endpoint = pricingV2Sub === 'directory' ? '/creator/directory-plans' : '/creator/website-plans';
+        const { plans } = await API.get(endpoint);
+        const flags = pricingV2Sub === 'directory' ? DIR_FLAGS : WEB_FLAGS;
+        content.innerHTML = plans.map(p => `
+          <div class="card" style="padding:1.25rem;margin-bottom:1rem">
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:.85rem">
+              <div><label style="font-size:.7rem;color:var(--clr-text-3);display:block">Name</label>
+                <input id="pv2_${p.id}_name" value="${p.name}" style="padding:.4rem .6rem;border:1px solid var(--clr-border);border-radius:8px;width:170px"></div>
+              <div><label style="font-size:.7rem;color:var(--clr-text-3);display:block">Tagline</label>
+                <input id="pv2_${p.id}_tagline" value="${p.tagline||''}" style="padding:.4rem .6rem;border:1px solid var(--clr-border);border-radius:8px;width:220px"></div>
+              <div><label style="font-size:.7rem;color:var(--clr-text-3);display:block">₵/month</label>
+                <input id="pv2_${p.id}_pm" type="number" step="0.01" value="${p.price_monthly}" style="padding:.4rem .6rem;border:1px solid var(--clr-border);border-radius:8px;width:90px"></div>
+              <div><label style="font-size:.7rem;color:var(--clr-text-3);display:block">₵/year</label>
+                <input id="pv2_${p.id}_py" type="number" step="0.01" value="${p.price_yearly}" style="padding:.4rem .6rem;border:1px solid var(--clr-border);border-radius:8px;width:90px"></div>
+              ${pricingV2Sub === 'website' ? `<div><label style="font-size:.7rem;color:var(--clr-text-3);display:block">Free trial (days)</label>
+                <input id="pv2_${p.id}_trial" type="number" value="${p.free_trial_days||0}" style="padding:.4rem .6rem;border:1px solid var(--clr-border);border-radius:8px;width:90px"></div>` : ''}
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.8rem"><input type="checkbox" id="pv2_${p.id}_popular" ${p.is_popular?'checked':''}> Popular</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.8rem"><input type="checkbox" id="pv2_${p.id}_active" ${p.is_active?'checked':''}> Active</label>
+              <span class="badge" style="background:${p.color||'var(--clr-primary)'};color:#fff">${p.tier}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.4rem;margin-bottom:.85rem">
+              ${flags.map(f => `<label style="display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--clr-text-2)"><input type="checkbox" id="pv2_${p.id}_${f}" ${p[f]?'checked':''}> ${flagLabel(f)}</label>`).join('')}
+            </div>
+            <button class="btn btn--primary btn--sm" onclick="savePv2('${pricingV2Sub}','${p.id}',${JSON.stringify(flags).replace(/"/g,'&quot;')})">Save ${p.name}</button>
+          </div>`).join('');
+      } catch { content.innerHTML = '<p style="color:var(--clr-danger)">Failed to load.</p>'; }
+    }
+    renderPv2();
+
+    window.savePv2 = async (kind, id, flags) => {
+      const body = {
+        name: document.getElementById(`pv2_${id}_name`).value.trim(),
+        tagline: document.getElementById(`pv2_${id}_tagline`).value.trim(),
+        price_monthly: parseFloat(document.getElementById(`pv2_${id}_pm`).value) || 0,
+        price_yearly: parseFloat(document.getElementById(`pv2_${id}_py`).value) || 0,
+        is_popular: document.getElementById(`pv2_${id}_popular`).checked,
+        is_active: document.getElementById(`pv2_${id}_active`).checked,
+      };
+      const trialEl = document.getElementById(`pv2_${id}_trial`);
+      if (trialEl) body.free_trial_days = parseInt(trialEl.value) || 0;
+      flags.forEach(f => { body[f] = document.getElementById(`pv2_${id}_${f}`).checked; });
+      try {
+        await API.patch(`/creator/${kind}-plans/${id}`, body);
+        toast.success('Plan updated');
+        renderPv2();
+      } catch { toast.error('Failed to save'); }
+    };
+
+    async function renderBundlesAdmin(content) {
+      try {
+        const { bundles } = await API.get('/creator/bundles');
+        content.innerHTML = bundles.map(b => `
+          <div class="card" style="padding:1.25rem;margin-bottom:1rem">
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end">
+              <div><label style="font-size:.7rem;color:var(--clr-text-3);display:block">Name</label>
+                <input id="bnd_${b.id}_name" value="${b.name}" style="padding:.4rem .6rem;border:1px solid var(--clr-border);border-radius:8px;width:220px"></div>
+              <div><label style="font-size:.7rem;color:var(--clr-text-3);display:block">Tagline</label>
+                <input id="bnd_${b.id}_tagline" value="${b.tagline||''}" style="padding:.4rem .6rem;border:1px solid var(--clr-border);border-radius:8px;width:220px"></div>
+              <div><label style="font-size:.7rem;color:var(--clr-text-3);display:block">Discount %</label>
+                <input id="bnd_${b.id}_discount" type="number" step="1" value="${b.discount_percent}" style="padding:.4rem .6rem;border:1px solid var(--clr-border);border-radius:8px;width:90px"></div>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.8rem"><input type="checkbox" id="bnd_${b.id}_popular" ${b.is_popular?'checked':''}> Popular</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.8rem"><input type="checkbox" id="bnd_${b.id}_active" ${b.is_active?'checked':''}> Active</label>
+            </div>
+            <div style="font-size:.8rem;color:var(--clr-text-2);margin:.75rem 0">
+              📋 ${b.directory_plans?.name} (${b.directory_plans?.tier}) &nbsp;+&nbsp; 🌐 ${b.website_plans?.name} (${b.website_plans?.tier})
+            </div>
+            <button class="btn btn--primary btn--sm" onclick="saveBundle('${b.id}')">Save</button>
+          </div>`).join('') || '<p style="color:var(--clr-text-3)">No bundles yet.</p>';
+
+        window.saveBundle = async (id) => {
+          const body = {
+            name: document.getElementById(`bnd_${id}_name`).value.trim(),
+            tagline: document.getElementById(`bnd_${id}_tagline`).value.trim(),
+            discount_percent: parseFloat(document.getElementById(`bnd_${id}_discount`).value) || 0,
+            is_popular: document.getElementById(`bnd_${id}_popular`).checked,
+            is_active: document.getElementById(`bnd_${id}_active`).checked,
+          };
+          try { await API.patch(`/creator/bundles/${id}`, body); toast.success('Bundle updated'); renderPv2(); }
+          catch { toast.error('Failed to save'); }
+        };
+      } catch { content.innerHTML = '<p style="color:var(--clr-danger)">Failed to load.</p>'; }
+    }
   }
 
   // ─── PROMOS ──────────────────────────────────────────────────────────────

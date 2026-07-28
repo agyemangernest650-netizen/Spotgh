@@ -72,17 +72,15 @@ const requireOwnership = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+// req.plan now resolves the user's Directory plan (business listing
+// limits: max_businesses, max_photos, etc.) — see planAccess.service.js.
+// Directory and Website are independent subscriptions as of migration 018;
+// website-specific gating (has_bookings, has_custom_domain, etc.) is
+// checked per-business via getWebsiteAccess(), not through req.plan.
 const loadPlan = async (req, res, next) => {
   try {
-    const { supabaseAdmin } = require('../config/supabase');
-    const { data: subs } = await supabaseAdmin
-      .from('subscriptions').select('tier,expires_at,plans(*)')
-      .eq('user_id', req.user.id).eq('status', 'active')
-      .gt('expires_at', new Date().toISOString())
-      .order('expires_at', { ascending: false }).limit(1);
-    if (subs?.[0]?.plans) { req.plan = subs[0].plans; return next(); }
-    const { data: free } = await supabaseAdmin.from('plans').select('*').eq('tier', 'free').single();
-    req.plan = free || null;
+    const { getUserDirectoryPlan } = require('../services/planAccess.service');
+    req.plan = await getUserDirectoryPlan(req.user.id);
     next();
   } catch (err) { next(err); }
 };

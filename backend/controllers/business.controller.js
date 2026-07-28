@@ -1,6 +1,7 @@
 // backend/controllers/business.controller.js
 const { supabaseAdmin } = require('../config/supabase');
 const { generateSlug, notify, audit, calcHealthScore, paginate, sanitizeSearchTerm } = require('../services/supabase.service');
+const { getDirectoryAccess, getWebsiteAccess } = require('../services/planAccess.service');
 const slugify = require('slugify');
 const env = require('../config/env');
 
@@ -150,12 +151,14 @@ exports.getBySlug = async (req, res, next) => {
       referrer: req.headers.referer || null,
     }).catch(() => {});
 
-    const { data: planFlags } = await supabaseAdmin.from('plans').select('has_remove_branding,has_bookings,has_online_ordering,has_website,has_custom_template').eq('tier', business.subscription_tier).maybeSingle();
-    business.hide_branding = !!planFlags?.has_remove_branding;
-    business.has_bookings = !!planFlags?.has_bookings;
-    business.has_online_ordering = !!planFlags?.has_online_ordering;
-    business.has_website = !!planFlags?.has_website;
-    business.has_custom_template = !!planFlags?.has_custom_template;
+    // Directory Listing and Mini-Website are independent subscriptions
+    // (migration 018) — see planAccess.service.js.
+    const websiteAccess = await getWebsiteAccess(business.id);
+    business.has_website = !!websiteAccess;
+    business.has_bookings = !!websiteAccess?.plan.has_bookings;
+    business.has_online_ordering = !!websiteAccess?.plan.has_online_payments;
+    business.has_custom_template = !!websiteAccess?.plan.has_custom_template;
+    business.hide_branding = websiteAccess?.plan.tier === 'business_pro';
 
     res.json({
       business,
@@ -175,8 +178,6 @@ exports.getById = async (req, res, next) => {
   try {
     const { data, error } = await supabaseAdmin.from('businesses_with_stats').select('*').eq('id', req.params.id).single();
     if (error || !data) return res.status(404).json({ error: 'Business not found' });
-    const { data: planFlags } = await supabaseAdmin.from('plans').select('has_website').eq('tier', data.subscription_tier).maybeSingle();
-    data.has_website = !!planFlags?.has_website;
     res.json({ business: data });
   } catch (err) { next(err); }
 };
@@ -210,15 +211,22 @@ async function checkUrlReachable(url) {
 // POST /api/businesses
 exports.create = async (req, res, next) => {
   try {
-    const { name, tagline, description, phone, whatsapp, email, website, has_own_website, wants_website,
+    const { name, tagline, description, phone, whatsapp, email, website, has_own_website,
             address, city, region, country, category_id, social_links,
             theme_color, template_key, meta_title, meta_description,
-            operating_hours, amenities } = req.body;
+            operating_hours, amenities, signup_type } = req.body;
     if (!name) return res.status(400).json({ error: 'Business name is required' });
 
-    // Check business limit from subscription
+    // signup_type: 'directory' (listing only), 'website' (mini-website only,
+    // still gets the free Directory listing since every business has one —
+    // it's just not upgraded), or 'both'. Defaults to 'both' for any caller
+    // that hasn't been updated to send it, matching the old behavior where
+    // every business without its own external site got a mini-website.
+    const wantsWebsite = signup_type !== 'directory';
+
+    // Check business limit from Directory plan (a Directory subscription
+    // always exists, even for a website-only signup)
     const plan = req.plan;
-    const tier = plan?.tier || 'free';
 
     if (plan && plan.max_businesses !== 999) {
       const { count } = await supabaseAdmin.from('businesses').select('id', { count: 'exact' }).eq('owner_id', req.user.id).neq('status', 'rejected');
@@ -229,32 +237,6 @@ exports.create = async (req, res, next) => {
 
     const ownsWebsite = has_own_website === true || has_own_website === 'true';
     const ownWebsiteVerified = ownsWebsite ? await checkUrlReachable(website) : null;
-
-    // A mini-website is a Starter-plan feature. A Free-tier signup who asks
-    // for one gets auto-enrolled in the one-time free Starter month (same
-    // trial offered on the pricing page) so they can go straight to
-    // building it — no manual checkout needed. Once that trial has been
-    // used, later requests fall back to the normal upgrade-and-pay flow.
-    const wantsMiniWebsite = !ownsWebsite && (wants_website === true || wants_website === 'true');
-    let businessTier = tier;
-    let trialGranted = null;
-    if (wantsMiniWebsite && tier === 'free') {
-      const { data: buyer } = await supabaseAdmin.from('users').select('trial_used').eq('id', req.user.id).single();
-      if (buyer?.trial_used) {
-        return res.status(403).json({
-          error: "A SpotGH mini-website needs the Standard plan — you've already used your free trial month, so this one needs a paid subscription. You can still list your business for free without a website.",
-          code: 'UPGRADE_REQUIRED', redirect: '/pricing',
-        });
-      }
-      const { data: starterPlan } = await supabaseAdmin.from('plans').select('*').eq('tier', 'starter').single();
-      if (!starterPlan) {
-        return res.status(500).json({ error: 'Starter plan is not configured.' });
-      }
-      businessTier = 'starter';
-      const now = new Date();
-      const exp = new Date(now); exp.setDate(exp.getDate() + 30);
-      trialGranted = { plan: starterPlan, startedAt: now, expiresAt: exp };
-    }
 
     const slug = await generateSlug(name);
     const { data: business, error } = await supabaseAdmin.from('businesses').insert({
@@ -272,23 +254,51 @@ exports.create = async (req, res, next) => {
       meta_title: meta_title || null, meta_description: meta_description || null,
       ...(operating_hours ? { operating_hours } : {}),
       ...(amenities ? { amenities } : {}),
-      subscription_tier: businessTier,
-      ...(trialGranted ? { subscription_expires_at: trialGranted.expiresAt.toISOString() } : {}),
+      subscription_tier: req.plan?.tier || 'free', // legacy column, left for backward compat
       status: 'pending',
     }).select().single();
     if (error) throw error;
 
-    if (trialGranted) {
-      await supabaseAdmin.from('subscriptions').insert({
-        user_id: req.user.id, business_id: business.id, plan_id: trialGranted.plan.id, tier: 'starter',
-        status: 'active', amount_paid: 0, billing_cycle: 'monthly',
-        started_at: trialGranted.startedAt.toISOString(), expires_at: trialGranted.expiresAt.toISOString(), is_trial: true,
-      });
-      await supabaseAdmin.from('users').update({ trial_used: true }).eq('id', req.user.id);
-    }
-
     if (req.user.role === 'user')
       await supabaseAdmin.from('users').update({ role: 'business_owner' }).eq('id', req.user.id);
+
+    // Every business gets a Directory subscription — Free unless the owner
+    // already has an active paid Directory plan on their account (checked
+    // above via req.plan), in which case it's the same tier.
+    const now = new Date();
+    const farFuture = new Date(now); farFuture.setFullYear(farFuture.getFullYear() + 100);
+    const { data: dirPlan } = await supabaseAdmin.from('directory_plans').select('*').eq('tier', plan?.tier === 'free' || !plan ? 'free' : plan.tier).maybeSingle();
+    if (dirPlan) {
+      await supabaseAdmin.from('business_directory_subscriptions').insert({
+        business_id: business.id, user_id: req.user.id, plan_id: dirPlan.id, tier: dirPlan.tier,
+        status: 'active', amount_paid: 0, billing_cycle: 'monthly',
+        started_at: now.toISOString(), expires_at: dirPlan.tier === 'free' ? farFuture.toISOString() : now.toISOString(),
+      });
+      await supabaseAdmin.from('businesses').update({ directory_tier: dirPlan.tier, directory_expires_at: dirPlan.tier === 'free' ? farFuture.toISOString() : now.toISOString() }).eq('id', business.id);
+    }
+
+    // Website-only/Both signups without their own external site get a
+    // Starter Website subscription — first month free, once per account
+    // (see users.website_trial_used), same mechanic as the existing
+    // account-wide directory trial in payments.routes.js.
+    if (wantsWebsite && !ownsWebsite) {
+      const { data: starterPlan } = await supabaseAdmin.from('website_plans').select('*').eq('tier', 'starter').maybeSingle();
+      const { data: buyer } = await supabaseAdmin.from('users').select('website_trial_used').eq('id', req.user.id).single();
+      const isTrial = starterPlan && !buyer?.website_trial_used;
+      if (starterPlan && isTrial) {
+        const exp = new Date(now); exp.setDate(exp.getDate() + (starterPlan.free_trial_days || 30));
+        await supabaseAdmin.from('business_website_subscriptions').insert({
+          business_id: business.id, user_id: req.user.id, plan_id: starterPlan.id, tier: starterPlan.tier,
+          status: 'active', amount_paid: 0, billing_cycle: 'monthly', is_trial: true,
+          started_at: now.toISOString(), expires_at: exp.toISOString(),
+        });
+        await supabaseAdmin.from('businesses').update({ website_tier: starterPlan.tier, website_expires_at: exp.toISOString() }).eq('id', business.id);
+        await supabaseAdmin.from('users').update({ website_trial_used: true }).eq('id', req.user.id);
+      }
+      // If the trial's already used, the owner still gets the listing —
+      // they just need to subscribe to a Website plan from the pricing
+      // page (or their business dashboard) to activate the mini-website.
+    }
 
     if (ownsWebsite) {
       await notify(req.user.id, 'info', '🔗 Your website is linked',
@@ -296,11 +306,7 @@ exports.create = async (req, res, next) => {
           ? `We confirmed ${website} is live and linked it to your SpotGH listing.`
           : `We saved ${website} on your listing, but couldn't confirm it responded — double check the link still works.`,
         `/pages/dashboard.html?tab=businesses`);
-    } else if (trialGranted) {
-      await notify(req.user.id, 'info', `🎉 Free ${trialGranted.plan.name} month started!`,
-        `${business.name} is on a free 30-day ${trialGranted.plan.name} trial — your SpotGH mini-website will be ready once approved. No payment needed until it renews.`,
-        `/pages/dashboard.html?tab=businesses`);
-    } else if (wantsMiniWebsite) {
+    } else if (wantsWebsite) {
       await notify(req.user.id, 'info', '🌐 Your SpotGH mini-website is being generated',
         `${business.name} will get its own SpotGH mini-website once approved — no external site needed.`,
         `/pages/dashboard.html?tab=businesses`);
@@ -347,14 +353,11 @@ exports.update = async (req, res, next) => {
     // that's just content layout — e.g. a restaurant's "Menu" section vs
     // a salon's "Book" section — not a paid design perk). Pro+ additionally
     // gets has_custom_template: their own theme_color/accent_color/custom_css.
-    const { data: biz } = await supabaseAdmin.from('businesses').select('subscription_tier').eq('id', req.params.id).single();
-    if (biz) {
-      const { data: plan } = await supabaseAdmin.from('plans').select('has_website,has_custom_template').eq('tier', biz.subscription_tier).single();
-      if (!plan?.has_website) {
-        ['theme_color', 'accent_color', 'template_key', 'custom_css'].forEach(k => delete updates[k]);
-      } else if (!plan?.has_custom_template) {
-        ['theme_color', 'accent_color', 'custom_css'].forEach(k => delete updates[k]);
-      }
+    const websiteAccessForUpdate = await getWebsiteAccess(req.params.id);
+    if (!websiteAccessForUpdate) {
+      ['theme_color', 'accent_color', 'template_key', 'custom_css'].forEach(k => delete updates[k]);
+    } else if (!websiteAccessForUpdate.plan.has_custom_template) {
+      ['theme_color', 'accent_color', 'custom_css'].forEach(k => delete updates[k]);
     }
 
     const { data: business, error } = await supabaseAdmin
@@ -389,11 +392,15 @@ exports.addProduct = async (req, res, next) => {
     if (!type || !name) return res.status(400).json({ error: 'type and name are required' });
     if (!['product','service'].includes(type)) return res.status(400).json({ error: 'type must be product or service' });
 
-    // Check plan limit
-    if (req.plan && req.plan.max_products !== 999) {
+    // Products/services are a mini-website feature — gated by the
+    // business's Website plan, not its Directory plan.
+    const websiteAccessForProduct = await getWebsiteAccess(req.params.id);
+    if (!websiteAccessForProduct)
+      return res.status(403).json({ error: 'Product/service catalogs require a Website plan.', code: 'FEATURE_NOT_INCLUDED', redirect: '/pricing' });
+    if (websiteAccessForProduct.plan.max_products !== 999) {
       const { count } = await supabaseAdmin.from('products_services').select('id',{count:'exact'}).eq('business_id', req.params.id);
-      if (count >= req.plan.max_products)
-        return res.status(403).json({ error: `Plan limit: ${req.plan.max_products} products/services`, code: 'LIMIT_REACHED' });
+      if (count >= websiteAccessForProduct.plan.max_products)
+        return res.status(403).json({ error: `Plan limit: ${websiteAccessForProduct.plan.max_products} products/services`, code: 'LIMIT_REACHED' });
     }
 
     const slug = slugify(name, { lower: true, strict: true }) + '-' + Date.now();
@@ -494,10 +501,9 @@ exports.setCustomDomain = async (req, res, next) => {
       return res.status(400).json({ error: 'Enter a valid domain, e.g. www.yourbusiness.com' });
     const clean = domain.trim().toLowerCase();
 
-    const { data: biz } = await supabaseAdmin.from('businesses').select('subscription_tier').eq('id', req.params.id).single();
-    const { data: plan } = await supabaseAdmin.from('plans').select('has_custom_domain').eq('tier', biz?.subscription_tier).single();
-    if (!plan?.has_custom_domain)
-      return res.status(403).json({ error: 'Custom domains are a Pro plan feature.', code: 'FEATURE_NOT_INCLUDED', redirect: '/pricing' });
+    const websiteAccessForDomain = await getWebsiteAccess(req.params.id);
+    if (!websiteAccessForDomain?.plan.has_custom_domain)
+      return res.status(403).json({ error: 'Custom domains are a Professional Website plan feature.', code: 'FEATURE_NOT_INCLUDED', redirect: '/pricing' });
 
     const { data: taken } = await supabaseAdmin.from('businesses').select('id').eq('custom_domain', clean).neq('id', req.params.id).maybeSingle();
     if (taken) return res.status(409).json({ error: 'That domain is already connected to another listing.' });
@@ -549,10 +555,9 @@ exports.removeCustomDomain = async (req, res, next) => {
 // See routes/apiV1.routes.js for the authenticated endpoints themselves.
 exports.createApiKey = async (req, res, next) => {
   try {
-    const { data: biz } = await supabaseAdmin.from('businesses').select('subscription_tier').eq('id', req.params.id).single();
-    const { data: plan } = await supabaseAdmin.from('plans').select('has_api_access').eq('tier', biz?.subscription_tier).single();
-    if (!plan?.has_api_access)
-      return res.status(403).json({ error: 'API access is an Enterprise plan feature.', code: 'FEATURE_NOT_INCLUDED', redirect: '/pricing' });
+    const websiteAccessForApi = await getWebsiteAccess(req.params.id);
+    if (!websiteAccessForApi?.plan.has_api_access)
+      return res.status(403).json({ error: 'API access is a Business Pro Website plan feature.', code: 'FEATURE_NOT_INCLUDED', redirect: '/pricing' });
 
     const { count } = await supabaseAdmin.from('api_keys').select('id', { count: 'exact' }).eq('business_id', req.params.id).is('revoked_at', null);
     if (count >= 5) return res.status(403).json({ error: 'Maximum of 5 active API keys per business. Revoke one first.' });

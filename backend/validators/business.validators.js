@@ -14,12 +14,15 @@ const isNo  = v => v === false || v === 'false';
 // sends a real boolean (has_own_website: true/false) in the JSON body,
 // not the string 'true', so isBoolean()/equals('true') would either crash
 // the request or silently skip the "website required" check.
+const wantsWebsite = req => req.body.signup_type !== 'directory';
+
 exports.createBusinessRules = [
   body('has_own_website')
+    .if(wantsWebsite)
     .custom(v => isYes(v) || isNo(v))
     .withMessage('Please tell us whether you already have a website'),
   body('website')
-    .if((value, { req }) => isYes(req.body.has_own_website))
+    .if((value, { req }) => wantsWebsite(req) && isYes(req.body.has_own_website))
     .trim().notEmpty().withMessage('Please enter your website URL')
     .isURL({ require_protocol: true }).withMessage('Enter a valid website URL, including https://'),
 ];
