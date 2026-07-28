@@ -53,21 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.sidebar__item').forEach(a => a.classList.remove('active'));
     document.querySelector('a[href="/pages/dashboard.html?tab=new"]').classList.add('active');
 
-    content.innerHTML = `<div class="skeleton" style="height:80px;border-radius:12px;margin-bottom:1.5rem"></div>`;
-    try {
-      const s = await API.get('/subscriptions/status');
-      if (!s.is_active) {
-        content.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-state__icon">💳</div>
-            <h3>Subscribe to list a business</h3>
-            <p>You need an active plan — even the one-month Starter — before you can publish a business listing. Pick a plan, then come back here to register.</p>
-            <a href="/pages/pricing.html" class="btn btn--primary">View Plans</a>
-          </div>`;
-        return;
-      }
-    } catch {}
-
     content.innerHTML = `
       <h2 style="font-size:1.25rem;font-weight:700;margin-bottom:.25rem">Register Your Business</h2>
       <p style="color:var(--clr-text-2);font-size:.875rem;margin-bottom:1.5rem">Pick a category first — it sets your mini-website's template and accent color. You can fine-tune everything later.</p>
