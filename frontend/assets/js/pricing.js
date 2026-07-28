@@ -68,19 +68,44 @@ document.addEventListener('DOMContentLoaded', async () => {
       </div>
     </div>`;
 
-  try {
-    const [dRes, wRes, bRes] = await Promise.all([
-      API.get('/subscriptions/directory-plans'),
-      API.get('/subscriptions/website-plans'),
-      API.get('/subscriptions/bundles'),
-    ]);
-    directoryPlans = (dRes.plans || []).filter(p => p.is_active !== false);
-    websitePlans   = (wRes.plans || []).filter(p => p.is_active !== false);
-    bundles        = (bRes.bundles || []).filter(b => b.is_active !== false);
-  } catch { document.getElementById('plansGrid').innerHTML = '<p style="color:var(--clr-danger);grid-column:1/-1;text-align:center">Failed to load plans.</p>'; return; }
+  // Attached before the data fetch below — tab/billing switching must keep
+  // working even if the plans API fails, instead of leaving onclick="setTab(...)"
+  // pointing at a function that was never defined.
+  window.setTab = (t) => { activeTab = t; renderTabs(); renderPlans(); };
+  window.setBilling = (b) => {
+    billing = b;
+    document.getElementById('btnMonthly').className = `btn ${b==='monthly'?'btn--primary':'btn--ghost'} btn--sm`;
+    document.getElementById('btnMonthly').style.borderRadius = '40px';
+    document.getElementById('btnYearly').className  = `btn ${b==='yearly' ?'btn--primary':'btn--ghost'} btn--sm`;
+    document.getElementById('btnYearly').style.borderRadius = '40px';
+    renderPlans();
+  };
 
-  renderTabs();
-  renderPlans();
+  async function loadPlans() {
+    try {
+      const [dRes, wRes, bRes] = await Promise.all([
+        API.get('/subscriptions/directory-plans'),
+        API.get('/subscriptions/website-plans'),
+        API.get('/subscriptions/bundles'),
+      ]);
+      directoryPlans = (dRes.plans || []).filter(p => p.is_active !== false);
+      websitePlans   = (wRes.plans || []).filter(p => p.is_active !== false);
+      bundles        = (bRes.bundles || []).filter(b => b.is_active !== false);
+      renderTabs();
+      renderPlans();
+      return true;
+    } catch {
+      document.getElementById('plansGrid').innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;color:var(--clr-danger)">
+          <p>Couldn't load plans right now.</p>
+          <button class="btn btn--outline btn--sm" style="margin-top:.5rem" onclick="retryLoadPlans()">Try again</button>
+        </div>`;
+      return false;
+    }
+  }
+  window.retryLoadPlans = () => loadPlans();
+  const loaded = await loadPlans();
+  if (!loaded) renderTabs(); // tabs/hint text still render even with no data
 
   if (Auth.isLoggedIn()) {
     try {
@@ -109,17 +134,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     document.getElementById('tabHint').textContent = hints[activeTab];
   }
-
-  window.setTab = (t) => { activeTab = t; renderTabs(); renderPlans(); };
-
-  window.setBilling = (b) => {
-    billing = b;
-    document.getElementById('btnMonthly').className = `btn ${b==='monthly'?'btn--primary':'btn--ghost'} btn--sm`;
-    document.getElementById('btnMonthly').style.borderRadius = '40px';
-    document.getElementById('btnYearly').className  = `btn ${b==='yearly' ?'btn--primary':'btn--ghost'} btn--sm`;
-    document.getElementById('btnYearly').style.borderRadius = '40px';
-    renderPlans();
-  };
 
   function planIcon(tier) {
     return { free:'🆓', standard:'⭐', premium:'👑', starter:'🚀', professional:'💼', business_pro:'🏆' }[tier] || '✨';
