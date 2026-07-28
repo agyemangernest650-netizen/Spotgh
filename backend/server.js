@@ -205,11 +205,18 @@ app.use(express.static(path.join(__dirname, '../frontend'), {
   etag: true,
   index: 'index.html',
   setHeaders: (res, filePath) => {
-    // HTML pages must always be revalidated — CSP headers and any other
-    // per-response changes ship as part of this same cached response, so a
-    // long maxAge here means browsers can silently keep serving stale pages
-    // (and stale security headers) for up to 7 days after every deploy.
-    if (filePath.endsWith('.html')) {
+    // HTML/JS/CSS must always be revalidated. HTML because CSP headers and
+    // any other per-response changes ship as part of that same cached
+    // response; JS/CSS because this is an actively-developed app where
+    // these files change constantly and a stale cached copy means users
+    // silently keep running old (sometimes broken) code for up to 7 days.
+    // The service worker's fetch handler also requests these with
+    // cache:'no-store', but that's a second layer, not a substitute for
+    // this — if the SW hasn't taken control of a given tab yet for any
+    // reason, this header is what actually stops the browser's own HTTP
+    // cache from serving stale JS on a normal (non-hard) refresh. Only
+    // truly static assets (images, fonts, icons) keep the 7-day cache.
+    if (/\.(html|js|css)$/.test(filePath)) {
       res.setHeader('Cache-Control', 'no-cache');
     }
   },
