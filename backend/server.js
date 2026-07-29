@@ -41,7 +41,7 @@ app.use(helmet({
       scriptSrcAttr: ["'unsafe-inline'"],
       styleSrc:   ["'self'","'unsafe-inline'","fonts.googleapis.com","cdnjs.cloudflare.com","unpkg.com"],
       fontSrc:    ["'self'","fonts.gstatic.com","cdnjs.cloudflare.com"],
-      imgSrc:     ["'self'","data:","blob:","res.cloudinary.com","*.googleapis.com","*.gstatic.com","*.openstreetmap.org"],
+      imgSrc:     ["'self'","data:","blob:","res.cloudinary.com","*.googleapis.com","*.gstatic.com","*.googleusercontent.com","*.openstreetmap.org"],
       connectSrc: ["'self'","*.supabase.co","api.paystack.co","https://www.google-analytics.com","https://region1.google-analytics.com","https://analytics.google.com","https://hcaptcha.com","https://*.hcaptcha.com"],
       frameSrc:   ["'self'","maps.google.com","https://newassets.hcaptcha.com","https://hcaptcha.com"],
       objectSrc:  ["'none'"],

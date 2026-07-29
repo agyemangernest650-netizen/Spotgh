@@ -14,9 +14,21 @@
 -- always undefined there even though it's set correctly in the
 -- `businesses` table itself — meaning the dashboard couldn't tell which
 -- businesses actually have an active Website subscription.
+--
+-- Uses DROP + CREATE rather than CREATE OR REPLACE: Postgres refuses to
+-- REPLACE a view if it would rename or reorder any existing output
+-- column, which happens here because `b.*` now expands in a different
+-- column order than whenever this view was last created (columns added
+-- to `businesses` by migrations in between shifted everything after
+-- them). Dropping first sidesteps that restriction entirely.
+-- businesses_admin_view is the only thing that depends on
+-- businesses_with_stats, so both are dropped and recreated together.
 -- ============================================================
 
-CREATE OR REPLACE VIEW public.businesses_with_stats AS
+DROP VIEW IF EXISTS public.businesses_admin_view;
+DROP VIEW IF EXISTS public.businesses_with_stats;
+
+CREATE VIEW public.businesses_with_stats AS
 SELECT
   b.*,
   c.name AS category_name, c.slug AS category_slug,
@@ -62,7 +74,7 @@ LEFT JOIN (
   ORDER BY expires_at DESC LIMIT 1
 ) s ON s.business_id = b.id;
 
-CREATE OR REPLACE VIEW public.businesses_admin_view AS
+CREATE VIEW public.businesses_admin_view AS
 SELECT bws.*, u.email AS owner_email
 FROM public.businesses_with_stats bws
 LEFT JOIN public.users u ON bws.owner_id = u.id;
