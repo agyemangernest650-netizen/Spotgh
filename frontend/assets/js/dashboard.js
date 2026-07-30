@@ -53,29 +53,47 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.sidebar__item').forEach(a => a.classList.remove('active'));
     document.querySelector('a[href="/pages/dashboard.html?tab=new"]').classList.add('active');
 
+    const isCreator = user?.role === 'creator';
+    let creatorForceDirectoryTier = null, creatorForceWebsiteTier = null;
+
     let signupType = new URLSearchParams(location.search).get('signup_type');
     if (!['directory','website','both'].includes(signupType)) signupType = null;
 
     content.innerHTML = `
-      <h2 style="font-size:1.25rem;font-weight:700;margin-bottom:.25rem">Register Your Business</h2>
-      <p style="color:var(--clr-text-2);font-size:.875rem;margin-bottom:1.5rem" id="newBizIntro">What do you want to set up?</p>
+      <h2 style="font-size:1.25rem;font-weight:700;margin-bottom:.25rem">What would you like to do?</h2>
+      <p style="color:var(--clr-text-2);font-size:.875rem;margin-bottom:1.5rem" id="newBizIntro">Choose how you want to use SpotGH.</p>
 
       <div id="signupTypePicker" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.85rem;margin-bottom:1.75rem;max-width:640px">
         <button type="button" class="card signup-type-pick" data-type="directory" style="padding:1.25rem 1rem;text-align:left;border:1px solid var(--clr-border);cursor:pointer;background:var(--clr-surface)">
-          <div style="font-size:1.6rem;margin-bottom:.4rem">📋</div>
-          <div style="font-weight:700;margin-bottom:.25rem">Directory Listing</div>
-          <div style="font-size:.78rem;color:var(--clr-text-2)">Get found in search — free to start.</div>
+          <div style="font-size:1.6rem;margin-bottom:.4rem">📍</div>
+          <div style="font-weight:700;margin-bottom:.25rem">List My Business</div>
+          <div style="font-size:.78rem;color:var(--clr-text-2)">Get discovered by customers searching SpotGH — already have a website? Just link it.</div>
         </button>
         <button type="button" class="card signup-type-pick" data-type="website" style="padding:1.25rem 1rem;text-align:left;border:1px solid var(--clr-border);cursor:pointer;background:var(--clr-surface)">
           <div style="font-size:1.6rem;margin-bottom:.4rem">🌐</div>
-          <div style="font-weight:700;margin-bottom:.25rem">Mini-Website</div>
-          <div style="font-size:.78rem;color:var(--clr-text-2)">A branded website for your business — first month free.</div>
+          <div style="font-weight:700;margin-bottom:.25rem">Create a Business Website</div>
+          <div style="font-size:.78rem;color:var(--clr-text-2)">A professional website for your business — first month free.</div>
         </button>
-        <button type="button" class="card signup-type-pick" data-type="both" style="padding:1.25rem 1rem;text-align:left;border:1px solid var(--clr-border);cursor:pointer;background:var(--clr-surface)">
-          <div style="font-size:1.6rem;margin-bottom:.4rem">🎁</div>
-          <div style="font-weight:700;margin-bottom:.25rem">Both (Bundle)</div>
-          <div style="font-size:.78rem;color:var(--clr-text-2)">Listing + website together, discounted.</div>
+        <button type="button" class="card signup-type-pick" data-type="both" style="padding:1.25rem 1rem;text-align:left;border:2px solid var(--clr-primary);cursor:pointer;background:var(--clr-surface)">
+          <div style="font-size:1.6rem;margin-bottom:.4rem">🚀</div>
+          <div style="font-size:.68rem;font-weight:700;color:var(--clr-primary);margin-bottom:.25rem">RECOMMENDED</div>
+          <div style="font-weight:700;margin-bottom:.25rem">List + Create Website</div>
+          <div style="font-size:.78rem;color:var(--clr-text-2)">Get listed on SpotGH and create your professional business website.</div>
         </button>
+      </div>
+
+      <div id="planPicker" style="display:none;max-width:640px;margin-bottom:1.75rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+          <button type="button" class="btn btn--ghost btn--sm" id="planPickerBack"><i class="fa-solid fa-arrow-left"></i> Back</button>
+          <div style="display:inline-flex;background:var(--clr-surface-2);border-radius:40px;padding:.2rem;gap:.2rem">
+            <button type="button" class="btn btn--primary btn--sm" id="planPickerMonthly" style="border-radius:40px">Monthly</button>
+            <button type="button" class="btn btn--ghost btn--sm" id="planPickerYearly" style="border-radius:40px">Yearly</button>
+          </div>
+        </div>
+        <div id="planPickerGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.85rem">
+          <div class="card skeleton" style="height:220px"></div>
+          <div class="card skeleton" style="height:220px"></div>
+        </div>
       </div>
 
       <div id="categoryPicker" style="display:none;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.75rem;margin-bottom:1.75rem">
@@ -120,18 +138,18 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <div class="wiz-step" data-step="4" style="display:none">
-          <h3 style="font-size:1rem;margin-bottom:1rem">Website or SpotGH Website?</h3>
-          <label class="form-label">Do you already have a website? *</label>
+          <h3 style="font-size:1rem;margin-bottom:1rem">Existing Website</h3>
+          <label class="form-label">Do you already have a website you'd like linked from your listing? (optional)</label>
           <div style="display:flex;gap:1.25rem;margin-bottom:.5rem">
             <label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;cursor:pointer">
-              <input type="radio" name="bizHasWebsite" value="yes"> Yes, I have one
+              <input type="radio" name="bizHasWebsite" value="yes"> Yes, link it
             </label>
             <label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;cursor:pointer">
-              <input type="radio" name="bizHasWebsite" value="no"> No — build me a free SpotGH mini-website
+              <input type="radio" name="bizHasWebsite" value="no" checked> No — just the SpotGH listing
             </label>
           </div>
           <input id="bizWebsite" class="form-input" type="url" placeholder="https://yourwebsite.com" style="display:none">
-          <div style="font-size:.73rem;color:var(--clr-text-3);margin-top:.3rem">We'll link to it from your listing and check that it's live. If you don't have one yet, SpotGH builds and hosts a mini-website for you instead.</div>
+          <div style="font-size:.73rem;color:var(--clr-text-3);margin-top:.3rem">Purely optional — we'll check it's live and link to it from your directory profile. Your Directory plan (including Premium) works the same either way.</div>
         </div>
 
         <div class="wiz-step" data-step="5" style="display:none">
@@ -159,10 +177,105 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function revealCategoryPicker() {
       document.getElementById('signupTypePicker').style.display = 'none';
+      document.getElementById('planPicker').style.display = 'none';
       document.getElementById('categoryPicker').style.display = 'grid';
       document.getElementById('newBizIntro').textContent = "Pick a category first — it sets your mini-website's template and accent color. You can fine-tune everything later.";
     }
+
+    let planBilling = 'monthly';
+    function planPrice(p) { return planBilling === 'yearly' ? p.price_yearly : p.price_monthly; }
+
+    function planCard(type, key, name, tagline, price, isPopular, isFree) {
+      return `
+        <div class="card" style="padding:1.1rem 1rem;border:${isPopular ? '2px solid var(--clr-primary)' : '1px solid var(--clr-border)'};text-align:left">
+          ${isPopular ? `<div style="font-size:.68rem;font-weight:700;color:var(--clr-primary);margin-bottom:.35rem">MOST POPULAR</div>` : ''}
+          <div style="font-weight:700;margin-bottom:.15rem">${name}</div>
+          <div style="font-size:.75rem;color:var(--clr-text-2);margin-bottom:.6rem">${tagline || ''}</div>
+          <div style="font-weight:700;margin-bottom:.75rem">${isFree ? 'Free' : `₵${price}${planBilling === 'yearly' ? '/yr' : '/mo'}`}</div>
+          <button type="button" class="btn ${isPopular ? 'btn--primary' : 'btn--outline'} btn--sm plan-pick" data-type="${type}" data-key="${key}" style="width:100%;margin-bottom:${isCreator && !isFree ? '.4rem' : '0'}">Choose</button>
+          ${isCreator && !isFree ? `<button type="button" class="btn btn--ghost btn--sm plan-comp" data-type="${type}" data-key="${key}" style="width:100%">🎁 Grant free (creator)</button>` : ''}
+        </div>`;
+    }
+
+    async function showPlanPicker(type) {
+      document.getElementById('signupTypePicker').style.display = 'none';
+      const picker = document.getElementById('planPicker');
+      picker.style.display = 'block';
+      document.getElementById('newBizIntro').textContent = 'Choose a plan for this business — you can change it any time from your dashboard.';
+      const grid = document.getElementById('planPickerGrid');
+      grid.innerHTML = `<div class="card skeleton" style="height:220px"></div><div class="card skeleton" style="height:220px"></div>`;
+      try {
+        if (type === 'directory') {
+          const { plans } = await API.get('/subscriptions/directory-plans');
+          grid.innerHTML = (plans || []).filter(p => p.is_active !== false).map(p =>
+            planCard('directory', p.tier, p.name, p.tagline, planPrice(p), !!p.is_popular, p.tier === 'free')).join('');
+        } else if (type === 'website') {
+          const { plans } = await API.get('/subscriptions/website-plans');
+          grid.innerHTML = (plans || []).filter(p => p.is_active !== false).map(p =>
+            planCard('website', p.tier, p.name, p.tagline, planPrice(p), !!p.is_popular, false)).join('');
+        } else {
+          const { bundles } = await API.get('/subscriptions/bundles');
+          grid.innerHTML = (bundles || []).filter(b => b.is_active !== false).map(b => {
+            const card = planCard('bundle', b.key, b.name, b.tagline, planPrice(b), !!b.is_popular, false);
+            // Stash the bundle's underlying directory/website tiers on the
+            // comp button (only rendered for creators) so granting it can
+            // set both subscriptions at once.
+            return card.replace('class="btn btn--ghost btn--sm plan-comp"',
+              `class="btn btn--ghost btn--sm plan-comp" data-dir-tier="${b.directory_plans?.tier || ''}" data-web-tier="${b.website_plans?.tier || ''}"`);
+          }).join('');
+        }
+      } catch {
+        grid.innerHTML = `<p style="color:var(--clr-danger);grid-column:1/-1">Couldn't load plans. <button type="button" class="btn btn--outline btn--sm" id="planPickerRetry">Try again</button></p>`;
+        document.getElementById('planPickerRetry')?.addEventListener('click', () => showPlanPicker(type));
+        return;
+      }
+      grid.querySelectorAll('.plan-pick').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const { type: subscriptionType, key } = btn.dataset;
+          // Free Directory needs no checkout later — business creation
+          // grants it automatically, same as today's default.
+          if (subscriptionType === 'directory' && key === 'free') {
+            sessionStorage.removeItem('spotgh_pending_plan');
+          } else {
+            sessionStorage.setItem('spotgh_pending_plan', JSON.stringify({ subscription_type: subscriptionType, plan_key: key, billing: planBilling }));
+          }
+          revealCategoryPicker();
+        });
+      });
+      grid.querySelectorAll('.plan-comp').forEach(btn => {
+        btn.addEventListener('click', () => {
+          sessionStorage.removeItem('spotgh_pending_plan'); // comped, not purchased
+          const { type: subscriptionType, key, dirTier, webTier } = btn.dataset;
+          if (subscriptionType === 'directory') creatorForceDirectoryTier = key;
+          else if (subscriptionType === 'website') creatorForceWebsiteTier = key;
+          else { creatorForceDirectoryTier = dirTier || null; creatorForceWebsiteTier = webTier || null; }
+          toast.success(`Will grant this business a free ${key} plan once created`);
+          revealCategoryPicker();
+        });
+      });
+    }
+
+    document.getElementById('planPickerBack').addEventListener('click', () => {
+      document.getElementById('planPicker').style.display = 'none';
+      document.getElementById('signupTypePicker').style.display = 'grid';
+      document.getElementById('newBizIntro').textContent = 'What do you want to set up?';
+    });
+    document.getElementById('planPickerMonthly').addEventListener('click', () => {
+      planBilling = 'monthly';
+      document.getElementById('planPickerMonthly').className = 'btn btn--primary btn--sm';
+      document.getElementById('planPickerYearly').className = 'btn btn--ghost btn--sm';
+      showPlanPicker(signupType);
+    });
+    document.getElementById('planPickerYearly').addEventListener('click', () => {
+      planBilling = 'yearly';
+      document.getElementById('planPickerYearly').className = 'btn btn--primary btn--sm';
+      document.getElementById('planPickerMonthly').className = 'btn btn--ghost btn--sm';
+      showPlanPicker(signupType);
+    });
+
     if (signupType) {
+      // Arrived with a plan already chosen from the pricing page — that
+      // sessionStorage flow is unchanged, so skip straight to category.
       revealCategoryPicker();
     } else {
       document.querySelectorAll('.signup-type-pick').forEach(btn => {
@@ -170,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
           signupType = btn.dataset.type;
           document.querySelectorAll('.signup-type-pick').forEach(b => b.style.border = '1px solid var(--clr-border)');
           btn.style.border = '2px solid var(--clr-primary)';
-          revealCategoryPicker();
+          showPlanPicker(signupType);
         });
       });
     }
@@ -224,9 +337,12 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     } catch { document.getElementById('categoryPicker').innerHTML = '<p style="color:var(--clr-danger)">Failed to load categories.</p>'; }
 
-    // A Directory-only signup skips the "already have a website" step
-    // entirely — it's not going to get a mini-website of ours either way.
-    const skipWebsiteStep = signupType === 'directory';
+    // Only "List My Business" (Directory-only) asks about an existing
+    // website to link — it's optional and doesn't affect their Directory
+    // plan (Premium included). "Create a Business Website" and "List +
+    // Create Website" always get a SpotGH-built site, so this step would
+    // just be confusing there and is skipped.
+    const skipWebsiteStep = signupType !== 'directory';
     const STEP_LABELS = skipWebsiteStep ? ['Info', 'Location', 'Description', 'Review'] : ['Info', 'Location', 'Description', 'Website', 'Review'];
     const reviewStepNum = STEP_LABELS.length;
     let currentStep = 1;
@@ -269,15 +385,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const checked = document.querySelector('input[name="bizHasWebsite"]:checked');
       const website = checked?.value === 'yes' ? document.getElementById('bizWebsite').value.trim() : null;
       const websiteLine = skipWebsiteStep
-        ? 'Directory listing only'
-        : (website || (checked?.value === 'no' ? 'SpotGH mini-website' : '—'));
+        ? 'SpotGH website (included)'
+        : (website || 'No existing website linked');
       document.getElementById('wizReview').innerHTML = `
         <div><strong>Category:</strong> ${document.getElementById('bizCategoryName').value || '—'}</div>
         <div><strong>Name:</strong> ${document.getElementById('bizName').value.trim() || '—'}</div>
         <div><strong>Tagline:</strong> ${document.getElementById('bizTagline').value.trim() || '—'}</div>
         <div><strong>Location:</strong> ${[document.getElementById('bizCity').value.trim(), document.getElementById('bizRegion').value.trim()].filter(Boolean).join(', ') || '—'}</div>
         <div><strong>Contact:</strong> ${[document.getElementById('bizWhatsapp').value.trim(), document.getElementById('bizPhone').value.trim()].filter(Boolean).join(' / ') || '—'}</div>
-        <div><strong>Website:</strong> ${websiteLine}</div>`;
+        <div><strong>Website:</strong> ${websiteLine}</div>
+        ${creatorForceDirectoryTier || creatorForceWebsiteTier ? `<div><strong>🎁 Creator grant:</strong> ${[creatorForceDirectoryTier ? `Directory: ${creatorForceDirectoryTier}` : '', creatorForceWebsiteTier ? `Website: ${creatorForceWebsiteTier}` : ''].filter(Boolean).join(', ')} (free)</div>` : ''}`;
     }
 
     window.showStep = (n) => {
@@ -331,6 +448,8 @@ document.addEventListener('DOMContentLoaded', () => {
           has_own_website: hasOwnWebsite,
           website: hasOwnWebsite ? websiteUrl : '',
           signup_type: signupType || 'both',
+          ...(creatorForceDirectoryTier ? { force_directory_tier: creatorForceDirectoryTier } : {}),
+          ...(creatorForceWebsiteTier ? { force_website_tier: creatorForceWebsiteTier } : {}),
         });
         sessionStorage.removeItem('spotgh_own_website_choice');
 

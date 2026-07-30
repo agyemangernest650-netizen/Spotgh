@@ -214,21 +214,32 @@ exports.create = async (req, res, next) => {
     const { name, tagline, description, phone, whatsapp, email, website, has_own_website,
             address, city, region, country, category_id, social_links,
             theme_color, template_key, meta_title, meta_description,
-            operating_hours, amenities, signup_type } = req.body;
+            operating_hours, amenities, signup_type,
+            force_directory_tier, force_website_tier } = req.body;
     if (!name) return res.status(400).json({ error: 'Business name is required' });
+
+    // Only the platform admin can comp a Directory/Website tier for free —
+    // never trust these two fields from a regular caller's request body.
+    const isCreator = req.user.role === 'creator';
+    const DIRECTORY_TIERS = ['free', 'standard', 'premium'];
+    const WEBSITE_TIERS = ['starter', 'professional', 'business_pro'];
+    const compDirectoryTier = isCreator && DIRECTORY_TIERS.includes(force_directory_tier) ? force_directory_tier : null;
+    const compWebsiteTier = isCreator && WEBSITE_TIERS.includes(force_website_tier) ? force_website_tier : null;
 
     // signup_type: 'directory' (listing only), 'website' (mini-website only,
     // still gets the free Directory listing since every business has one —
     // it's just not upgraded), or 'both'. Defaults to 'both' for any caller
     // that hasn't been updated to send it, matching the old behavior where
     // every business without its own external site got a mini-website.
-    const wantsWebsite = signup_type !== 'directory';
+    const wantsWebsite = signup_type !== 'directory' || !!compWebsiteTier;
 
     // Check business limit from Directory plan (a Directory subscription
-    // always exists, even for a website-only signup)
+    // always exists, even for a website-only signup). The creator role
+    // manages listings on behalf of other businesses and isn't bound by
+    // its own account's plan limit.
     const plan = req.plan;
 
-    if (plan && plan.max_businesses !== 999) {
+    if (!isCreator && plan && plan.max_businesses !== 999) {
       const { count } = await supabaseAdmin.from('businesses').select('id', { count: 'exact' }).eq('owner_id', req.user.id).neq('status', 'rejected');
       if (count >= plan.max_businesses) {
         return res.status(403).json({ error: `Your ${plan.name} plan allows ${plan.max_businesses} business(es). Upgrade to add more.`, code: 'LIMIT_REACHED', redirect: '/pricing' });
@@ -267,21 +278,40 @@ exports.create = async (req, res, next) => {
     // above via req.plan), in which case it's the same tier.
     const now = new Date();
     const farFuture = new Date(now); farFuture.setFullYear(farFuture.getFullYear() + 100);
-    const { data: dirPlan } = await supabaseAdmin.from('directory_plans').select('*').eq('tier', plan?.tier === 'free' || !plan ? 'free' : plan.tier).maybeSingle();
+    const dirTierToGrant = compDirectoryTier || (plan?.tier === 'free' || !plan ? 'free' : plan.tier);
+    const { data: dirPlan } = await supabaseAdmin.from('directory_plans').select('*').eq('tier', dirTierToGrant).maybeSingle();
     if (dirPlan) {
+      // A creator-comped tier is free and doesn't expire, same as the Free
+      // tier's own "forever" expiry — it's an admin grant, not a paid term.
+      const dirExpires = (dirPlan.tier === 'free' || compDirectoryTier) ? farFuture : now;
       await supabaseAdmin.from('business_directory_subscriptions').insert({
         business_id: business.id, user_id: req.user.id, plan_id: dirPlan.id, tier: dirPlan.tier,
         status: 'active', amount_paid: 0, billing_cycle: 'monthly',
-        started_at: now.toISOString(), expires_at: dirPlan.tier === 'free' ? farFuture.toISOString() : now.toISOString(),
+        started_at: now.toISOString(), expires_at: dirExpires.toISOString(),
       });
-      await supabaseAdmin.from('businesses').update({ directory_tier: dirPlan.tier, directory_expires_at: dirPlan.tier === 'free' ? farFuture.toISOString() : now.toISOString() }).eq('id', business.id);
+      await supabaseAdmin.from('businesses').update({ directory_tier: dirPlan.tier, directory_expires_at: dirExpires.toISOString() }).eq('id', business.id);
     }
 
     // Website-only/Both signups without their own external site get a
     // Starter Website subscription — first month free, once per account
     // (see users.website_trial_used), same mechanic as the existing
     // account-wide directory trial in payments.routes.js.
-    if (wantsWebsite && !ownsWebsite) {
+    if (compWebsiteTier) {
+      // Creator comp: grant the requested Website tier directly, free,
+      // for a year — doesn't touch the account's own trial eligibility
+      // and isn't blocked by has_own_website, since the creator is
+      // building this business's mini-website on their behalf.
+      const { data: compPlan } = await supabaseAdmin.from('website_plans').select('*').eq('tier', compWebsiteTier).maybeSingle();
+      if (compPlan) {
+        const exp = new Date(now); exp.setFullYear(exp.getFullYear() + 1);
+        await supabaseAdmin.from('business_website_subscriptions').insert({
+          business_id: business.id, user_id: req.user.id, plan_id: compPlan.id, tier: compPlan.tier,
+          status: 'active', amount_paid: 0, billing_cycle: 'monthly', is_trial: false,
+          started_at: now.toISOString(), expires_at: exp.toISOString(),
+        });
+        await supabaseAdmin.from('businesses').update({ website_tier: compPlan.tier, website_expires_at: exp.toISOString() }).eq('id', business.id);
+      }
+    } else if (wantsWebsite && !ownsWebsite) {
       const { data: starterPlan } = await supabaseAdmin.from('website_plans').select('*').eq('tier', 'starter').maybeSingle();
       const { data: buyer } = await supabaseAdmin.from('users').select('website_trial_used').eq('id', req.user.id).single();
       const isTrial = starterPlan && !buyer?.website_trial_used;

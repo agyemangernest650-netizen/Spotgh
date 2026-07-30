@@ -107,17 +107,20 @@ app.use(async (req, res, next) => {
     }
     return next();
   }
-  // Custom domain (Enterprise plan): any other host hitting this server
-  // gets checked against verified custom domains. Gating on
-  // subscription_tier here (not just custom_domain_verified) means this
-  // automatically stops resolving the moment a business's Enterprise plan
-  // lapses, with no extra cron job needed.
+  // Custom domain (Professional Website plan and up): any other host
+  // hitting this server gets checked against verified custom domains.
+  // Gating on website_tier + website_expires_at (not just
+  // custom_domain_verified) means this automatically stops resolving
+  // the moment a business's Website plan lapses, with no extra cron
+  // job needed.
   if (host && host !== root && host !== `www.${root}` && req.path === '/') {
     try {
       const { supabaseAdmin } = require('./config/supabase');
       const { data: biz } = await supabaseAdmin.from('businesses').select('slug')
         .eq('custom_domain', host).eq('custom_domain_verified', true)
-        .eq('subscription_tier', 'enterprise').eq('status', 'active').single();
+        .in('website_tier', ['professional', 'business_pro'])
+        .gt('website_expires_at', new Date().toISOString())
+        .eq('status', 'active').single();
       if (biz) req.url = `/pages/business.html?slug=${biz.slug}`;
     } catch {}
   }
