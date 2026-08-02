@@ -297,7 +297,7 @@ window.loadComponents = () => {
     nav.innerHTML = `
       <a href="/" class="mobile-bottom-nav__item ${isActive('/')}"><i class="fa-solid fa-house"></i><span>Home</span></a>
       <a href="/pages/categories.html" class="mobile-bottom-nav__item ${isActive('/pages/categories.html')}"><i class="fa-solid fa-grip"></i><span>Categories</span></a>
-      <a href="/pages/dashboard.html?action=add-business" class="mobile-bottom-nav__item mobile-bottom-nav__item--cta"><i class="fa-solid fa-plus"></i></a>
+      <a href="/pages/dashboard.html?tab=new" class="mobile-bottom-nav__item mobile-bottom-nav__item--cta"><i class="fa-solid fa-plus"></i></a>
       <a href="/pages/deals.html" class="mobile-bottom-nav__item ${isActive('/pages/deals.html')}"><i class="fa-solid fa-tag"></i><span>Deals</span></a>
       <a href="${profileHref}" class="mobile-bottom-nav__item ${isActive(profileHref)}"><i class="fa-solid fa-user"></i><span>Profile</span></a>`;
     document.body.appendChild(nav);
