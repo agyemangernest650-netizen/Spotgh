@@ -183,15 +183,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let planBilling = 'monthly';
-    function planPrice(p) { return planBilling === 'yearly' ? p.price_yearly : p.price_monthly; }
+    function planPrice(p) {
+      if (p.directory_plans && p.website_plans) {
+        // Bundle: no price of its own — it's discount_percent off the
+        // sum of its underlying Directory + Website plan prices, same
+        // computation pricing.js uses for its own bundle cards.
+        const dir = p.directory_plans, web = p.website_plans;
+        const base = planBilling === 'yearly' ? Number(dir.price_yearly) + Number(web.price_yearly) : Number(dir.price_monthly) + Number(web.price_monthly);
+        return Math.round(base * (1 - (p.discount_percent || 0) / 100));
+      }
+      return planBilling === 'yearly' ? p.price_yearly : p.price_monthly;
+    }
 
-    function planCard(type, key, name, tagline, price, isPopular, isFree) {
+    function planCard(type, key, name, tagline, price, isPopular, isFree, discountPercent) {
       return `
         <div class="card" style="padding:1.1rem 1rem;border:${isPopular ? '2px solid var(--clr-primary)' : '1px solid var(--clr-border)'};text-align:left">
           ${isPopular ? `<div style="font-size:.68rem;font-weight:700;color:var(--clr-primary);margin-bottom:.35rem">MOST POPULAR</div>` : ''}
           <div style="font-weight:700;margin-bottom:.15rem">${name}</div>
           <div style="font-size:.75rem;color:var(--clr-text-2);margin-bottom:.6rem">${tagline || ''}</div>
-          <div style="font-weight:700;margin-bottom:.75rem">${isFree ? 'Free' : `₵${price}${planBilling === 'yearly' ? '/yr' : '/mo'}`}</div>
+          <div style="font-weight:700;margin-bottom:.75rem">${isFree ? 'Free' : `₵${price}${planBilling === 'yearly' ? '/yr' : '/mo'}${discountPercent ? ` <span style="font-weight:600;color:var(--clr-success);font-size:.72rem">save ${discountPercent}%</span>` : ''}`}</div>
           <button type="button" class="btn ${isPopular ? 'btn--primary' : 'btn--outline'} btn--sm plan-pick" data-type="${type}" data-key="${key}" style="width:100%;margin-bottom:${isCreator && !isFree ? '.4rem' : '0'}">Choose</button>
           ${isCreator && !isFree ? `<button type="button" class="btn btn--ghost btn--sm plan-comp" data-type="${type}" data-key="${key}" style="width:100%">🎁 Grant free (creator)</button>` : ''}
         </div>`;
@@ -216,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           const { bundles } = await API.get('/subscriptions/bundles');
           grid.innerHTML = (bundles || []).filter(b => b.is_active !== false).map(b => {
-            const card = planCard('bundle', b.key, b.name, b.tagline, planPrice(b), !!b.is_popular, false);
+            const card = planCard('bundle', b.key, b.name, b.tagline, planPrice(b), !!b.is_popular, false, b.discount_percent);
             // Stash the bundle's underlying directory/website tiers on the
             // comp button (only rendered for creators) so granting it can
             // set both subscriptions at once.
@@ -229,6 +239,16 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('planPickerRetry')?.addEventListener('click', () => showPlanPicker(type));
         return;
       }
+      try {
+        const pending = JSON.parse(sessionStorage.getItem('spotgh_pending_plan') || 'null');
+        if (pending && pending.subscription_type === type) {
+          const match = grid.querySelector(`.plan-pick[data-key="${pending.plan_key}"]`);
+          if (match) {
+            match.closest('.card').style.outline = '2px solid var(--clr-primary)';
+            match.insertAdjacentHTML('beforebegin', `<div style="font-size:.68rem;font-weight:700;color:var(--clr-primary);margin-bottom:.4rem">✓ SELECTED ON PRICING PAGE</div>`);
+          }
+        }
+      } catch {}
       grid.querySelectorAll('.plan-pick').forEach(btn => {
         btn.addEventListener('click', () => {
           const { type: subscriptionType, key } = btn.dataset;
@@ -274,9 +294,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (signupType) {
-      // Arrived with a plan already chosen from the pricing page — that
-      // sessionStorage flow is unchanged, so skip straight to category.
-      revealCategoryPicker();
+      // Arriving from the Pricing page (signup_type set via URL) now goes
+      // through the exact same plan-picker screen as clicking "Add
+      // Business" directly — previously this jumped straight to Category,
+      // which is why the two entry points looked like different flows.
+      document.querySelectorAll('.signup-type-pick').forEach(b => { if (b.dataset.type === signupType) b.style.border = '2px solid var(--clr-primary)'; });
+      showPlanPicker(signupType);
     } else {
       document.querySelectorAll('.signup-type-pick').forEach(btn => {
         btn.addEventListener('click', () => {

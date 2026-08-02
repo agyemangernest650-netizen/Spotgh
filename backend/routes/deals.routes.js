@@ -33,7 +33,7 @@ router.get('/my', verifyToken, async (req, res, next) => {
 router.patch('/:id', verifyToken, async (req, res, next) => {
   try {
     const { data: deal } = await supabaseAdmin.from('business_deals').select('businesses(owner_id)').eq('id', req.params.id).single();
-    if (!deal || deal.businesses.owner_id !== req.user.id) return res.status(403).json({ error: 'Not authorized' });
+    if (!deal || (deal.businesses.owner_id !== req.user.id && req.user.role !== 'creator')) return res.status(403).json({ error: 'Not authorized' });
     const { title, description, discount_text, expires_at, is_active } = req.body;
     const updates = {};
     if (title !== undefined) updates.title = title;
@@ -49,7 +49,7 @@ router.patch('/:id', verifyToken, async (req, res, next) => {
 router.delete('/:id', verifyToken, async (req, res, next) => {
   try {
     const { data: deal } = await supabaseAdmin.from('business_deals').select('businesses(owner_id)').eq('id', req.params.id).single();
-    if (!deal || deal.businesses.owner_id !== req.user.id) return res.status(403).json({ error: 'Not authorized' });
+    if (!deal || (deal.businesses.owner_id !== req.user.id && req.user.role !== 'creator')) return res.status(403).json({ error: 'Not authorized' });
     await supabaseAdmin.from('business_deals').delete().eq('id', req.params.id);
     res.json({ message: 'Deal deleted' });
   } catch (err) { next(err); }
