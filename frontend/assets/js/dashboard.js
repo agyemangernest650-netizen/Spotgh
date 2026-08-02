@@ -102,7 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="skeleton" style="height:90px;border-radius:12px"></div>
       </div>
 
-      <form id="newBizForm" style="display:none;max-width:560px">
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-start">
+      <form id="newBizForm" style="display:none;flex:1;min-width:280px;max-width:560px">
         <input type="hidden" id="bizCategoryId">
         <input type="hidden" id="bizCategoryName">
         <input type="hidden" id="bizTemplateKey" value="default">
@@ -138,24 +139,19 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <div class="wiz-step" data-step="4" style="display:none">
-          <h3 style="font-size:1rem;margin-bottom:1rem">Existing Website</h3>
-          <label class="form-label">Do you already have a website you'd like linked from your listing? (optional)</label>
-          <div style="display:flex;gap:1.25rem;margin-bottom:.5rem">
-            <label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;cursor:pointer">
-              <input type="radio" name="bizHasWebsite" value="yes"> Yes, link it
-            </label>
-            <label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;cursor:pointer">
-              <input type="radio" name="bizHasWebsite" value="no" checked> No — just the SpotGH listing
-            </label>
-          </div>
-          <input id="bizWebsite" class="form-input" type="url" placeholder="https://yourwebsite.com" style="display:none">
-          <div style="font-size:.73rem;color:var(--clr-text-3);margin-top:.3rem">Purely optional — we'll check it's live and link to it from your directory profile. Your Directory plan (including Premium) works the same either way.</div>
+          <h3 style="font-size:1rem;margin-bottom:.25rem">Branding</h3>
+          <p style="font-size:.8rem;color:var(--clr-text-2);margin-bottom:1rem">This is what makes your mini-website feel like yours — watch the preview update as you go.</p>
+          <label class="form-label">Accent color</label>
+          <div id="colorSwatches" style="display:flex;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap"></div>
+          <label class="form-label">Logo (optional — you can also add this later)</label>
+          <input type="file" id="bizLogoFile" accept="image/*" class="form-input" style="margin-bottom:.4rem">
+          <div style="font-size:.73rem;color:var(--clr-text-3)">Square images work best. JPG or PNG, under 5MB.</div>
         </div>
 
         <div class="wiz-step" data-step="5" style="display:none">
           <h3 style="font-size:1rem;margin-bottom:1rem">Review</h3>
           <div id="wizReview" style="background:var(--clr-surface-2);border-radius:var(--radius-md);padding:1rem;font-size:.85rem;line-height:1.9"></div>
-          <p style="font-size:.78rem;color:var(--clr-text-3);margin-top:.75rem">You'll be able to add a logo, photos, and business hours right after this — those aren't required to submit.</p>
+          <p id="wizReviewNote" style="font-size:.78rem;color:var(--clr-text-3);margin-top:.75rem">You'll be able to add photos and business hours right after this — those aren't required to submit.</p>
         </div>
 
         <div style="display:flex;gap:.75rem;margin-top:1.5rem">
@@ -164,6 +160,22 @@ document.addEventListener('DOMContentLoaded', () => {
           <button type="submit" class="btn btn--primary" id="submitBizBtn" style="display:none"><i class="fa-solid fa-rocket"></i> Submit for Review</button>
         </div>
       </form>
+
+      <div id="bizPreviewPanel" style="display:none;flex:1;min-width:260px;max-width:340px;position:sticky;top:1rem">
+        <div style="font-size:.7rem;font-weight:700;color:var(--clr-text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Live Preview</div>
+        <div class="card" style="overflow:hidden;padding:0">
+          <div id="previewHeader" style="height:70px;background:#4E0DAD;position:relative;transition:background .2s"></div>
+          <div style="padding:0 1rem 1rem">
+            <div id="previewLogo" style="width:56px;height:56px;border-radius:12px;background:#fff;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:1.5rem;overflow:hidden;margin-top:-28px;margin-bottom:.6rem">🏢</div>
+            <div id="previewName" style="font-weight:700;font-size:1rem">Your Business Name</div>
+            <div id="previewTagline" style="font-size:.8rem;color:var(--clr-text-2);margin-bottom:.4rem">Your tagline goes here</div>
+            <div id="previewLocation" style="font-size:.75rem;color:var(--clr-text-3);margin-bottom:.5rem"></div>
+            <div id="previewDescription" style="font-size:.78rem;color:var(--clr-text-2);line-height:1.5"></div>
+          </div>
+        </div>
+        <p style="font-size:.73rem;color:var(--clr-text-3);margin-top:.5rem">A quick preview of your mini-website — the real one has your full template and layout.</p>
+      </div>
+      </div>
 
       <div id="newBizSuccess" style="display:none;max-width:560px" class="empty-state">
         <div class="empty-state__icon">🎉</div>
@@ -311,25 +323,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // If the user answered "already have a website?" on the pricing page
-    // before subscribing (see pricing.js), pre-fill it here so they don't
-    // have to answer twice — it's still editable.
-    document.querySelectorAll('input[name="bizHasWebsite"]').forEach(r => {
-      r.addEventListener('change', () => {
-        document.getElementById('bizWebsite').style.display = r.value === 'yes' ? 'block' : 'none';
-      });
-    });
-    try {
-      const stored = JSON.parse(sessionStorage.getItem('spotgh_own_website_choice') || 'null');
-      if (stored) {
-        const radio = document.querySelector(`input[name="bizHasWebsite"][value="${stored.has_own_website ? 'yes' : 'no'}"]`);
-        if (radio) {
-          radio.checked = true;
-          document.getElementById('bizWebsite').style.display = stored.has_own_website ? 'block' : 'none';
-          if (stored.website) document.getElementById('bizWebsite').value = stored.website;
-        }
-      }
-    } catch {}
 
     try {
       const { categories } = await API.get('/categories');
@@ -354,35 +347,33 @@ document.addEventListener('DOMContentLoaded', () => {
           document.getElementById('chosenCategoryNote').innerHTML = `<i class="fa-solid fa-circle-check" style="color:var(--clr-primary)"></i> Category: <strong>${name}</strong> — your mini-website will use the <strong>${template}</strong> template.`;
           picker.style.display = 'none';
           document.getElementById('newBizForm').style.display = 'block';
+          configureWizard();
           showStep(1);
           document.getElementById('bizName').focus();
         });
       });
     } catch { document.getElementById('categoryPicker').innerHTML = '<p style="color:var(--clr-danger)">Failed to load categories.</p>'; }
 
-    // Directory listing is just "list my business" — no website question
-    // belongs there at all. Website/Bundle always build a SpotGH site
-    // regardless. So this step is skipped for every signup type now.
-    const skipWebsiteStep = true;
-    const STEP_LABELS = skipWebsiteStep ? ['Info', 'Location', 'Description', 'Review'] : ['Info', 'Location', 'Description', 'Website', 'Review'];
-    const reviewStepNum = STEP_LABELS.length;
+    // Which signup types get a Branding step (accent color + logo) and a
+    // live preview: only ones that actually get a SpotGH-built website.
+    // Directory-only keeps the plain 4-step flow — nothing to brand there.
+    // NOTE: this can't be computed until signupType is truly final (the
+    // user may still be about to pick a type card), so the real values
+    // are set inside configureWizard(), called from the category-pick
+    // handler below — the last point before the wizard is actually used.
+    const ACCENT_SWATCHES = ['#4E0DAD', '#E8590C', '#C2255C', '#0B7285', '#9C36B5', '#2F9E44', '#1971C2', '#E03131'];
+    let logoFile = null, isWebsiteFlow = false, steps = [1, 2, 3, 5], STEP_LABELS = ['Info', 'Location', 'Description', 'Review'], lastStep = 5;
     let currentStep = 1;
 
-    function nextStepAfter(n) {
-      if (skipWebsiteStep && n === 3) return reviewStepNum; // straight to Review
-      return n + 1;
-    }
-    function prevStepBefore(n) {
-      if (skipWebsiteStep && n === reviewStepNum) return 3;
-      return n - 1;
-    }
+    function nextStepAfter(n) { return steps[steps.indexOf(n) + 1]; }
+    function prevStepBefore(n) { return steps[steps.indexOf(n) - 1]; }
 
     function renderProgress(n) {
-      const displayStep = skipWebsiteStep && n === reviewStepNum ? STEP_LABELS.length : n;
+      const pos = steps.indexOf(n) + 1; // 1-based position among STEP_LABELS
       document.getElementById('wizardProgress').innerHTML = STEP_LABELS.map((l, i) => {
         const step = i + 1;
-        const state = step === displayStep ? 'background:var(--clr-primary);color:#fff'
-          : step < displayStep ? 'background:var(--clr-primary-10);color:var(--clr-primary)'
+        const state = step === pos ? 'background:var(--clr-primary);color:#fff'
+          : step < pos ? 'background:var(--clr-primary-10);color:var(--clr-primary)'
           : 'background:var(--clr-surface-2);color:var(--clr-text-3)';
         return `<div style="flex:1;text-align:center;font-size:.68rem;font-weight:600;padding:.4rem .2rem;border-radius:6px;${state}">${step}. ${l}</div>`;
       }).join('');
@@ -392,14 +383,55 @@ document.addEventListener('DOMContentLoaded', () => {
       if (n === 1 && !document.getElementById('bizName').value.trim()) {
         toast.warning('Business name is required'); return false;
       }
-      if (n === 4 && !skipWebsiteStep) {
-        const checked = document.querySelector('input[name="bizHasWebsite"]:checked');
-        if (!checked) { toast.warning('Please tell us whether you already have a website'); return false; }
-        if (checked.value === 'yes' && !/^https?:\/\/.+\..+/.test(document.getElementById('bizWebsite').value.trim())) {
-          toast.warning('Please enter a valid website URL, including https://'); return false;
-        }
-      }
       return true;
+    }
+
+    function updatePreview() {
+      if (!isWebsiteFlow) return;
+      document.getElementById('previewHeader').style.background = document.getElementById('bizThemeColor').value;
+      document.getElementById('previewName').textContent = document.getElementById('bizName').value.trim() || 'Your Business Name';
+      document.getElementById('previewTagline').textContent = document.getElementById('bizTagline').value.trim() || 'Your tagline goes here';
+      const loc = [document.getElementById('bizCity').value.trim(), document.getElementById('bizRegion').value.trim()].filter(Boolean).join(', ');
+      document.getElementById('previewLocation').innerHTML = loc ? `<i class="fa-solid fa-location-dot"></i> ${loc}` : '';
+      document.getElementById('previewDescription').textContent = document.getElementById('bizDescription').value.trim().slice(0, 140);
+    }
+
+    // Wired once — harmless no-op via updatePreview()'s own isWebsiteFlow
+    // check for Directory-only, so no need to gate this on signup type.
+    ['bizName', 'bizTagline', 'bizCity', 'bizRegion', 'bizDescription'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updatePreview);
+    });
+
+    // Sets isWebsiteFlow/steps/STEP_LABELS/lastStep for real now that
+    // signupType is settled, and wires the Branding step's controls.
+    // Called once, from the category-pick handler below.
+    function configureWizard() {
+      isWebsiteFlow = signupType !== 'directory';
+      steps = isWebsiteFlow ? [1, 2, 3, 4, 5] : [1, 2, 3, 5];
+      STEP_LABELS = isWebsiteFlow ? ['Info', 'Location', 'Description', 'Branding', 'Review'] : ['Info', 'Location', 'Description', 'Review'];
+      lastStep = steps[steps.length - 1];
+      if (!isWebsiteFlow) return;
+      document.getElementById('bizPreviewPanel').style.display = 'block';
+      document.getElementById('colorSwatches').innerHTML = ACCENT_SWATCHES.map(c => `
+        <button type="button" class="color-swatch" data-color="${c}" style="width:32px;height:32px;border-radius:8px;background:${c};border:2px solid transparent;cursor:pointer"></button>`).join('');
+      document.querySelectorAll('.color-swatch').forEach(sw => {
+        if (sw.dataset.color.toLowerCase() === document.getElementById('bizThemeColor').value.toLowerCase()) sw.style.border = '2px solid var(--clr-text-1)';
+        sw.addEventListener('click', () => {
+          document.getElementById('bizThemeColor').value = sw.dataset.color;
+          document.querySelectorAll('.color-swatch').forEach(s => s.style.border = '2px solid transparent');
+          sw.style.border = '2px solid var(--clr-text-1)';
+          updatePreview();
+        });
+      });
+      document.getElementById('bizLogoFile').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        logoFile = file;
+        const reader = new FileReader();
+        reader.onload = () => { document.getElementById('previewLogo').innerHTML = `<img src="${reader.result}" style="width:100%;height:100%;object-fit:cover">`; };
+        reader.readAsDataURL(file);
+      });
+      updatePreview();
     }
 
     function renderReview() {
@@ -411,16 +443,20 @@ document.addEventListener('DOMContentLoaded', () => {
         <div><strong>Location:</strong> ${[document.getElementById('bizCity').value.trim(), document.getElementById('bizRegion').value.trim()].filter(Boolean).join(', ') || '—'}</div>
         <div><strong>Contact:</strong> ${[document.getElementById('bizWhatsapp').value.trim(), document.getElementById('bizPhone').value.trim()].filter(Boolean).join(' / ') || '—'}</div>
         <div><strong>Website:</strong> ${websiteLine}</div>
+        ${isWebsiteFlow ? `<div><strong>Accent color:</strong> <span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${document.getElementById('bizThemeColor').value};vertical-align:middle;margin-right:.3rem"></span>${document.getElementById('bizThemeColor').value}</div><div><strong>Logo:</strong> ${logoFile ? logoFile.name : 'None yet — add it any time'}</div>` : ''}
         ${creatorForceDirectoryTier || creatorForceWebsiteTier ? `<div><strong>🎁 Creator grant:</strong> ${[creatorForceDirectoryTier ? `Directory: ${creatorForceDirectoryTier}` : '', creatorForceWebsiteTier ? `Website: ${creatorForceWebsiteTier}` : ''].filter(Boolean).join(', ')} (free)</div>` : ''}`;
+      document.getElementById('wizReviewNote').textContent = isWebsiteFlow
+        ? "You'll be able to add photos and business hours right after this — those aren't required to submit."
+        : "You'll be able to add a logo and photos right after this — those aren't required to submit.";
     }
 
     window.showStep = (n) => {
       document.querySelectorAll('.wiz-step').forEach(el => el.style.display = (+el.dataset.step === n) ? 'block' : 'none');
       document.getElementById('wizBackBtn').textContent = n === 1 ? 'Change Category' : 'Back';
-      document.getElementById('wizNextBtn').style.display = n === 5 ? 'none' : 'inline-flex';
-      document.getElementById('submitBizBtn').style.display = n === 5 ? 'inline-flex' : 'none';
+      document.getElementById('wizNextBtn').style.display = n === lastStep ? 'none' : 'inline-flex';
+      document.getElementById('submitBizBtn').style.display = n === lastStep ? 'inline-flex' : 'none';
       renderProgress(n);
-      if (n === 5) renderReview();
+      if (n === lastStep) renderReview();
       currentStep = n;
     };
 
@@ -430,6 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('wizBackBtn').addEventListener('click', () => {
       if (currentStep === 1) {
         document.getElementById('newBizForm').style.display = 'none';
+        document.getElementById('bizPreviewPanel').style.display = 'none';
         document.getElementById('categoryPicker').style.display = 'grid';
       } else showStep(prevStepBefore(currentStep));
     });
@@ -439,16 +476,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const btn = document.getElementById('submitBizBtn');
       const name = document.getElementById('bizName').value.trim();
       if (!name) return toast.warning('Business name is required');
-      let hasOwnWebsite = false, websiteUrl = '';
-      if (!skipWebsiteStep) {
-        const hasWebsiteChecked = document.querySelector('input[name="bizHasWebsite"]:checked');
-        if (!hasWebsiteChecked) return toast.warning('Please tell us whether you already have a website');
-        hasOwnWebsite = hasWebsiteChecked.value === 'yes';
-        websiteUrl = document.getElementById('bizWebsite').value.trim();
-        if (hasOwnWebsite && !/^https?:\/\/.+\..+/.test(websiteUrl)) {
-          return toast.warning('Please enter a valid website URL, including https://');
-        }
-      }
       setLoading(btn, true, 'Submitting…');
       try {
         const { business } = await API.post('/businesses', {
@@ -462,13 +489,20 @@ document.addEventListener('DOMContentLoaded', () => {
           category_id: document.getElementById('bizCategoryId').value || null,
           template_key: document.getElementById('bizTemplateKey').value,
           theme_color: document.getElementById('bizThemeColor').value,
-          has_own_website: hasOwnWebsite,
-          website: hasOwnWebsite ? websiteUrl : '',
+          has_own_website: false,
+          website: '',
           signup_type: signupType || 'both',
           ...(creatorForceDirectoryTier ? { force_directory_tier: creatorForceDirectoryTier } : {}),
           ...(creatorForceWebsiteTier ? { force_website_tier: creatorForceWebsiteTier } : {}),
         });
         sessionStorage.removeItem('spotgh_own_website_choice');
+
+        if (logoFile) {
+          try {
+            const fd = new FormData(); fd.append('logo', logoFile);
+            await API.upload(`/upload/${business.id}/logo`, fd);
+          } catch { toast.warning("Business created, but the logo didn't upload — you can add it from Add Logo & Photos."); }
+        }
 
         // If they arrived here from the pricing page choosing a specific
         // paid plan, finish that checkout now that a business exists to
