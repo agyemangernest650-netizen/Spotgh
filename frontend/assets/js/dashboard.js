@@ -360,12 +360,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     } catch { document.getElementById('categoryPicker').innerHTML = '<p style="color:var(--clr-danger)">Failed to load categories.</p>'; }
 
-    // Only "List My Business" (Directory-only) asks about an existing
-    // website to link — it's optional and doesn't affect their Directory
-    // plan (Premium included). "Create a Business Website" and "List +
-    // Create Website" always get a SpotGH-built site, so this step would
-    // just be confusing there and is skipped.
-    const skipWebsiteStep = signupType !== 'directory';
+    // Directory listing is just "list my business" — no website question
+    // belongs there at all. Website/Bundle always build a SpotGH site
+    // regardless. So this step is skipped for every signup type now.
+    const skipWebsiteStep = true;
     const STEP_LABELS = skipWebsiteStep ? ['Info', 'Location', 'Description', 'Review'] : ['Info', 'Location', 'Description', 'Website', 'Review'];
     const reviewStepNum = STEP_LABELS.length;
     let currentStep = 1;
@@ -405,11 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderReview() {
-      const checked = document.querySelector('input[name="bizHasWebsite"]:checked');
-      const website = checked?.value === 'yes' ? document.getElementById('bizWebsite').value.trim() : null;
-      const websiteLine = skipWebsiteStep
-        ? 'SpotGH website (included)'
-        : (website || 'No existing website linked');
+      const websiteLine = signupType === 'directory' ? 'Directory listing only' : 'SpotGH website (included)';
       document.getElementById('wizReview').innerHTML = `
         <div><strong>Category:</strong> ${document.getElementById('bizCategoryName').value || '—'}</div>
         <div><strong>Name:</strong> ${document.getElementById('bizName').value.trim() || '—'}</div>
@@ -592,17 +586,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const totalWA    = businesses.reduce((s,b) => s+(b.whatsapp_click_count||0), 0);
       const avgRating  = businesses.length ? (businesses.reduce((s,b) => s+(b.avg_rating||0),0)/businesses.length).toFixed(1) : '—';
 
-      document.getElementById('statGrid').innerHTML = [
-        { label:'My Businesses', value:businesses.length, icon:'🏪', color:'var(--clr-primary)', bg:'var(--clr-primary-10)' },
-        { label:'Total Views',   value:totalViews.toLocaleString(), icon:'👁', color:'var(--clr-success)', bg:'rgba(34,197,94,.1)' },
-        { label:'WhatsApp Clicks', value:totalWA.toLocaleString(), icon:'💬', color:'#25D366', bg:'rgba(37,211,102,.1)' },
-        { label:'Avg Rating',    value:avgRating, icon:'⭐', color:'var(--clr-gold)', bg:'rgba(244,162,41,.1)' },
-      ].map(k => `
-        <div class="stat-card">
-          <div class="stat-card__icon" style="background:${k.bg};color:${k.color};font-size:1.5rem">${k.icon}</div>
-          <div class="stat-card__label">${k.label}</div>
-          <div class="stat-card__value">${k.value}</div>
-        </div>`).join('');
+      const statGrid = document.getElementById('statGrid');
+      if (statGrid) {
+        statGrid.innerHTML = [
+          { label:'My Businesses', value:businesses.length, icon:'🏪', color:'var(--clr-primary)', bg:'var(--clr-primary-10)' },
+          { label:'Total Views',   value:totalViews.toLocaleString(), icon:'👁', color:'var(--clr-success)', bg:'rgba(34,197,94,.1)' },
+          { label:'WhatsApp Clicks', value:totalWA.toLocaleString(), icon:'💬', color:'#25D366', bg:'rgba(37,211,102,.1)' },
+          { label:'Avg Rating',    value:avgRating, icon:'⭐', color:'var(--clr-gold)', bg:'rgba(244,162,41,.1)' },
+        ].map(k => `
+          <div class="stat-card">
+            <div class="stat-card__icon" style="background:${k.bg};color:${k.color};font-size:1.5rem">${k.icon}</div>
+            <div class="stat-card__label">${k.label}</div>
+            <div class="stat-card__value">${k.value}</div>
+          </div>`).join('');
+      }
 
       const list = document.getElementById('myBusinessesList');
       if (!businesses.length) {
@@ -668,6 +665,6 @@ document.addEventListener('DOMContentLoaded', () => {
           { target:'a[href="/pages/pricing.html"]', title:'Choose a Plan',    text:'You need an active subscription to go live. Subscribe to start reaching customers!' },
         ]), 1500);
       }
-    } catch(err) { toast.error('Failed to load dashboard'); }
+    } catch(err) { console.error('loadDashboard failed:', err); toast.error('Failed to load dashboard'); }
   }
 });
