@@ -5,6 +5,27 @@ const { getDirectoryAccess, getWebsiteAccess } = require('../services/planAccess
 const slugify = require('slugify');
 const env = require('../config/env');
 
+// GET /api/businesses/check-slug?slug=xyz
+exports.checkSlug = async (req, res, next) => {
+  try {
+    const raw = (req.query.slug || '').trim().toLowerCase();
+    const clean = slugify(raw, { lower: true, strict: true });
+    if (!clean || clean.length < 3) return res.json({ available: false, reason: 'too_short', suggestion: null });
+    if (clean.length > 40) return res.json({ available: false, reason: 'too_long', suggestion: clean.slice(0, 40) });
+    if (clean !== raw) return res.json({ available: false, reason: 'invalid_chars', suggestion: clean });
+
+    const RESERVED = ['www', 'api', 'admin', 'app', 'blog', 'help', 'support', 'status', 'about', 'pricing', 'mail', 'dashboard'];
+    if (RESERVED.includes(clean)) return res.json({ available: false, reason: 'reserved', suggestion: `${clean}-gh` });
+
+    const { data } = await supabaseAdmin.from('businesses').select('id').eq('slug', clean).maybeSingle();
+    if (data) {
+      const { data: taken2 } = await supabaseAdmin.from('businesses').select('id').eq('slug', `${clean}-gh`).maybeSingle();
+      return res.json({ available: false, reason: 'taken', suggestion: taken2 ? `${clean}-${Math.floor(Math.random()*900+100)}` : `${clean}-gh` });
+    }
+    res.json({ available: true, slug: clean });
+  } catch (err) { next(err); }
+};
+
 // GET /api/businesses
 exports.list = async (req, res, next) => {
   try {
@@ -214,7 +235,7 @@ exports.create = async (req, res, next) => {
     const { name, tagline, description, phone, whatsapp, email, website, has_own_website,
             address, city, region, country, category_id, social_links,
             theme_color, template_key, meta_title, meta_description,
-            operating_hours, amenities, signup_type,
+            operating_hours, amenities, signup_type, custom_slug,
             force_directory_tier, force_website_tier } = req.body;
     if (!name) return res.status(400).json({ error: 'Business name is required' });
 
@@ -249,7 +270,19 @@ exports.create = async (req, res, next) => {
     const ownsWebsite = has_own_website === true || has_own_website === 'true';
     const ownWebsiteVerified = ownsWebsite ? await checkUrlReachable(website) : null;
 
-    const slug = await generateSlug(name);
+    let slug;
+    if (custom_slug) {
+      const clean = slugify(custom_slug, { lower: true, strict: true });
+      const RESERVED = ['www', 'api', 'admin', 'app', 'blog', 'help', 'support', 'status', 'about', 'pricing', 'mail', 'dashboard'];
+      if (clean.length < 3 || clean.length > 40 || RESERVED.includes(clean)) {
+        return res.status(400).json({ error: 'That domain name isn\'t valid — please choose another.' });
+      }
+      const { data: taken } = await supabaseAdmin.from('businesses').select('id').eq('slug', clean).maybeSingle();
+      if (taken) return res.status(409).json({ error: 'That domain name was just taken — please choose another.', code: 'SLUG_TAKEN' });
+      slug = clean;
+    } else {
+      slug = await generateSlug(name);
+    }
     const { data: business, error } = await supabaseAdmin.from('businesses').insert({
       owner_id: req.user.id, name, slug,
       tagline: tagline || null, description: description || null,

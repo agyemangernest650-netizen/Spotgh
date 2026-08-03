@@ -834,18 +834,68 @@ document.addEventListener('DOMContentLoaded', () => {
   async function moderation() {
     const el = document.getElementById('creatorContent');
     el.innerHTML = `<div class="dashboard__header"><h1 class="dashboard__title">Moderation</h1>
-        <p style="color:var(--clr-text-2)">Business claims and user reports awaiting review</p></div>
-      <div style="margin-bottom:.75rem;display:flex;gap:.5rem">
-        <button class="btn btn--sm btn--primary" id="modClaimsBtn">Claims</button>
+        <p style="color:var(--clr-text-2)">Business listings, claims, and user reports awaiting review</p></div>
+      <div style="margin-bottom:.75rem;display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn btn--sm btn--primary" id="modListingsBtn">Pending Listings</button>
+        <button class="btn btn--sm btn--ghost" id="modRejectedBtn">Rejected Listings</button>
+        <button class="btn btn--sm btn--ghost" id="modClaimsBtn">Claims</button>
         <button class="btn btn--sm btn--ghost" id="modReportsBtn">Reports</button>
       </div>
       <div id="moderationList"><div class="skeleton" style="height:300px;border-radius:16px"></div></div>`;
 
+    document.getElementById('modListingsBtn').addEventListener('click', () => { setActive('modListingsBtn'); loadListings('pending'); });
+    document.getElementById('modRejectedBtn').addEventListener('click', () => { setActive('modRejectedBtn'); loadListings('rejected'); });
     document.getElementById('modClaimsBtn').addEventListener('click', () => { setActive('modClaimsBtn'); loadClaims(); });
     document.getElementById('modReportsBtn').addEventListener('click', () => { setActive('modReportsBtn'); loadReports(); });
     function setActive(id) {
-      ['modClaimsBtn','modReportsBtn'].forEach(x => document.getElementById(x).className = x === id ? 'btn btn--sm btn--primary' : 'btn btn--sm btn--ghost');
+      ['modListingsBtn','modRejectedBtn','modClaimsBtn','modReportsBtn'].forEach(x => document.getElementById(x).className = x === id ? 'btn btn--sm btn--primary' : 'btn btn--sm btn--ghost');
     }
+
+    async function loadListings(status) {
+      const list = document.getElementById('moderationList');
+      list.innerHTML = `<div class="skeleton" style="height:300px;border-radius:16px"></div>`;
+      try {
+        const { businesses } = await API.get(`/creator/businesses?status=${status}&limit=50`);
+        if (!businesses?.length) {
+          list.innerHTML = `<div class="card" style="padding:2rem;text-align:center;color:var(--clr-text-2)">${status === 'pending' ? 'No pending listings 🎉' : 'No rejected listings'}</div>`;
+          return;
+        }
+        list.innerHTML = businesses.map(b => `
+          <div class="card" style="padding:1rem 1.25rem;margin-bottom:.75rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap">
+            <div style="flex:1;min-width:220px">
+              <strong>${b.name}</strong> <span style="color:var(--clr-text-3);font-size:.8rem">${b.city || ''}</span>
+              <div style="font-size:.85rem;margin-top:.35rem">${b.category_name || 'Uncategorized'} · Owner: ${b.owner_email || '—'}</div>
+              ${b.tagline ? `<div style="font-size:.8rem;color:var(--clr-text-2);margin-top:.25rem">"${b.tagline}"</div>` : ''}
+              ${b.rejection_reason ? `<div style="font-size:.8rem;color:var(--clr-danger);margin-top:.25rem">Rejected: ${b.rejection_reason}</div>` : ''}
+              <div style="font-size:.75rem;color:var(--clr-text-3);margin-top:.25rem">Submitted ${timeAgo(b.created_at)}</div>
+            </div>
+            <div style="display:flex;gap:.5rem">
+              ${status === 'pending' ? `
+                <button class="btn btn--sm btn--success" onclick="approveListing('${b.id}')"><i class="fa-solid fa-check"></i> Approve</button>
+                <button class="btn btn--sm btn--danger" onclick="rejectListing('${b.id}')"><i class="fa-solid fa-xmark"></i> Reject</button>
+              ` : `
+                <a href="/pages/business-edit.html?id=${b.id}" class="btn btn--sm btn--ghost"><i class="fa-solid fa-eye"></i> Review</a>
+                <button class="btn btn--sm btn--danger" onclick="deleteRejectedListing('${b.id}','${b.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-trash"></i> Delete</button>
+              `}
+            </div>
+          </div>`).join('');
+      } catch { list.innerHTML = '<p style="color:var(--clr-danger)">Failed to load listings.</p>'; }
+    }
+
+    window.approveListing = async (id) => {
+      try { await API.patch(`/creator/businesses/${id}`, { status: 'active' }); toast.success('Listing approved — it\'s now live'); loadListings('pending'); }
+      catch (err) { toast.error(err.message || 'Failed to approve listing'); }
+    };
+    window.rejectListing = async (id) => {
+      const reason = prompt('Reason for rejecting this listing (shown to the owner):') || '';
+      try { await API.patch(`/creator/businesses/${id}`, { status: 'rejected', rejection_reason: reason }); toast.success('Listing rejected'); loadListings('pending'); }
+      catch (err) { toast.error(err.message || 'Failed to reject listing'); }
+    };
+    window.deleteRejectedListing = async (id, name) => {
+      if (!confirm(`Permanently delete "${name}"? This can't be undone.`)) return;
+      try { await API.delete(`/businesses/${id}`); toast.success('Listing deleted'); loadListings('rejected'); }
+      catch (err) { toast.error(err.message || 'Failed to delete listing'); }
+    };
 
     async function loadClaims() {
       const list = document.getElementById('moderationList');
@@ -910,6 +960,6 @@ document.addEventListener('DOMContentLoaded', () => {
       catch (err) { toast.error(err.message || 'Failed to dismiss report'); }
     };
 
-    loadClaims();
+    loadListings('pending');
   }
 });

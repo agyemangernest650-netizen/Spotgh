@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <h2 style="font-size:1.25rem;font-weight:700">My Businesses</h2>
             <a href="/pages/dashboard.html?tab=new" class="btn btn--primary btn--sm"><i class="fa-solid fa-plus"></i> Add Business</a>
           </div>
+          <div id="incompleteBizReminder" style="display:none"></div>
           <div id="myBusinessesList">
             <div class="skeleton" style="height:120px;border-radius:12px;margin-bottom:.75rem"></div>
             <div class="skeleton" style="height:120px;border-radius:12px"></div>
@@ -48,6 +49,19 @@ document.addEventListener('DOMContentLoaded', () => {
   else loadDashboard();
   loadPlanBanner();
 
+  if (new URLSearchParams(location.search).get('payment') === 'success') {
+    try {
+      const finishing = JSON.parse(sessionStorage.getItem('spotgh_finish_business') || 'null');
+      if (finishing) {
+        sessionStorage.removeItem('spotgh_finish_business');
+        toast.success(`Payment confirmed — ${finishing.name} is live! Add its location, description, and branding to finish setting it up.`);
+        setTimeout(() => { window.location.href = `/pages/business-edit.html?id=${finishing.id}`; }, 2200);
+      } else {
+        toast.success('Payment confirmed — your plan is active!');
+      }
+    } catch { toast.success('Payment confirmed — your plan is active!'); }
+  }
+
   async function loadNewBusinessTab() {
     const content = document.getElementById('dashContent');
     document.querySelectorAll('.sidebar__item').forEach(a => a.classList.remove('active'));
@@ -55,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const isCreator = user?.role === 'creator';
     let creatorForceDirectoryTier = null, creatorForceWebsiteTier = null;
+    let pendingPaidPlan = null; // set when a paid plan needs immediate checkout, before any business details
 
     let signupType = new URLSearchParams(location.search).get('signup_type');
     if (!['directory','website','both'].includes(signupType)) signupType = null;
@@ -102,6 +117,32 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="skeleton" style="height:90px;border-radius:12px"></div>
       </div>
 
+      <form id="quickCheckoutForm" style="display:none;max-width:480px">
+        <input type="hidden" id="qcCategoryId">
+        <input type="hidden" id="qcCategoryName">
+        <input type="hidden" id="qcTemplateKey" value="default">
+        <input type="hidden" id="qcThemeColor" value="#4E0DAD">
+        <h3 style="font-size:1rem;margin-bottom:.25rem">Just the basics for now</h3>
+        <p id="qcPlanNote" style="font-size:.825rem;color:var(--clr-text-2);margin-bottom:1.25rem"></p>
+        <label class="form-label">Business name</label>
+        <input id="qcName" class="form-input" placeholder="e.g. Buka Restaurant" required style="margin-bottom:1rem">
+        <label class="form-label">Tagline (optional)</label>
+        <input id="qcTagline" class="form-input" placeholder="One line that sells what you do" style="margin-bottom:1.25rem">
+        <div id="qcSlugRow" style="display:none">
+          <label class="form-label">Your website address</label>
+          <div style="display:flex;align-items:center;gap:0;margin-bottom:.35rem">
+            <input id="qcSlug" class="form-input" placeholder="yourbusiness" style="border-radius:8px 0 0 8px">
+            <span style="background:var(--clr-surface-2);border:1px solid var(--clr-border);border-left:none;border-radius:0 8px 8px 0;padding:.6rem .75rem;font-size:.85rem;color:var(--clr-text-2);white-space:nowrap">.spotgh.com</span>
+          </div>
+          <div id="qcSlugStatus" style="font-size:.78rem;margin-bottom:1.25rem;min-height:1.1em"></div>
+        </div>
+        <div style="display:flex;gap:.75rem">
+          <button type="button" class="btn btn--ghost" id="qcBackBtn">Change Category</button>
+          <button type="submit" class="btn btn--primary" id="qcPayBtn"><i class="fa-solid fa-lock"></i> Continue to Payment</button>
+        </div>
+        <p style="font-size:.73rem;color:var(--clr-text-3);margin-top:.9rem">Once payment's confirmed, you'll come right back to finish location, description, and branding.</p>
+      </form>
+
       <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-start">
       <form id="newBizForm" style="display:none;flex:1;min-width:280px;max-width:560px">
         <input type="hidden" id="bizCategoryId">
@@ -141,6 +182,12 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="wiz-step" data-step="4" style="display:none">
           <h3 style="font-size:1rem;margin-bottom:.25rem">Branding</h3>
           <p style="font-size:.8rem;color:var(--clr-text-2);margin-bottom:1rem">This is what makes your mini-website feel like yours — watch the preview update as you go.</p>
+          <label class="form-label">Your website address</label>
+          <div style="display:flex;align-items:center;gap:0;margin-bottom:.35rem">
+            <input id="bizSlug" class="form-input" placeholder="yourbusiness" style="border-radius:8px 0 0 8px">
+            <span style="background:var(--clr-surface-2);border:1px solid var(--clr-border);border-left:none;border-radius:0 8px 8px 0;padding:.6rem .75rem;font-size:.85rem;color:var(--clr-text-2);white-space:nowrap">.spotgh.com</span>
+          </div>
+          <div id="slugStatus" style="font-size:.78rem;margin-bottom:1.25rem;min-height:1.1em"></div>
           <label class="form-label">Accent color</label>
           <div id="colorSwatches" style="display:flex;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap"></div>
           <label class="form-label">Logo (optional — you can also add this later)</label>
@@ -264,12 +311,19 @@ document.addEventListener('DOMContentLoaded', () => {
       grid.querySelectorAll('.plan-pick').forEach(btn => {
         btn.addEventListener('click', () => {
           const { type: subscriptionType, key } = btn.dataset;
-          // Free Directory needs no checkout later — business creation
-          // grants it automatically, same as today's default.
-          if (subscriptionType === 'directory' && key === 'free') {
-            sessionStorage.removeItem('spotgh_pending_plan');
-          } else {
+          // Free Directory and the once-per-account Website Starter trial
+          // don't need payment up front — the full wizard's existing
+          // deferred-checkout logic already handles those correctly.
+          // Every other paid plan charges immediately, before any business
+          // details are collected, since a subscription needs a business
+          // to exist but shouldn't require a full form first.
+          const isFreeEligible = (subscriptionType === 'directory' && key === 'free') || (subscriptionType === 'website' && key === 'starter');
+          if (isFreeEligible) {
             sessionStorage.setItem('spotgh_pending_plan', JSON.stringify({ subscription_type: subscriptionType, plan_key: key, billing: planBilling }));
+            pendingPaidPlan = null;
+          } else {
+            sessionStorage.removeItem('spotgh_pending_plan');
+            pendingPaidPlan = { subscription_type: subscriptionType, plan_key: key, billing: planBilling };
           }
           revealCategoryPicker();
         });
@@ -277,6 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
       grid.querySelectorAll('.plan-comp').forEach(btn => {
         btn.addEventListener('click', () => {
           sessionStorage.removeItem('spotgh_pending_plan'); // comped, not purchased
+          pendingPaidPlan = null;
           const { type: subscriptionType, key, dirTier, webTier } = btn.dataset;
           if (subscriptionType === 'directory') creatorForceDirectoryTier = key;
           else if (subscriptionType === 'website') creatorForceWebsiteTier = key;
@@ -346,13 +401,64 @@ document.addEventListener('DOMContentLoaded', () => {
           document.getElementById('bizThemeColor').value = palette[template] || palette.default;
           document.getElementById('chosenCategoryNote').innerHTML = `<i class="fa-solid fa-circle-check" style="color:var(--clr-primary)"></i> Category: <strong>${name}</strong> — your mini-website will use the <strong>${template}</strong> template.`;
           picker.style.display = 'none';
-          document.getElementById('newBizForm').style.display = 'block';
-          configureWizard();
-          showStep(1);
-          document.getElementById('bizName').focus();
+          if (pendingPaidPlan) {
+            document.getElementById('qcCategoryId').value = id;
+            document.getElementById('qcCategoryName').value = name;
+            document.getElementById('qcTemplateKey').value = template;
+            document.getElementById('qcThemeColor').value = palette[template] || palette.default;
+            const planLabel = pendingPaidPlan.subscription_type === 'bundle' ? 'bundle' : pendingPaidPlan.subscription_type === 'directory' ? 'Directory' : 'Website';
+            document.getElementById('qcPlanNote').textContent = `You picked the ${pendingPaidPlan.plan_key} ${planLabel} plan — just the name and category are needed before payment.`;
+            document.getElementById('qcSlugRow').style.display = pendingPaidPlan.subscription_type === 'directory' ? 'none' : 'block';
+            document.getElementById('quickCheckoutForm').style.display = 'block';
+            document.getElementById('qcName').focus();
+          } else {
+            document.getElementById('newBizForm').style.display = 'block';
+            configureWizard();
+            showStep(1);
+            document.getElementById('bizName').focus();
+          }
         });
       });
     } catch { document.getElementById('categoryPicker').innerHTML = '<p style="color:var(--clr-danger)">Failed to load categories.</p>'; }
+
+    document.getElementById('qcBackBtn').addEventListener('click', () => {
+      document.getElementById('quickCheckoutForm').style.display = 'none';
+      document.getElementById('categoryPicker').style.display = 'grid';
+    });
+
+    document.getElementById('quickCheckoutForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('qcName').value.trim();
+      if (!name) return toast.warning('Business name is required');
+      const btn = document.getElementById('qcPayBtn');
+      setLoading(btn, true, 'Setting up…');
+      try {
+        const { business } = await API.post('/businesses', {
+          name,
+          tagline: document.getElementById('qcTagline').value.trim() || null,
+          category_id: document.getElementById('qcCategoryId').value || null,
+          template_key: document.getElementById('qcTemplateKey').value,
+          theme_color: document.getElementById('qcThemeColor').value,
+          has_own_website: false, website: '',
+          signup_type: signupType || 'both',
+          custom_slug: document.getElementById('qcSlug').value.trim() || undefined,
+        });
+        sessionStorage.setItem('spotgh_finish_business', JSON.stringify({ id: business.id, name: business.name }));
+        const res = await API.post('/payments/v2/initialize', {
+          subscription_type: pendingPaidPlan.subscription_type, plan_key: pendingPaidPlan.plan_key,
+          billing_cycle: pendingPaidPlan.billing || 'monthly', business_id: business.id,
+        });
+        if (res.fully_covered) {
+          toast.success(res.is_trial ? '🎉 Your free month has started!' : '🎉 Plan activated!');
+          window.location.href = `/pages/dashboard.html?payment=success`;
+        } else if (res.authorization_url) {
+          window.location.href = res.authorization_url;
+        }
+      } catch (err) {
+        setLoading(btn, false);
+        toast.error(err.message || 'Something went wrong setting up payment. Please try again.');
+      }
+    });
 
     // Which signup types get a Branding step (accent color + logo) and a
     // live preview: only ones that actually get a SpotGH-built website.
@@ -405,6 +511,52 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sets isWebsiteFlow/steps/STEP_LABELS/lastStep for real now that
     // signupType is settled, and wires the Branding step's controls.
     // Called once, from the category-pick handler below.
+    // Shared by both the full wizard's Branding step and the quick-
+    // checkout form — debounced availability check against /check-slug.
+    function wireSlugField(inputId, statusId) {
+      const input = document.getElementById(inputId);
+      const status = document.getElementById(statusId);
+      let debounceTimer;
+      input.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        const val = input.value.trim();
+        if (!val) { status.textContent = ''; return; }
+        status.textContent = 'Checking…';
+        status.style.color = 'var(--clr-text-3)';
+        debounceTimer = setTimeout(async () => {
+          try {
+            const res = await API.get(`/businesses/check-slug?slug=${encodeURIComponent(val)}`);
+            if (res.available) {
+              status.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${res.slug}.spotgh.com is available`;
+              status.style.color = 'var(--clr-success)';
+            } else {
+              const reasonText = { too_short: 'Too short (min 3 characters)', too_long: 'Too long', invalid_chars: 'Use only letters, numbers, and hyphens',
+                reserved: 'That name is reserved', taken: 'Already taken' }[res.reason] || 'Not available';
+              status.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ${reasonText}${res.suggestion ? ` — try <a href="#" class="slug-suggest" data-value="${res.suggestion}">${res.suggestion}</a>` : ''}`;
+              status.style.color = 'var(--clr-danger)';
+              status.querySelector('.slug-suggest')?.addEventListener('click', (e) => {
+                e.preventDefault(); input.value = res.suggestion; input.dispatchEvent(new Event('input'));
+              });
+            }
+          } catch { status.textContent = ''; }
+        }, 400);
+      });
+    }
+    wireSlugField('bizSlug', 'slugStatus');
+    wireSlugField('qcSlug', 'qcSlugStatus');
+    document.getElementById('qcName').addEventListener('input', () => {
+      if (!document.getElementById('qcSlug').dataset.touched) {
+        document.getElementById('qcSlug').value = document.getElementById('qcName').value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      }
+    });
+    document.getElementById('qcSlug').addEventListener('input', () => { document.getElementById('qcSlug').dataset.touched = '1'; });
+    document.getElementById('bizName').addEventListener('input', () => {
+      if (!document.getElementById('bizSlug').dataset.touched) {
+        document.getElementById('bizSlug').value = document.getElementById('bizName').value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      }
+    });
+    document.getElementById('bizSlug').addEventListener('input', () => { document.getElementById('bizSlug').dataset.touched = '1'; });
+
     function configureWizard() {
       isWebsiteFlow = signupType !== 'directory';
       steps = isWebsiteFlow ? [1, 2, 3, 4, 5] : [1, 2, 3, 5];
@@ -443,7 +595,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div><strong>Location:</strong> ${[document.getElementById('bizCity').value.trim(), document.getElementById('bizRegion').value.trim()].filter(Boolean).join(', ') || '—'}</div>
         <div><strong>Contact:</strong> ${[document.getElementById('bizWhatsapp').value.trim(), document.getElementById('bizPhone').value.trim()].filter(Boolean).join(' / ') || '—'}</div>
         <div><strong>Website:</strong> ${websiteLine}</div>
-        ${isWebsiteFlow ? `<div><strong>Accent color:</strong> <span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${document.getElementById('bizThemeColor').value};vertical-align:middle;margin-right:.3rem"></span>${document.getElementById('bizThemeColor').value}</div><div><strong>Logo:</strong> ${logoFile ? logoFile.name : 'None yet — add it any time'}</div>` : ''}
+        ${isWebsiteFlow ? `<div><strong>Website address:</strong> ${document.getElementById('bizSlug').value.trim() ? document.getElementById('bizSlug').value.trim() + '.spotgh.com' : 'Auto-generated from name'}</div><div><strong>Accent color:</strong> <span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${document.getElementById('bizThemeColor').value};vertical-align:middle;margin-right:.3rem"></span>${document.getElementById('bizThemeColor').value}</div><div><strong>Logo:</strong> ${logoFile ? logoFile.name : 'None yet — add it any time'}</div>` : ''}
         ${creatorForceDirectoryTier || creatorForceWebsiteTier ? `<div><strong>🎁 Creator grant:</strong> ${[creatorForceDirectoryTier ? `Directory: ${creatorForceDirectoryTier}` : '', creatorForceWebsiteTier ? `Website: ${creatorForceWebsiteTier}` : ''].filter(Boolean).join(', ')} (free)</div>` : ''}`;
       document.getElementById('wizReviewNote').textContent = isWebsiteFlow
         ? "You'll be able to add photos and business hours right after this — those aren't required to submit."
@@ -492,6 +644,7 @@ document.addEventListener('DOMContentLoaded', () => {
           has_own_website: false,
           website: '',
           signup_type: signupType || 'both',
+          ...(isWebsiteFlow && document.getElementById('bizSlug').value.trim() ? { custom_slug: document.getElementById('bizSlug').value.trim() } : {}),
           ...(creatorForceDirectoryTier ? { force_directory_tier: creatorForceDirectoryTier } : {}),
           ...(creatorForceWebsiteTier ? { force_website_tier: creatorForceWebsiteTier } : {}),
         });
@@ -636,6 +789,29 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const list = document.getElementById('myBusinessesList');
+
+      // Persistent reminder for anything still missing basic details (most
+      // often: paid, then the owner left before finishing location/
+      // description/branding). Driven by the actual business record, so
+      // unlike the one-time post-payment redirect, this survives closing
+      // the browser and coming back days later.
+      const incomplete = businesses.filter(b => !b.city || !b.description);
+      const reminderBox = document.getElementById('incompleteBizReminder');
+      if (incomplete.length) {
+        reminderBox.style.display = 'block';
+        reminderBox.innerHTML = `
+          <div class="card" style="padding:1rem 1.25rem;border:1px solid var(--clr-gold);background:rgba(244,162,41,.08);margin-bottom:1.25rem">
+            <div style="font-weight:700;margin-bottom:.5rem">⚠️ ${incomplete.length === 1 ? 'One business needs' : incomplete.length + ' businesses need'} a bit more info</div>
+            ${incomplete.map(b => `
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.4rem 0;flex-wrap:wrap">
+                <span style="font-size:.875rem">${b.name} — missing ${!b.city ? 'location' : ''}${!b.city && !b.description ? ' & ' : ''}${!b.description ? 'description' : ''}</span>
+                <a href="/pages/business-edit.html?id=${b.id}" class="btn btn--primary btn--sm">Finish Setup</a>
+              </div>`).join('')}
+          </div>`;
+      } else if (reminderBox) {
+        reminderBox.style.display = 'none';
+      }
+
       if (!businesses.length) {
         list.innerHTML = `
           <div class="empty-state">

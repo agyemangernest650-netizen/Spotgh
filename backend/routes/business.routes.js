@@ -10,6 +10,7 @@ const { handleValidation } = require('../middleware/validate.middleware');
 router.get ('/',              optionalAuth, ctrl.list);
 router.get ('/trending',                   ctrl.trending);
 router.get ('/slug/:slug',    optionalAuth, ctrl.getBySlug);
+router.get ('/check-slug',                 ctrl.checkSlug);
 router.post('/contact',                    ctrl.contact);
 router.post('/:slug/track',                ctrl.track);
 
