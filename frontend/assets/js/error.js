@@ -33,8 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ${code === '401' ? `
         <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem">
-          <a href="/pages/login.html" class="btn btn--primary">Log In</a>
-          <a href="/pages/register.html" class="btn btn--outline">Register Free</a>
+          <a href="/login" class="btn btn--primary">Log In</a>
+          <a href="/register" class="btn btn--outline">Register Free</a>
         </div>` : `
         <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem">
           <a href="/" class="btn btn--primary"><i class="fa-solid fa-house" style="margin-right:.4rem"></i>Go Home</a>

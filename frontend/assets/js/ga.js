@@ -7,11 +7,11 @@
   // Same list as the Disallow rules in server.js's /robots.txt route —
   // logged-in/private app pages shouldn't be tracked as public traffic.
   const PRIVATE_PATHS = [
-    '/pages/dashboard.html', '/pages/admin.html', '/pages/creator.html',
-    '/pages/business-edit.html', '/pages/deals-manager.html', '/pages/payment-history.html',
-    '/pages/subscriptions.html', '/pages/analytics.html', '/pages/bookings.html', '/pages/orders.html', '/pages/business-orders.html', '/pages/messages.html',
-    '/pages/saved.html', '/pages/referrals.html', '/pages/profile.html',
-    '/pages/oauth-callback.html', '/pages/health.html',
+    '/dashboard', '/admin', '/creator',
+    '/business-edit', '/deals-manager', '/payment-history',
+    '/subscriptions', '/analytics', '/bookings', '/orders', '/business-orders', '/messages',
+    '/saved', '/referrals', '/profile',
+    '/oauth-callback', '/health',
   ];
   if (PRIVATE_PATHS.includes(location.pathname)) return;
   if (navigator.doNotTrack === '1' || window.doNotTrack === '1') return;

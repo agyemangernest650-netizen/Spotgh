@@ -1,7 +1,7 @@
 // assets/js/forgot-password.js
 document.addEventListener('DOMContentLoaded', () => {
   loadComponents();
-  if (Auth.isLoggedIn()) { window.location.href = '/pages/dashboard.html'; return; }
+  if (Auth.isLoggedIn()) { window.location.href = '/dashboard'; return; }
 
   const params = new URLSearchParams(location.search);
   const token  = params.get('token');
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="h-captcha" data-sitekey="" id="forgotCaptcha"></div>
             <button type="submit" class="btn btn--primary btn--full btn--lg" id="forgotBtn">Send Reset Link</button>
           </form>
-          <div class="auth-footer"><a href="/pages/login.html"><i class="fa-solid fa-arrow-left" style="margin-right:.35rem"></i>Back to Login</a></div>
+          <div class="auth-footer"><a href="/login"><i class="fa-solid fa-arrow-left" style="margin-right:.35rem"></i>Back to Login</a></div>
         </div>
       </div>`;
   }
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <button type="submit" class="btn btn--primary btn--full btn--lg" id="resetBtn">Update Password</button>
           </form>
-          <div class="auth-footer"><a href="/pages/login.html"><i class="fa-solid fa-arrow-left" style="margin-right:.35rem"></i>Back to Login</a></div>
+          <div class="auth-footer"><a href="/login"><i class="fa-solid fa-arrow-left" style="margin-right:.35rem"></i>Back to Login</a></div>
         </div>
       </div>`;
   }
@@ -139,8 +139,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await API.post('/auth/reset-password', { token, password: pwd });
       toast.success('Password updated! Redirecting to login…');
       // If API returns a session, save it
-      if (data.token) { Auth.save(data.token, data.user); setTimeout(() => window.location.href = '/pages/dashboard.html', 1200); }
-      else              setTimeout(() => window.location.href = '/pages/login.html', 1200);
+      if (data.token) { Auth.save(data.token, data.user); setTimeout(() => window.location.href = '/dashboard', 1200); }
+      else              setTimeout(() => window.location.href = '/login', 1200);
     } catch(err) {
       alert.innerHTML = `<div class="alert alert--error"><i class="fa-solid fa-circle-exclamation"></i> ${err.message || 'Reset failed. The link may have expired.'}</div>`;
       setLoading(btn, false);

@@ -12,13 +12,13 @@ router.get('/sitemap.xml', async (req, res, next) => {
       supabaseAdmin.from('blog_posts').select('slug,published_at').eq('status', 'published'),
     ]);
 
-    const staticPages = ['', '/pages/directory.html', '/pages/categories.html', '/pages/pricing.html', '/pages/deals.html', '/pages/events.html', '/pages/leads.html', '/pages/blog.html', '/pages/map.html'];
+    const staticPages = ['', '/directory', '/categories', '/pricing', '/deals', '/events', '/leads', '/blog', '/map'];
 
     const urls = [
       ...staticPages.map(p => `<url><loc>${base}${p}</loc><changefreq>daily</changefreq><priority>${p === '' ? '1.0' : '0.7'}</priority></url>`),
-      ...(businesses || []).map(b => `<url><loc>${base}/pages/business.html?slug=${b.slug}</loc><lastmod>${(b.updated_at || '').slice(0,10)}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`),
-      ...(categories || []).map(c => `<url><loc>${base}/pages/directory.html?category=${c.slug}</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>`),
-      ...(posts || []).map(p => `<url><loc>${base}/pages/blog-post.html?slug=${p.slug}</loc><lastmod>${(p.published_at || '').slice(0,10)}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>`),
+      ...(businesses || []).map(b => `<url><loc>${base}/business?slug=${b.slug}</loc><lastmod>${(b.updated_at || '').slice(0,10)}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`),
+      ...(categories || []).map(c => `<url><loc>${base}/directory?category=${c.slug}</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>`),
+      ...(posts || []).map(p => `<url><loc>${base}/blog-post?slug=${p.slug}</loc><lastmod>${(p.published_at || '').slice(0,10)}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>`),
     ].join('\n');
 
     res.set('Content-Type', 'application/xml');

@@ -37,11 +37,11 @@ router.patch('/businesses/:id/status', async (req, res, next) => {
     if (error) throw error;
     await audit(req.user.id, `business_${status}`, 'business', req.params.id, null, {reason}, req);
     if (status==='active') {
-      await notify(data.owner_id,'success',`✅ ${data.name} is now live!`,`Your business has been approved. Share your link!`,`/pages/business.html?slug=${data.slug}`);
+      await notify(data.owner_id,'success',`✅ ${data.name} is now live!`,`Your business has been approved. Share your link!`,`/business?slug=${data.slug}`);
       const { data: owner } = await supabaseAdmin.from('users').select('phone').eq('id', data.owner_id).maybeSingle();
-      if (owner?.phone) await sendSMS(owner.phone, `SpotGH: Great news! ${data.name} is now live and visible to customers. View it at spotgh.com/pages/business.html?slug=${data.slug}`);
+      if (owner?.phone) await sendSMS(owner.phone, `SpotGH: Great news! ${data.name} is now live and visible to customers. View it at spotgh.com/business?slug=${data.slug}`);
     }
-    if (status==='rejected') await notify(data.owner_id,'danger',`❌ ${data.name} was not approved`, reason||'Please review our guidelines and resubmit.',`/pages/dashboard.html?tab=businesses`);
+    if (status==='rejected') await notify(data.owner_id,'danger',`❌ ${data.name} was not approved`, reason||'Please review our guidelines and resubmit.',`/dashboard?tab=businesses`);
     res.json({ business:data });
   } catch (err) { next(err); }
 });

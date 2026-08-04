@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadComponents();
   const slug = new URLSearchParams(location.search).get('slug');
   const main = document.getElementById('pageMain');
-  if (!slug) { location.href = '/pages/blog.html'; return; }
+  if (!slug) { location.href = '/blog'; return; }
 
   main.innerHTML = `<div class="container" style="padding:2rem 1rem;max-width:720px"><div class="card skeleton" style="height:400px"></div></div>`;
   try {
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     main.innerHTML = `
       <div class="container" style="padding:2rem 1rem 4rem;max-width:720px">
-        <a href="/pages/blog.html" style="font-size:.85rem;color:var(--clr-text-2)"><i class="fa-solid fa-arrow-left"></i> Back to Blog</a>
+        <a href="/blog" style="font-size:.85rem;color:var(--clr-text-2)"><i class="fa-solid fa-arrow-left"></i> Back to Blog</a>
         ${post.cover_url ? `<img src="${post.cover_url}" style="width:100%;border-radius:12px;margin:1rem 0;max-height:320px;object-fit:cover">` : ''}
         <h1 style="font-size:clamp(1.5rem,4vw,2.25rem);font-weight:800;margin-bottom:.25rem">${post.title}</h1>
         <p style="color:var(--clr-text-3);font-size:.85rem;margin-bottom:1.5rem">${formatDate(post.published_at)}</p>
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <h3 style="font-weight:700;margin-bottom:1rem">Featured in this article</h3>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem">
             ${featured_businesses.map(b => `
-              <a href="/pages/business.html?slug=${b.slug}" class="card" style="padding:1rem;text-decoration:none;color:inherit;display:flex;align-items:center;gap:.75rem">
+              <a href="/business?slug=${b.slug}" class="card" style="padding:1rem;text-decoration:none;color:inherit;display:flex;align-items:center;gap:.75rem">
                 ${b.logo_url ? `<img src="${b.logo_url}" style="width:44px;height:44px;border-radius:8px;object-fit:cover">` : ''}
                 <div><strong style="font-size:.9rem">${b.name}</strong><div style="font-size:.75rem;color:var(--clr-text-2)">${b.city || ''}${b.avg_rating ? ` · ⭐ ${b.avg_rating}` : ''}</div></div>
               </a>`).join('')}

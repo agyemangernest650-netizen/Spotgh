@@ -34,7 +34,7 @@ router.post('/', verifyToken, limits.contact, async (req, res, next) => {
     const { data: matches } = await q.limit(200);
 
     await Promise.all((matches || []).map(biz =>
-      notify(biz.owner_id, 'info', `📢 New lead: ${title}`, `A customer in ${city} needs: ${description.slice(0, 100)}`, `/pages/leads.html?id=${lead.id}`)
+      notify(biz.owner_id, 'info', `📢 New lead: ${title}`, `A customer in ${city} needs: ${description.slice(0, 100)}`, `/leads?id=${lead.id}`)
     ));
 
     res.status(201).json({ lead, notified_businesses: matches?.length || 0 });
@@ -104,7 +104,7 @@ router.post('/:id/quotes', verifyToken, requireBusinessOwner, limits.contact, as
       throw error;
     }
     await supabaseAdmin.from('leads').update({ quote_count: (lead.quote_count || 0) + 1 }).eq('id', lead.id);
-    await notify(lead.customer_id, 'info', `💬 New quote for "${lead.title}"`, `${biz.name} sent you a quote of GH₵${price}`, `/pages/leads.html?id=${lead.id}`);
+    await notify(lead.customer_id, 'info', `💬 New quote for "${lead.title}"`, `${biz.name} sent you a quote of GH₵${price}`, `/leads?id=${lead.id}`);
 
     res.status(201).json({ quote });
   } catch (err) { next(err); }
@@ -124,7 +124,7 @@ router.patch('/:id/award/:quoteId', verifyToken, async (req, res, next) => {
     await supabaseAdmin.from('leads').update({ status: 'awarded', awarded_business_id: quote.business_id }).eq('id', lead.id);
     await supabaseAdmin.from('lead_quotes').update({ status: 'accepted' }).eq('id', quote.id);
     await supabaseAdmin.from('lead_quotes').update({ status: 'declined' }).eq('lead_id', lead.id).neq('id', quote.id);
-    await notify(quote.businesses.owner_id, 'success', `🎉 You won a lead!`, `You were awarded "${lead.title}"`, `/pages/leads.html?id=${lead.id}`);
+    await notify(quote.businesses.owner_id, 'success', `🎉 You won a lead!`, `You were awarded "${lead.title}"`, `/leads?id=${lead.id}`);
 
     res.json({ message: 'Lead awarded', lead_id: lead.id, business_id: quote.business_id });
   } catch (err) { next(err); }

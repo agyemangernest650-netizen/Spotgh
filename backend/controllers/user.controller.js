@@ -35,7 +35,7 @@ exports.getReferralCode = async (req, res, next) => {
       user.referral_code = code;
     }
     const { count } = await supabaseAdmin.from('users').select('id', { count: 'exact' }).eq('referred_by', req.user.id);
-    res.json({ code: user.referral_code, referrals_count: count || 0, credit_balance: Number(user.referral_credit_ghs || 0), share_url: `${process.env.APP_URL || 'http://localhost:3000'}/pages/register.html?ref=${user.referral_code}` });
+    res.json({ code: user.referral_code, referrals_count: count || 0, credit_balance: Number(user.referral_credit_ghs || 0), share_url: `${process.env.APP_URL || 'http://localhost:3000'}/register?ref=${user.referral_code}` });
   } catch (err) { next(err); }
 };
 
@@ -59,7 +59,7 @@ exports.applyReferral = async (req, res, next) => {
     // discount. Now it's a real balance, applied automatically at the
     // next subscription checkout — see payments.routes.js /initialize.
     await supabaseAdmin.from('users').update({ referral_credit_ghs: (referrer.referral_credit_ghs || 0) + SIGNUP_REFERRAL_CREDIT }).eq('id', referrer.id);
-    await notify(referrer.id, 'success', '🎉 New Referral!', `Someone joined using your referral code! GHS ${SIGNUP_REFERRAL_CREDIT} credit has been added to your account — it's applied automatically on your next plan payment.`, '/pages/referrals.html');
+    await notify(referrer.id, 'success', '🎉 New Referral!', `Someone joined using your referral code! GHS ${SIGNUP_REFERRAL_CREDIT} credit has been added to your account — it's applied automatically on your next plan payment.`, '/referrals');
     res.json({ message: 'Referral applied' });
   } catch (err) { next(err); }
 };

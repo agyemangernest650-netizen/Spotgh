@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           guest_email: document.getElementById('tGuestEmail')?.value,
         });
         toast.success('Ticket submitted! We\'ll get back to you soon.');
-        if (Auth.isLoggedIn()) location.href = `/pages/support.html?id=${ticket.id}`;
+        if (Auth.isLoggedIn()) location.href = `/support?id=${ticket.id}`;
         else e.target.reset();
       } catch (err) { toast.error(err.message); setLoading(btn, false); }
     });
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const { tickets } = await API.get('/support/mine');
         const el = document.getElementById('ticketsList');
         el.innerHTML = tickets.length ? tickets.map(t => `
-          <a href="/pages/support.html?id=${t.id}" class="card" style="padding:1rem;margin-bottom:.6rem;display:flex;justify-content:space-between;text-decoration:none;color:inherit">
+          <a href="/support?id=${t.id}" class="card" style="padding:1rem;margin-bottom:.6rem;display:flex;justify-content:space-between;text-decoration:none;color:inherit">
             <span>${t.subject}</span><span class="badge badge--${t.status==='resolved'||t.status==='closed'?'success':'warning'}">${t.status}</span>
           </a>`).join('') : `<p style="color:var(--clr-text-2)">No tickets yet.</p>`;
       } catch {}
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const { ticket, messages } = await API.get(`/support/${id}`);
       main.innerHTML = `
         <div class="container" style="padding:2rem 1rem 4rem;max-width:640px">
-          <a href="/pages/support.html" style="font-size:.85rem;color:var(--clr-text-2)"><i class="fa-solid fa-arrow-left"></i> Back</a>
+          <a href="/support" style="font-size:.85rem;color:var(--clr-text-2)"><i class="fa-solid fa-arrow-left"></i> Back</a>
           <div style="display:flex;justify-content:space-between;align-items:center;margin:1rem 0">
             <h2 style="margin:0">${ticket.subject}</h2>
             <span class="badge badge--${ticket.status==='resolved'||ticket.status==='closed'?'success':'warning'}">${ticket.status}</span>

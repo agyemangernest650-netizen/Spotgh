@@ -17,7 +17,7 @@ window.ADSENSE_CLIENT = 'ca-pub-0000000000000000'; // <-- replace with your real
 window.HOUSE_AD = {
   type: 'image',
   src: '',                                   // put your promo image/video path here (leave blank for a clean text/icon placeholder)
-  link: '/pages/pricing.html',               // where clicking the ad goes
+  link: '/pricing',               // where clicking the ad goes
   alt: 'List your business on SpotGH — Advertise Here',
 };
 

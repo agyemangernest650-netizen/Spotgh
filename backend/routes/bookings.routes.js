@@ -19,7 +19,7 @@ router.post('/', optionalAuth, async (req, res, next) => {
     const code = uuidv4().slice(0,8).toUpperCase();
     const { data, error } = await supabaseAdmin.from('bookings').insert({ business_id, customer_id: req.user?.id || null, service_id: service_id || null, customer_name, customer_email: customer_email || null, customer_phone, booking_date, booking_time, notes: notes || null, confirmation_code: code, status: 'pending' }).select().single();
     if (error) throw error;
-    await notify(biz.owner_id, 'info', `📅 New booking from ${customer_name}`, `${booking_date} at ${booking_time}. Code: ${code}`, `/pages/dashboard.html?tab=bookings&biz=${business_id}`);
+    await notify(biz.owner_id, 'info', `📅 New booking from ${customer_name}`, `${booking_date} at ${booking_time}. Code: ${code}`, `/dashboard?tab=bookings&biz=${business_id}`);
     const { data: owner } = await supabaseAdmin.from('users').select('phone').eq('id', biz.owner_id).maybeSingle();
     if (owner?.phone) await sendSMS(owner.phone, `SpotGH: New booking for ${biz.name} from ${customer_name}, ${booking_date} at ${booking_time}. Code: ${code}`);
 
@@ -63,7 +63,7 @@ router.patch('/:id/status', verifyToken, async (req, res, next) => {
     // them by whichever contact info is actually available.
     if (status === 'completed') {
       const bizName = existing.businesses?.name || 'the business';
-      const link = `/pages/business.html?slug=${existing.businesses?.slug || ''}#reviews`;
+      const link = `/business?slug=${existing.businesses?.slug || ''}#reviews`;
       if (existing.customer_id) await notify(existing.customer_id, 'info', `How was your visit to ${bizName}?`, `Leave a quick review to help other customers.`, link);
       if (existing.customer_phone) await sendSMS(existing.customer_phone, `SpotGH: Thanks for visiting ${bizName}! We'd love your feedback — leave a review at spotgh.com${link}`);
     }

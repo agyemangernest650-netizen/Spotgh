@@ -16,20 +16,20 @@
     <a href="/" class="navbar__logo"><img src="/assets/images/icon-192.png" alt="SpotGH"> Spot<span>GH</span></a>
     <div class="navbar__search hidden-mobile"><div class="search-bar-nav"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="navSearch" placeholder="Search businesses..." autocomplete="off"><div id="navSuggestions" class="suggestions-dropdown" hidden></div></div></div>
     <nav class="navbar__actions">
-      <a href="/pages/categories.html" class="navbar__link hidden-mobile" data-i18n="nav.categories">Categories</a>
-      <a href="/pages/directory.html" class="navbar__link hidden-mobile" data-i18n="nav.directory">Directory</a>
-      <a href="/pages/pricing.html" class="navbar__link hidden-mobile" data-i18n="nav.pricing">Pricing</a>
-      <a href="/pages/deals.html" class="navbar__link hidden-mobile" data-i18n="nav.deals">🎉 Deals</a>
-        <a href="/pages/events.html" class="navbar__link hidden-mobile">Events</a>
-        <a href="/pages/blog.html" class="navbar__link hidden-mobile">Blog</a>
+      <a href="/categories" class="navbar__link hidden-mobile" data-i18n="nav.categories">Categories</a>
+      <a href="/directory" class="navbar__link hidden-mobile" data-i18n="nav.directory">Directory</a>
+      <a href="/pricing" class="navbar__link hidden-mobile" data-i18n="nav.pricing">Pricing</a>
+      <a href="/deals" class="navbar__link hidden-mobile" data-i18n="nav.deals">🎉 Deals</a>
+        <a href="/events" class="navbar__link hidden-mobile">Events</a>
+        <a href="/blog" class="navbar__link hidden-mobile">Blog</a>
       <select id="langSwitcher" onchange="setLanguage(this.value)" style="background:none;border:1px solid var(--clr-border);border-radius:8px;padding:.3rem .4rem;font-size:.75rem;color:var(--clr-text-2);cursor:pointer" title="Language"><option value="en">EN</option></select>
         <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
       <div id="authNav"></div>
       <button class="navbar__hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
     </nav>
   </div>
-  <div class="mobile-menu" id="mobileMenu" hidden><input type="text" id="mobileSearch" placeholder="Search..." class="mobile-search-input"><nav class="mobile-nav"><a href="/">Home</a><a href="/pages/categories.html">Categories</a>
-      <a href="/pages/directory.html">Directory</a><div id="mobileAuthLinks"></div></nav></div>
+  <div class="mobile-menu" id="mobileMenu" hidden><input type="text" id="mobileSearch" placeholder="Search..." class="mobile-search-input"><nav class="mobile-nav"><a href="/">Home</a><a href="/categories">Categories</a>
+      <a href="/directory">Directory</a><div id="mobileAuthLinks"></div></nav></div>
   </header>
   <main id="pageMain"></main>
   <div id="toastContainer"></div>

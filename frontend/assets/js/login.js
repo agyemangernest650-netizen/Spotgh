@@ -1,9 +1,9 @@
 // assets/js/login.js
 document.addEventListener('DOMContentLoaded', () => {
   loadComponents();
-  if (Auth.isLoggedIn()) { window.location.href = '/pages/dashboard.html'; return; }
+  if (Auth.isLoggedIn()) { window.location.href = '/dashboard'; return; }
 
-  const next = new URLSearchParams(window.location.search).get('next') || '/pages/dashboard.html';
+  const next = new URLSearchParams(window.location.search).get('next') || '/dashboard';
 
   document.getElementById('pageMain').innerHTML = `
     <div class="auth-page">
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="form-group">
             <label class="form-label" style="display:flex;justify-content:space-between">
-              Password <a href="/pages/forgot-password.html" style="font-weight:400;font-size:.8rem;color:var(--clr-primary)">Forgot?</a>
+              Password <a href="/forgot-password" style="font-weight:400;font-size:.8rem;color:var(--clr-primary)">Forgot?</a>
             </label>
             <div class="input-icon-wrap" style="position:relative">
               <i class="fa-solid fa-lock"></i>
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <button type="submit" class="btn btn--primary btn--full btn--lg" id="loginBtn">Sign In</button>
         </form>
         <div id="oauthButtons"></div>
-        <div class="auth-footer">No account? <a href="/pages/register.html">Register free</a></div>
+        <div class="auth-footer">No account? <a href="/register">Register free</a></div>
       </div>
     </div>`;
 

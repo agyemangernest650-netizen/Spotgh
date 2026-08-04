@@ -23,7 +23,7 @@
     "url": "https://spotgh.com/",
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://spotgh.com/pages/directory.html?q={search_term_string}",
+      "target": "https://spotgh.com/directory?q={search_term_string}",
       "query-input": "required name=search_term_string"
     }
   }
@@ -53,14 +53,14 @@
       <a href="/" class="navbar__logo"><img src="/assets/images/icon-192.png" alt="SpotGH"> Spot<span>GH</span></a>
       <div class="navbar__search hidden-mobile"><div class="search-bar-nav"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="navSearch" placeholder="Search businesses..." autocomplete="off"><div id="navSuggestions" class="suggestions-dropdown" hidden></div></div></div>
       <nav class="navbar__actions">
-        <a href="/pages/categories.html" class="navbar__link hidden-mobile" data-i18n="nav.categories">Categories</a>
-        <a href="/pages/directory.html" class="navbar__link hidden-mobile" data-i18n="nav.directory">Directory</a>
-        <a href="/pages/pricing.html" class="navbar__link hidden-mobile" data-i18n="nav.pricing">Pricing</a>
-        <a href="/pages/leads.html" class="navbar__link hidden-mobile">📢 Leads</a>
-        <a href="/pages/deals.html" class="navbar__link hidden-mobile" data-i18n="nav.deals">🎉 Deals</a>
-        <a href="/pages/events.html" class="navbar__link hidden-mobile">Events</a>
-        <a href="/pages/blog.html" class="navbar__link hidden-mobile">Blog</a>
-        <a href="/pages/map.html" class="navbar__link hidden-mobile"><i class="fa-solid fa-map"></i></a>
+        <a href="/categories" class="navbar__link hidden-mobile" data-i18n="nav.categories">Categories</a>
+        <a href="/directory" class="navbar__link hidden-mobile" data-i18n="nav.directory">Directory</a>
+        <a href="/pricing" class="navbar__link hidden-mobile" data-i18n="nav.pricing">Pricing</a>
+        <a href="/leads" class="navbar__link hidden-mobile">📢 Leads</a>
+        <a href="/deals" class="navbar__link hidden-mobile" data-i18n="nav.deals">🎉 Deals</a>
+        <a href="/events" class="navbar__link hidden-mobile">Events</a>
+        <a href="/blog" class="navbar__link hidden-mobile">Blog</a>
+        <a href="/map" class="navbar__link hidden-mobile"><i class="fa-solid fa-map"></i></a>
         <select id="langSwitcher" onchange="setLanguage(this.value)" style="background:none;border:1px solid var(--clr-border);border-radius:8px;padding:.3rem .4rem;font-size:.75rem;color:var(--clr-text-2);cursor:pointer" title="Language"><option value="en">EN</option></select>
         <button class="theme-toggle-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
         <button class="near-me-btn hidden-mobile" onclick="searchNearMe()"><i class="fa-solid fa-location-crosshairs"></i></button>
@@ -70,7 +70,7 @@
     </div>
     <div class="mobile-menu" id="mobileMenu" hidden>
       <input type="text" id="mobileSearch" class="mobile-search-input" placeholder="Search...">
-      <nav class="mobile-nav"><a href="/">Home</a><a href="/pages/categories.html">Categories</a><a href="/pages/directory.html">Directory</a><a href="/pages/pricing.html">Pricing</a><a href="/pages/deals.html">Deals</a><a href="/pages/map.html">Map</a><a href="/pages/leads.html">Leads</a><a href="/pages/events.html">Events</a><a href="/pages/blog.html">Blog</a><button type="button" onclick="searchNearMe()" style="text-align:left;background:none;border:none;font:inherit;width:100%"><i class="fa-solid fa-location-crosshairs" style="margin-right:.5rem"></i>Near Me</button><div id="mobileAuthLinks"></div></nav>
+      <nav class="mobile-nav"><a href="/">Home</a><a href="/categories">Categories</a><a href="/directory">Directory</a><a href="/pricing">Pricing</a><a href="/deals">Deals</a><a href="/map">Map</a><a href="/leads">Leads</a><a href="/events">Events</a><a href="/blog">Blog</a><button type="button" onclick="searchNearMe()" style="text-align:left;background:none;border:none;font:inherit;width:100%"><i class="fa-solid fa-location-crosshairs" style="margin-right:.5rem"></i>Near Me</button><div id="mobileAuthLinks"></div></nav>
     </div>
   </header>
 
@@ -91,11 +91,11 @@
       </div>
       <div class="hero__popular">
         <span>Popular Searches:</span>
-        <a href="/pages/directory.html?category=restaurants">Restaurants</a>
-        <a href="/pages/directory.html?category=beauty-salons">Salons</a>
-        <a href="/pages/directory.html?category=automotive">Car Dealers</a>
-        <a href="/pages/directory.html?category=trades">Plumbers</a>
-        <a href="/pages/directory.html?category=fitness">Gyms</a>
+        <a href="/directory?category=restaurants">Restaurants</a>
+        <a href="/directory?category=beauty-salons">Salons</a>
+        <a href="/directory?category=automotive">Car Dealers</a>
+        <a href="/directory?category=trades">Plumbers</a>
+        <a href="/directory?category=fitness">Gyms</a>
       </div>
     </div></div>
     <div class="container">
@@ -127,7 +127,7 @@
   <section class="section section--tint">
     <div class="container"><div class="section__header"><div class="section__eyebrow">⭐ Featured</div><h2 class="section__title">Top Businesses in Ghana</h2></div>
     <div class="grid grid--3" id="featuredGrid"><div class="skeleton" style="height:320px;border-radius:16px"></div><div class="skeleton" style="height:320px;border-radius:16px"></div><div class="skeleton" style="height:320px;border-radius:16px"></div></div>
-    <div style="text-align:center;margin-top:2rem"><a href="/pages/directory.html" class="btn btn--outline btn--lg">View All Businesses</a></div></div>
+    <div style="text-align:center;margin-top:2rem"><a href="/directory" class="btn btn--outline btn--lg">View All Businesses</a></div></div>
   </section>
 
   <section class="section">
@@ -142,13 +142,13 @@
       <div style="text-align:center;padding:2rem"><div class="step-icon">💳</div><h3>Choose a Plan</h3><p style="color:var(--clr-text-2);font-size:.875rem;margin-top:.5rem">Pay once for your first month with Paystack — cards, MTN MoMo, Vodafone. No surprise renewals.</p></div>
       <div style="text-align:center;padding:2rem"><div class="step-icon">🚀</div><h3>Get Your Mini-Website</h3><p style="color:var(--clr-text-2);font-size:.875rem;margin-top:.5rem">Go live with your own page, manage it from your dashboard, and reach customers across Ghana.</p></div>
     </div>
-    <div style="text-align:center;margin-top:2rem"><a href="/pages/register.html" class="btn btn--primary btn--lg">List Your Business Free <i class="fa-solid fa-arrow-right"></i></a></div></div>
+    <div style="text-align:center;margin-top:2rem"><a href="/register" class="btn btn--primary btn--lg">List Your Business Free <i class="fa-solid fa-arrow-right"></i></a></div></div>
   </section>
 
   <section class="section" id="dealsSection" style="display:none">
     <div class="container"><div class="section__header"><div class="section__eyebrow">🏷️ Deals</div><h2 class="section__title">Live Deals Right Now</h2></div>
     <div class="grid grid--3" id="dealsGrid"></div>
-    <div style="text-align:center;margin-top:2rem"><a href="/pages/deals.html" class="btn btn--outline btn--lg">View All Deals</a></div></div>
+    <div style="text-align:center;margin-top:2rem"><a href="/deals" class="btn btn--outline btn--lg">View All Deals</a></div></div>
   </section>
 
   <section class="section section--tint">
@@ -159,7 +159,7 @@
   <section class="section" id="blogSection" style="display:none">
     <div class="container"><div class="section__header"><div class="section__eyebrow">📰 From the Blog</div><h2 class="section__title">Tips & Local Business News</h2></div>
     <div class="grid grid--3" id="blogGrid"></div>
-    <div style="text-align:center;margin-top:2rem"><a href="/pages/blog.html" class="btn btn--outline btn--lg">Read More</a></div></div>
+    <div style="text-align:center;margin-top:2rem"><a href="/blog" class="btn btn--outline btn--lg">Read More</a></div></div>
   </section>
 
   <section class="section" id="testimonialsSection" style="display:none">
@@ -172,8 +172,8 @@
       <h2 style="color:#fff;font-size:clamp(1.75rem,4vw,3rem);margin-bottom:1rem">Ready to Grow Your Business? 🚀</h2>
       <p style="opacity:.9;font-size:1.1rem;margin-bottom:2rem;max-width:500px;margin-inline:auto">Join thousands of Ghanaian businesses on SpotGH.</p>
       <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
-        <a href="/pages/register.html" class="btn btn--lg" style="background:#fff;color:var(--clr-primary)">Get Started Free</a>
-        <a href="/pages/pricing.html" class="btn btn--lg" style="background:transparent;border:2px solid rgba(255,255,255,.5);color:#fff">View Plans</a>
+        <a href="/register" class="btn btn--lg" style="background:#fff;color:var(--clr-primary)">Get Started Free</a>
+        <a href="/pricing" class="btn btn--lg" style="background:transparent;border:2px solid rgba(255,255,255,.5);color:#fff">View Plans</a>
       </div>
     </div>
   </section>
@@ -190,11 +190,11 @@
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2rem;margin-bottom:2rem">
         <div><a href="/" style="font-family:var(--font-display);font-size:1.25rem;font-weight:800;color:#fff">🏙️ Spot<span style="color:var(--clr-primary)">GH</span></a><p style="font-size:.875rem;margin-top:.75rem">Discover trusted businesses across Ghana, or build your own business website in minutes. Made with ❤️ in Ghana.</p></div>
-        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Explore</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/directory.html">Directory</a></li><li><a href="/pages/pricing.html">Pricing</a></li><li><a href="/pages/deals.html">Deals</a></li><li><a href="/pages/map.html">Map View</a></li><li><a href="/pages/blog.html">Blog</a></li><li><a href="/pages/smart-search.html">AI Search</a></li><li><a href="/pages/compare.html">Compare</a></li><li><a href="/pages/support.html">Support</a></li></ul></div>
-        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Categories</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/directory.html?category=restaurants">🍽️ Restaurants</a></li><li><a href="/pages/directory.html?category=beauty-salons">💄 Salons</a></li><li><a href="/pages/directory.html?category=hotels">🏨 Hotels</a></li><li><a href="/pages/directory.html?category=fashion">👗 Fashion</a></li></ul></div>
-        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Cities</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/directory.html?location=Accra">Accra</a></li><li><a href="/pages/directory.html?location=Kumasi">Kumasi</a></li><li><a href="/pages/directory.html?location=Takoradi">Takoradi</a></li><li><a href="/pages/directory.html?location=Tamale">Tamale</a></li></ul></div>
-        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Company</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/about.html">About Us</a></li><li><a href="/pages/help.html">Help Center</a></li><li><a href="/pages/status.html">System Status</a></li></ul></div>
-        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Legal</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/terms.html">Terms of Service</a></li><li><a href="/pages/privacy.html">Privacy Policy</a></li><li><a href="/pages/refund-policy.html">Refund Policy</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Explore</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/directory">Directory</a></li><li><a href="/pricing">Pricing</a></li><li><a href="/deals">Deals</a></li><li><a href="/map">Map View</a></li><li><a href="/blog">Blog</a></li><li><a href="/smart-search">AI Search</a></li><li><a href="/compare">Compare</a></li><li><a href="/support">Support</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Categories</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/directory?category=restaurants">🍽️ Restaurants</a></li><li><a href="/directory?category=beauty-salons">💄 Salons</a></li><li><a href="/directory?category=hotels">🏨 Hotels</a></li><li><a href="/directory?category=fashion">👗 Fashion</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Cities</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/directory?location=Accra">Accra</a></li><li><a href="/directory?location=Kumasi">Kumasi</a></li><li><a href="/directory?location=Takoradi">Takoradi</a></li><li><a href="/directory?location=Tamale">Tamale</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Company</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/about">About Us</a></li><li><a href="/help">Help Center</a></li><li><a href="/status">System Status</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Legal</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/terms">Terms of Service</a></li><li><a href="/privacy">Privacy Policy</a></li><li><a href="/refund-policy">Refund Policy</a></li></ul></div>
       </div>
       <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:1.5rem;text-align:center;font-size:.8rem">© 2026 SpotGH · 🇬🇭 Supporting Ghanaian Businesses</div>
     </div>
@@ -218,7 +218,7 @@
           API.get('/blog?limit=3'),
         ]);
         document.getElementById('categoriesGrid').innerHTML = (cats.categories||[]).map(c =>
-          `<a href="/pages/directory.html?category=${c.slug}" class="category-card"><div class="category-card__icon">${c.icon}</div><div class="category-card__name">${c.name}</div></a>`).join('');
+          `<a href="/directory?category=${c.slug}" class="category-card"><div class="category-card__icon">${c.icon}</div><div class="category-card__name">${c.name}</div></a>`).join('');
         const heroCat = document.getElementById('heroCategory');
         if (heroCat) heroCat.innerHTML += (cats.categories||[]).map(c => `<option value="${c.slug}">${c.name}</option>`).join('');
         renderBusinessGrid('featuredGrid', featured.businesses||[]);
@@ -235,7 +235,7 @@
         if ((blog.posts||[]).length > 0) {
           document.getElementById('blogSection').style.display = 'block';
           document.getElementById('blogGrid').innerHTML = blog.posts.map(p => `
-            <a href="/pages/blog-post.html?slug=${p.slug}" class="card" style="padding:0;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column">
+            <a href="/blog-post?slug=${p.slug}" class="card" style="padding:0;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column">
               ${p.cover_url ? `<img src="${p.cover_url}" alt="${p.title}" style="width:100%;height:160px;object-fit:cover">` : `<div style="width:100%;height:160px;background:var(--clr-surface-2);display:flex;align-items:center;justify-content:center;font-size:2rem">📰</div>`}
               <div style="padding:1.1rem;flex:1;display:flex;flex-direction:column">
                 <div style="font-weight:700;font-size:.95rem;margin-bottom:.4rem">${p.title}</div>
@@ -275,7 +275,7 @@
             const hoursLeft = Math.max(0, Math.floor((expires - Date.now()) / 3600000));
             const urgent = hoursLeft < 24;
             return `
-              <a href="/pages/business.html?slug=${biz.slug||''}" class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;text-decoration:none;color:inherit">
+              <a href="/business?slug=${biz.slug||''}" class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;text-decoration:none;color:inherit">
                 <div style="background:linear-gradient(135deg,var(--clr-primary),#e55a2b);padding:1.25rem;color:#fff;position:relative">
                   ${d.discount_text ? `<div style="font-size:1.75rem;font-weight:800;margin-bottom:.25rem">${d.discount_text}</div>` : ''}
                   <div style="font-weight:700;font-size:1rem">${d.title}</div>
@@ -295,7 +295,7 @@
       const q = document.getElementById('heroSearch').value;
       const loc = document.getElementById('heroLocation')?.value || '';
       const cat = document.getElementById('heroCategory')?.value || '';
-      window.location.href = `/pages/directory.html?q=${encodeURIComponent(q)}&location=${encodeURIComponent(loc)}${cat ? `&category=${encodeURIComponent(cat)}` : ''}`;
+      window.location.href = `/directory?q=${encodeURIComponent(q)}&location=${encodeURIComponent(loc)}${cat ? `&category=${encodeURIComponent(cat)}` : ''}`;
     };
     ['heroSearch','heroLocation'].forEach(id => {
       document.getElementById(id)?.addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('heroSearchBtn').click(); });

@@ -4,13 +4,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!Auth.requireAuth()) return;
 
   const bizId = new URLSearchParams(location.search).get('id');
-  if (!bizId) { location.href = '/pages/dashboard.html'; return; }
+  if (!bizId) { location.href = '/dashboard'; return; }
 
   document.getElementById('pageMain').innerHTML = `
     <div class="container" style="max-width:760px;margin:0 auto;padding:2rem 1rem 4rem">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:2rem;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:1rem">
-          <a href="/pages/dashboard.html" class="btn btn--ghost btn--sm"><i class="fa-solid fa-arrow-left"></i></a>
+          <a href="/dashboard" class="btn btn--ghost btn--sm"><i class="fa-solid fa-arrow-left"></i></a>
           <h1 style="font-size:1.5rem;font-weight:800;margin:0">🎉 Deals Manager</h1>
         </div>
         <button class="btn btn--primary btn--sm" onclick="showDealForm()"><i class="fa-solid fa-plus"></i> New Deal</button>
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       <!-- Tip -->
       <div class="card" style="padding:1rem 1.25rem;margin-bottom:1.5rem;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.2)">
-        <p style="font-size:.875rem;margin:0">💡 <strong>Tip:</strong> Deals appear on the <a href="/pages/deals.html" style="color:var(--clr-primary)">Deals page</a> and help attract new customers. Keep them short and urgent!</p>
+        <p style="font-size:.875rem;margin:0">💡 <strong>Tip:</strong> Deals appear on the <a href="/deals" style="color:var(--clr-primary)">Deals page</a> and help attract new customers. Keep them short and urgent!</p>
       </div>
 
       <!-- Form -->

@@ -28,7 +28,7 @@ router.patch('/:orderId', verifyToken, async (req, res, next) => {
 
     if (delivery_status && order.customer_id) {
       const messages = { preparing: 'Your order is being prepared', out_for_delivery: 'Your order is on the way!', delivered: 'Your order has been delivered' };
-      if (messages[delivery_status]) await notify(order.customer_id, 'info', `Order ${order.order_number}`, messages[delivery_status], '/pages/orders.html');
+      if (messages[delivery_status]) await notify(order.customer_id, 'info', `Order ${order.order_number}`, messages[delivery_status], '/orders');
     }
     res.json({ order: data });
   } catch (err) { next(err); }

@@ -4,20 +4,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!Auth.requireAuth()) return;
 
   const bizId = new URLSearchParams(location.search).get('id');
-  if (!bizId) { location.href = '/pages/dashboard.html'; return; }
+  if (!bizId) { location.href = '/dashboard'; return; }
 
   document.getElementById('pageMain').innerHTML = `
     <div class="container" style="max-width:760px;margin:0 auto;padding:2rem 1rem 4rem">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:2rem;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:1rem">
-          <a href="/pages/dashboard.html" class="btn btn--ghost btn--sm"><i class="fa-solid fa-arrow-left"></i></a>
+          <a href="/dashboard" class="btn btn--ghost btn--sm"><i class="fa-solid fa-arrow-left"></i></a>
           <h1 style="font-size:1.5rem;font-weight:800;margin:0">🎪 Events Manager</h1>
         </div>
         <button class="btn btn--primary btn--sm" onclick="showEventForm()"><i class="fa-solid fa-plus"></i> New Event</button>
       </div>
 
       <div class="card" style="padding:1rem 1.25rem;margin-bottom:1.5rem;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.2)">
-        <p style="font-size:.875rem;margin:0">💡 Events show up on the <a href="/pages/events.html" style="color:var(--clr-primary)">Events page</a> and on your business mini-site.</p>
+        <p style="font-size:.875rem;margin:0">💡 Events show up on the <a href="/events" style="color:var(--clr-primary)">Events page</a> and on your business mini-site.</p>
       </div>
 
       <div id="eventForm" hidden class="card" style="padding:1.5rem;margin-bottom:1.5rem">

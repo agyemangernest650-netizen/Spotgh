@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadComponents();
 
   const slug = new URLSearchParams(location.search).get('slug');
-  if (!slug) { location.href = '/pages/directory.html'; return; }
+  if (!slug) { location.href = '/directory'; return; }
 
   const main = document.getElementById('pageMain');
   main.innerHTML = `<div class="container" style="padding:3rem 1rem;text-align:center">
@@ -71,8 +71,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           <span class="badge ${si.badge}">${si.label}</span>
           <span id="ownerBannerStats" style="font-size:.8rem;color:var(--clr-text-2)" hidden></span>
           <div style="margin-left:auto;display:flex;gap:.5rem;flex-wrap:wrap">
-            <a href="/pages/dashboard.html" class="btn btn--outline btn--sm"><i class="fa-solid fa-gauge"></i> Dashboard</a>
-            <a href="/pages/business-edit.html?id=${biz.id}" class="btn btn--primary btn--sm"><i class="fa-solid fa-pen"></i> Edit</a>
+            <a href="/dashboard" class="btn btn--outline btn--sm"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+            <a href="/business-edit?id=${biz.id}" class="btn btn--primary btn--sm"><i class="fa-solid fa-pen"></i> Edit</a>
           </div>
         </div>
       </div>`;
@@ -83,8 +83,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       <div class="container" style="padding:.85rem 1rem;font-size:.8rem;color:var(--clr-text-3)">
         <a href="/" style="color:var(--clr-text-3);text-decoration:none">Home</a>
         <span style="margin:0 .4rem">/</span>
-        <a href="/pages/directory.html" style="color:var(--clr-text-3);text-decoration:none">Businesses</a>
-        ${biz.category_name ? `<span style="margin:0 .4rem">/</span><a href="/pages/directory.html?category=${biz.category_slug||''}" style="color:var(--clr-text-3);text-decoration:none">${biz.category_name}</a>` : ''}
+        <a href="/directory" style="color:var(--clr-text-3);text-decoration:none">Businesses</a>
+        ${biz.category_name ? `<span style="margin:0 .4rem">/</span><a href="/directory?category=${biz.category_slug||''}" style="color:var(--clr-text-3);text-decoration:none">${biz.category_name}</a>` : ''}
         <span style="margin:0 .4rem">/</span>
         <span style="color:var(--clr-text-2);font-weight:600">${biz.name}</span>
       </div>
@@ -490,7 +490,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const isLocal = host === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(host);
         const rootDomain = host.split('.').slice(-2).join('.');
         const vanityUrl = isLocal
-          ? `${location.origin}/pages/business.html?slug=${biz.slug}`
+          ? `${location.origin}/business?slug=${biz.slug}`
           : `https://${biz.slug}.${rootDomain}`;
         document.getElementById('vanityLink').textContent = vanityUrl;
         document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(vanityUrl)}`;
@@ -512,7 +512,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('reportPanel').hidden = !document.getElementById('reportPanel').hidden;
     };
     window.submitClaim = async () => {
-      if (!Auth.getUser()) { toast.error('Please log in first to claim this business.'); return location.href = `/pages/login.html?redirect=${encodeURIComponent(location.pathname + location.search)}`; }
+      if (!Auth.getUser()) { toast.error('Please log in first to claim this business.'); return location.href = `/login?redirect=${encodeURIComponent(location.pathname + location.search)}`; }
       const full_name = document.getElementById('clName').value.trim();
       const phone     = document.getElementById('clPhone').value.trim();
       if (!full_name || !phone) return toast.error('Please fill in your name and phone number.');
@@ -530,7 +530,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       } catch (err) { toast.error(err.message || 'Failed to submit claim.'); }
     };
     window.submitReport = async () => {
-      if (!Auth.getUser()) { toast.error('Please log in first to report this business.'); return location.href = `/pages/login.html?redirect=${encodeURIComponent(location.pathname + location.search)}`; }
+      if (!Auth.getUser()) { toast.error('Please log in first to report this business.'); return location.href = `/login?redirect=${encodeURIComponent(location.pathname + location.search)}`; }
       const reason = document.getElementById('rpReason').value;
       if (!reason) return toast.error('Please select a reason.');
       const details = document.getElementById('rpDetails').value.trim();
@@ -577,7 +577,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       <div style="font-size:3rem;margin-bottom:1rem">😕</div>
       <h2>Business not found</h2>
       <p style="color:var(--clr-text-2);margin-bottom:1.5rem">This listing may have been removed or the link is incorrect.</p>
-      <a href="/pages/directory.html" class="btn btn--primary">Browse Directory</a>
+      <a href="/directory" class="btn btn--primary">Browse Directory</a>
     </div>`;
   }
 
@@ -791,7 +791,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       bar.innerHTML = `
         <div class="cart-bar" style="position:sticky;bottom:1rem;margin-top:1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;background:var(--clr-surface);border:1px solid var(--clr-border);box-shadow:0 8px 24px rgba(0,0,0,.12);border-radius:var(--radius-md);padding:1rem 1.25rem">
           <span><strong>${count}</strong> item${count===1?'':'s'} · ${formatCurrency(subtotal)}</span>
-          <a href="/pages/checkout.html?biz=${businessId}" class="btn btn--primary btn--sm">Checkout</a>
+          <a href="/checkout?biz=${businessId}" class="btn btn--primary btn--sm">Checkout</a>
         </div>`;
     } catch { /* not fatal — cart bar just stays empty */ }
   }
@@ -936,7 +936,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
           <textarea id="reviewText" rows="3" class="input" placeholder="Share your experience…" style="width:100%;resize:vertical;margin-bottom:.75rem"></textarea>
           <button class="btn btn--primary btn--sm" onclick="submitReview('${bizId}')">Submit Review</button>
-        </div>` : `<p style="color:var(--clr-text-2);margin-bottom:1.5rem"><a href="/pages/login.html" style="color:var(--clr-primary)">Log in</a> to leave a review.</p>`}
+        </div>` : `<p style="color:var(--clr-text-2);margin-bottom:1.5rem"><a href="/login" style="color:var(--clr-primary)">Log in</a> to leave a review.</p>`}
         ${!reviews.length ? '<p style="color:var(--clr-text-2);text-align:center;padding:2rem">No reviews yet. Be the first!</p>' :
           reviews.map(r => `
           <div class="card" style="padding:1.25rem;margin-bottom:.75rem">

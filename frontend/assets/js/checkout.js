@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!items?.length) {
       content.innerHTML = emptyState({
         icon: '🛒', title: 'Your cart is empty',
-        actionHtml: `<a href="/pages/business.html?slug=${business.slug}" class="btn btn--primary">Browse ${business.name}</a>`,
+        actionHtml: `<a href="/business?slug=${business.slug}" class="btn btn--primary">Browse ${business.name}</a>`,
       });
       return;
     }
@@ -181,8 +181,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             <h2 style="font-weight:800;margin-bottom:.5rem">Order placed!</h2>
             <p style="color:var(--clr-text-2);margin-bottom:1.5rem">Your order <strong>${order_number}</strong> has been sent to ${business.name}. They'll confirm it shortly.</p>
             <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
-              <a href="/pages/business.html?slug=${business.slug}" class="btn btn--outline">Back to ${business.name}</a>
-              ${user ? `<a href="/pages/orders.html" class="btn btn--primary">View My Orders</a>` : `<a href="/pages/track-order.html?order=${order_number}" class="btn btn--primary">Track This Order</a>`}
+              <a href="/business?slug=${business.slug}" class="btn btn--outline">Back to ${business.name}</a>
+              ${user ? `<a href="/orders" class="btn btn--primary">View My Orders</a>` : `<a href="/track-order?order=${order_number}" class="btn btn--primary">Track This Order</a>`}
             </div>`;
       } catch (err) {
         toast.error(err.message || 'Could not place order');

@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           ${compareRow('Delivery', businesses, b => b.has_delivery ? '✅ Yes' : '—')}
           <tr>
             <td></td>
-            ${businesses.map(b => `<td style="padding:1rem;text-align:center"><a href="/pages/business.html?slug=${b.slug}" class="btn btn--primary btn--sm">View Profile</a></td>`).join('')}
+            ${businesses.map(b => `<td style="padding:1rem;text-align:center"><a href="/business?slug=${b.slug}" class="btn btn--primary btn--sm">View Profile</a></td>`).join('')}
           </tr>
         </table>`;
     } catch { grid.innerHTML = '<p style="color:var(--clr-danger);text-align:center">Failed to load comparison.</p>'; }

@@ -95,7 +95,7 @@ router.post('/redeem', verifyToken, async (req, res, next) => {
     await supabaseAdmin.from('coupons').update({ used_count: coupon.used_count + 1 }).eq('id', coupon_id);
 
     const { data: biz } = await supabaseAdmin.from('businesses').select('owner_id,name').eq('id', coupon.business_id).maybeSingle();
-    if (biz?.owner_id) await notify(biz.owner_id, 'info', '🎟️ Coupon redeemed', `A customer just used code ${coupon.code} on ${biz.name}.`, '/pages/dashboard.html?tab=coupons');
+    if (biz?.owner_id) await notify(biz.owner_id, 'info', '🎟️ Coupon redeemed', `A customer just used code ${coupon.code} on ${biz.name}.`, '/dashboard?tab=coupons');
 
     res.status(201).json({ message: 'Coupon redeemed' });
   } catch (err) { next(err); }

@@ -78,7 +78,7 @@ router.post('/', verifyToken, async (req, res, next) => {
     if (error) throw error;
     require('../services/fraud.service').checkReview(data).catch(() => {});
     const { data: biz } = await supabaseAdmin.from('businesses').select('name,owner_id,slug').eq('id', business_id).single();
-    if (biz) await notify(biz.owner_id, 'success', `⭐ New ${rating}-star review for ${biz.name}`, content?.slice(0,100) || `${rating} star review received`, `/pages/business.html?slug=${biz.slug}`);
+    if (biz) await notify(biz.owner_id, 'success', `⭐ New ${rating}-star review for ${biz.name}`, content?.slice(0,100) || `${rating} star review received`, `/business?slug=${biz.slug}`);
     res.status(201).json({ review: data });
   } catch (err) { next(err); }
 });

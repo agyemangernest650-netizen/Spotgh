@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Help Centre | SpotGH</title>
   <meta name="description" content="Guides for using SpotGH — creating a listing, upgrading your plan, connecting an existing website, and using AI tools.">
-  <link rel="canonical" href="/pages/help.html">
+  <link rel="canonical" href="/help">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#4E0DAD">
   <link rel="icon" type="image/x-icon" href="/favicon.ico"><link rel="icon" type="image/png" sizes="192x192" href="/assets/images/icon-192.png"><link rel="apple-touch-icon" href="/assets/images/icon-192.png">
@@ -49,13 +49,13 @@
         </div>
       </div>
       <nav class="navbar__actions">
-        <a href="/pages/categories.html" class="navbar__link hidden-mobile" data-i18n="nav.categories">Categories</a>
-        <a href="/pages/directory.html" class="navbar__link hidden-mobile" data-i18n="nav.directory">Directory</a>
-        <a href="/pages/pricing.html" class="navbar__link hidden-mobile" data-i18n="nav.pricing">Pricing</a>
-        <a href="/pages/deals.html" class="navbar__link hidden-mobile">🎉 Deals</a>
-        <a href="/pages/events.html" class="navbar__link hidden-mobile">Events</a>
-        <a href="/pages/blog.html" class="navbar__link hidden-mobile">Blog</a>
-        <a href="/pages/map.html" class="navbar__link hidden-mobile"><i class="fa-solid fa-map"></i></a>
+        <a href="/categories" class="navbar__link hidden-mobile" data-i18n="nav.categories">Categories</a>
+        <a href="/directory" class="navbar__link hidden-mobile" data-i18n="nav.directory">Directory</a>
+        <a href="/pricing" class="navbar__link hidden-mobile" data-i18n="nav.pricing">Pricing</a>
+        <a href="/deals" class="navbar__link hidden-mobile">🎉 Deals</a>
+        <a href="/events" class="navbar__link hidden-mobile">Events</a>
+        <a href="/blog" class="navbar__link hidden-mobile">Blog</a>
+        <a href="/map" class="navbar__link hidden-mobile"><i class="fa-solid fa-map"></i></a>
         <select id="langSwitcher" onchange="setLanguage(this.value)" style="background:none;border:1px solid var(--clr-border);border-radius:8px;padding:.3rem .4rem;font-size:.75rem;color:var(--clr-text-2);cursor:pointer" title="Language"><option value="en">EN</option></select>
         <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
         <button class="near-me-btn hidden-mobile" onclick="searchNearMe()"><i class="fa-solid fa-location-crosshairs"></i></button>
@@ -67,14 +67,14 @@
       <input type="text" id="mobileSearch" placeholder="Search..." class="mobile-search-input">
       <nav class="mobile-nav">
         <a href="/">Home</a>
-        <a href="/pages/categories.html">Categories</a>
-        <a href="/pages/directory.html">Directory</a>
-        <a href="/pages/pricing.html">Pricing</a>
-        <a href="/pages/deals.html">Deals</a>
-        <a href="/pages/map.html">Map</a>
-        <a href="/pages/leads.html">Leads</a>
-        <a href="/pages/events.html">Events</a>
-        <a href="/pages/blog.html">Blog</a>
+        <a href="/categories">Categories</a>
+        <a href="/directory">Directory</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/deals">Deals</a>
+        <a href="/map">Map</a>
+        <a href="/leads">Leads</a>
+        <a href="/events">Events</a>
+        <a href="/blog">Blog</a>
         <button type="button" onclick="searchNearMe()" style="text-align:left;background:none;border:none;font:inherit;width:100%"><i class="fa-solid fa-location-crosshairs" style="margin-right:.5rem"></i>Near Me</button>
         <div id="mobileAuthLinks"></div>
       </nav>
@@ -132,7 +132,7 @@
           <summary>How to upgrade a subscription <i class="fa-solid fa-chevron-down"></i></summary>
           <div class="help-article-body">
             <ol>
-              <li>Go to the <a href="/pages/pricing.html">Pricing page</a>, or use the <strong>Upgrade Plan</strong> link on your dashboard or subscription tab.</li>
+              <li>Go to the <a href="/pricing">Pricing page</a>, or use the <strong>Upgrade Plan</strong> link on your dashboard or subscription tab.</li>
               <li>Choose monthly or yearly billing, and tell us whether you already have a website — it changes your price.</li>
               <li>Pick a plan and complete checkout via MoMo, Vodafone Cash, AirtelTigo Money, or card.</li>
             </ol>
@@ -174,7 +174,7 @@
       <div style="text-align:center;margin-top:3rem;padding:2rem;background:var(--clr-surface-2);border-radius:var(--radius-md,12px)">
         <h3 style="margin-bottom:.5rem">Still stuck?</h3>
         <p style="margin-bottom:1.25rem;color:var(--clr-text-2)">Our support team can help with anything not covered above.</p>
-        <a href="/pages/support.html" class="btn btn--primary">Contact Support</a>
+        <a href="/support" class="btn btn--primary">Contact Support</a>
       </div>
     </div>
   </main>
@@ -183,10 +183,10 @@
     <div class="container">
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2rem;margin-bottom:2rem">
         <div><a href="/" style="font-family:var(--font-display);font-size:1.25rem;font-weight:800;color:#fff">🏙️ Spot<span style="color:var(--clr-primary)">GH</span></a><p style="font-size:.875rem;margin-top:.75rem">Discover trusted businesses across Ghana, or build your own business website in minutes. Made with ❤️ in Ghana.</p></div>
-        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Explore</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/directory.html">Directory</a></li><li><a href="/pages/pricing.html">Pricing</a></li><li><a href="/pages/deals.html">Deals</a></li><li><a href="/pages/map.html">Map View</a></li></ul></div>
-        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Company</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/about.html">About Us</a></li><li><a href="/pages/help.html">Help Centre</a></li><li><a href="/pages/status.html">System Status</a></li></ul></div>
-        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Legal</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/pages/terms.html">Terms of Service</a></li><li><a href="/pages/privacy.html">Privacy Policy</a></li><li><a href="/pages/refund-policy.html">Refund Policy</a></li></ul></div>
-        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Support</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="mailto:support@spotgh.com">Contact Us</a></li><li><a href="/pages/pricing.html">Plans & Pricing</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Explore</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/directory">Directory</a></li><li><a href="/pricing">Pricing</a></li><li><a href="/deals">Deals</a></li><li><a href="/map">Map View</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Company</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/about">About Us</a></li><li><a href="/help">Help Centre</a></li><li><a href="/status">System Status</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Legal</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="/terms">Terms of Service</a></li><li><a href="/privacy">Privacy Policy</a></li><li><a href="/refund-policy">Refund Policy</a></li></ul></div>
+        <div><h4 style="color:#fff;margin-bottom:.75rem;font-size:1rem">Support</h4><ul style="display:flex;flex-direction:column;gap:.5rem;font-size:.875rem"><li><a href="mailto:support@spotgh.com">Contact Us</a></li><li><a href="/pricing">Plans & Pricing</a></li></ul></div>
       </div>
       <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:1.5rem;text-align:center;font-size:.8rem">© 2026 SpotGH · 🇬🇭 Supporting Ghanaian Businesses</div>
     </div>

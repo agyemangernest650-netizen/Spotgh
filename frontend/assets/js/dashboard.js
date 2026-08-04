@@ -10,15 +10,15 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="dashboard">
       <aside class="sidebar">
         <div class="sidebar__label">Main</div>
-        <a href="/pages/dashboard.html" class="sidebar__item active"><i class="fa-solid fa-gauge"></i> Overview</a>
-        <a href="/pages/dashboard.html?tab=businesses" class="sidebar__item"><i class="fa-solid fa-store"></i> My Businesses</a>
-        <a href="/pages/dashboard.html?tab=new" class="sidebar__item"><i class="fa-solid fa-plus"></i> Add Business</a>
+        <a href="/dashboard" class="sidebar__item active"><i class="fa-solid fa-gauge"></i> Overview</a>
+        <a href="/dashboard?tab=businesses" class="sidebar__item"><i class="fa-solid fa-store"></i> My Businesses</a>
+        <a href="/dashboard?tab=new" class="sidebar__item"><i class="fa-solid fa-plus"></i> Add Business</a>
         <div class="sidebar__label">Account</div>
-        <a href="/pages/subscriptions.html" class="sidebar__item"><i class="fa-solid fa-credit-card"></i> Subscription</a>
-        <a href="/pages/saved.html" class="sidebar__item"><i class="fa-regular fa-heart"></i> Saved</a>
-        <a href="/pages/referrals.html" class="sidebar__item"><i class="fa-solid fa-gift"></i> Referrals</a>
-        <a href="/pages/franchise-manager.html" class="sidebar__item"><i class="fa-solid fa-store"></i> Franchise Manager</a>
-        <a href="/pages/profile.html" class="sidebar__item"><i class="fa-solid fa-user"></i> Profile</a>
+        <a href="/subscriptions" class="sidebar__item"><i class="fa-solid fa-credit-card"></i> Subscription</a>
+        <a href="/saved" class="sidebar__item"><i class="fa-regular fa-heart"></i> Saved</a>
+        <a href="/referrals" class="sidebar__item"><i class="fa-solid fa-gift"></i> Referrals</a>
+        <a href="/franchise-manager" class="sidebar__item"><i class="fa-solid fa-store"></i> Franchise Manager</a>
+        <a href="/profile" class="sidebar__item"><i class="fa-solid fa-user"></i> Profile</a>
       </aside>
       <div class="dashboard__content">
         <div class="dashboard__header">
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div id="dashContent">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
             <h2 style="font-size:1.25rem;font-weight:700">My Businesses</h2>
-            <a href="/pages/dashboard.html?tab=new" class="btn btn--primary btn--sm"><i class="fa-solid fa-plus"></i> Add Business</a>
+            <a href="/dashboard?tab=new" class="btn btn--primary btn--sm"><i class="fa-solid fa-plus"></i> Add Business</a>
           </div>
           <div id="incompleteBizReminder" style="display:none"></div>
           <div id="myBusinessesList">
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (finishing) {
         sessionStorage.removeItem('spotgh_finish_business');
         toast.success(`Payment confirmed — ${finishing.name} is live! Add its location, description, and branding to finish setting it up.`);
-        setTimeout(() => { window.location.href = `/pages/business-edit.html?id=${finishing.id}`; }, 2200);
+        setTimeout(() => { window.location.href = `/business-edit?id=${finishing.id}`; }, 2200);
       } else {
         toast.success('Payment confirmed — your plan is active!');
       }
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadNewBusinessTab() {
     const content = document.getElementById('dashContent');
     document.querySelectorAll('.sidebar__item').forEach(a => a.classList.remove('active'));
-    document.querySelector('a[href="/pages/dashboard.html?tab=new"]').classList.add('active');
+    document.querySelector('a[href="/dashboard?tab=new"]').classList.add('active');
 
     const isCreator = user?.role === 'creator';
     let creatorForceDirectoryTier = null, creatorForceWebsiteTier = null;
@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <p>It's now pending review — most listings go live within a day. While you wait, add a logo, photos, and your business hours to make it shine.</p>
         <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin-top:.5rem">
           <a id="newBizSuccessEditLink" href="#" class="btn btn--primary">Add Logo & Photos</a>
-          <a href="/pages/dashboard.html" class="btn btn--ghost">Back to Dashboard</a>
+          <a href="/dashboard" class="btn btn--ghost">Back to Dashboard</a>
         </div>
       </div>`;
 
@@ -450,7 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (res.fully_covered) {
           toast.success(res.is_trial ? '🎉 Your free month has started!' : '🎉 Plan activated!');
-          window.location.href = `/pages/dashboard.html?payment=success`;
+          window.location.href = `/dashboard?payment=success`;
         } else if (res.authorization_url) {
           window.location.href = res.authorization_url;
         }
@@ -694,13 +694,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('newBizForm').style.display = 'none';
         document.getElementById('newBizSuccessTitle').textContent = `${business.name} submitted!`;
-        document.getElementById('newBizSuccessEditLink').href = `/pages/business-edit.html?id=${business.id}`;
+        document.getElementById('newBizSuccessEditLink').href = `/business-edit?id=${business.id}`;
         document.getElementById('newBizSuccess').style.display = 'block';
       } catch (err) {
         setLoading(btn, false);
         if (err.code === 'LIMIT_REACHED' || err.redirect) {
           toast.warning(err.error || 'Upgrade your plan to add more businesses');
-          setTimeout(() => window.location.href = '/pages/pricing.html', 1200);
+          setTimeout(() => window.location.href = '/pricing', 1200);
         } else toast.error(err.message || 'Failed to create business');
       }
     });
@@ -709,7 +709,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadSubscriptionTab() {
     const content = document.getElementById('dashContent');
     document.querySelectorAll('.sidebar__item').forEach(a => a.classList.remove('active'));
-    document.querySelector('a[href="/pages/dashboard.html?tab=subscription"]').classList.add('active');
+    document.querySelector('a[href="/dashboard?tab=subscription"]').classList.add('active');
     content.innerHTML = `<h2 style="font-size:1.25rem;font-weight:700;margin-bottom:1rem">Subscription</h2><div id="subDetail" class="card" style="padding:1.5rem"><div class="skeleton" style="height:80px;border-radius:8px"></div></div>`;
     try {
       // Resolve which business this subscription belongs to so the pricing
@@ -720,7 +720,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const bizId = await singleBusinessId();
       const s = await API.get(bizId ? `/subscriptions/status?business_id=${bizId}` : '/subscriptions/status');
       const isTrial = s.subscription?.is_trial && s.is_active;
-      const pricingHref = bizId ? `/pages/pricing.html?business_id=${bizId}` : '/pages/pricing.html';
+      const pricingHref = bizId ? `/pricing?business_id=${bizId}` : '/pricing';
       document.getElementById('subDetail').innerHTML = `
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
           <div>
@@ -756,7 +756,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const msg = isTrial
         ? `🎉 You're on a free 30-day Starter trial — ${s.days_left} day${s.days_left===1?'':'s'} left. No payment needed until it ends.`
         : s.message;
-      const pricingHref = bizId ? `/pages/pricing.html?business_id=${bizId}` : '/pages/pricing.html';
+      const pricingHref = bizId ? `/pricing?business_id=${bizId}` : '/pricing';
       document.getElementById('planBanner').innerHTML = `
         <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;background:${s.is_active?'rgba(78,13,173,.08)':'rgba(220,53,69,.08)'};border:1px solid ${s.is_active?'var(--clr-primary)':'var(--clr-danger)'};border-radius:var(--radius-md);padding:.85rem 1.1rem;margin-bottom:1.5rem">
           <i class="fa-solid ${s.is_active?'fa-clock':'fa-triangle-exclamation'}" style="color:${s.is_active?'var(--clr-primary)':'var(--clr-danger)'}"></i>
@@ -805,7 +805,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ${incomplete.map(b => `
               <div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.4rem 0;flex-wrap:wrap">
                 <span style="font-size:.875rem">${b.name} — missing ${!b.city ? 'location' : ''}${!b.city && !b.description ? ' & ' : ''}${!b.description ? 'description' : ''}</span>
-                <a href="/pages/business-edit.html?id=${b.id}" class="btn btn--primary btn--sm">Finish Setup</a>
+                <a href="/business-edit?id=${b.id}" class="btn btn--primary btn--sm">Finish Setup</a>
               </div>`).join('')}
           </div>`;
       } else if (reminderBox) {
@@ -819,8 +819,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <h3>No businesses yet</h3>
             <p>Subscribe to a plan and add your first business to get started.</p>
             <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
-              <a href="/pages/pricing.html" class="btn btn--primary">View Plans</a>
-              <a href="/pages/dashboard.html?tab=new" class="btn btn--ghost">Add Business</a>
+              <a href="/pricing" class="btn btn--primary">View Plans</a>
+              <a href="/dashboard?tab=new" class="btn btn--ghost">Add Business</a>
             </div>
           </div>`;
         return;
@@ -829,11 +829,11 @@ document.addEventListener('DOMContentLoaded', () => {
       list.innerHTML = businesses.map(b => {
         const hasWebsite = !!b.website_tier;
         const websiteIcons = hasWebsite ? `
-            <a href="/pages/gallery.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Gallery"><i class="fa-solid fa-images"></i></a>
-            <a href="/pages/products.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Products"><i class="fa-solid fa-box"></i></a>
-            <a href="/pages/bookings.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Bookings"><i class="fa-solid fa-calendar"></i></a>
-            <a href="/pages/business-orders.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Orders"><i class="fa-solid fa-bag-shopping"></i></a>`
-          : `<a href="/pages/pricing.html?tab=website&business_id=${b.id}" class="btn btn--outline btn--sm" title="Add a Mini-Website to unlock Gallery, Products, Bookings & Orders"><i class="fa-solid fa-globe"></i> Add Website</a>`;
+            <a href="/gallery?id=${b.id}" class="btn btn--ghost btn--sm" title="Gallery"><i class="fa-solid fa-images"></i></a>
+            <a href="/products?id=${b.id}" class="btn btn--ghost btn--sm" title="Products"><i class="fa-solid fa-box"></i></a>
+            <a href="/bookings?id=${b.id}" class="btn btn--ghost btn--sm" title="Bookings"><i class="fa-solid fa-calendar"></i></a>
+            <a href="/business-orders?id=${b.id}" class="btn btn--ghost btn--sm" title="Orders"><i class="fa-solid fa-bag-shopping"></i></a>`
+          : `<a href="/pricing?tab=website&business_id=${b.id}" class="btn btn--outline btn--sm" title="Add a Mini-Website to unlock Gallery, Products, Bookings & Orders"><i class="fa-solid fa-globe"></i> Add Website</a>`;
         return `
         <div class="card" style="padding:1.25rem;display:flex;align-items:center;gap:1.25rem;margin-bottom:.75rem;flex-wrap:wrap">
           ${b.logo_url
@@ -852,16 +852,16 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>
           <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-end">
-            ${b.status==='active' ? `<a href="/pages/business.html?slug=${b.slug}" class="btn btn--ghost btn--sm" target="_blank"><i class="fa-solid fa-eye"></i></a>` : ''}
-            <a href="/pages/business-edit.html?id=${b.id}" class="btn btn--outline btn--sm"><i class="fa-solid fa-pen"></i> Edit</a>
-            <a href="/pages/analytics.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Analytics"><i class="fa-solid fa-chart-line"></i></a>
+            ${b.status==='active' ? `<a href="/business?slug=${b.slug}" class="btn btn--ghost btn--sm" target="_blank"><i class="fa-solid fa-eye"></i></a>` : ''}
+            <a href="/business-edit?id=${b.id}" class="btn btn--outline btn--sm"><i class="fa-solid fa-pen"></i> Edit</a>
+            <a href="/analytics?id=${b.id}" class="btn btn--ghost btn--sm" title="Analytics"><i class="fa-solid fa-chart-line"></i></a>
             ${websiteIcons}
-            <a href="/pages/messages.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Messages"><i class="fa-solid fa-comment"></i></a>
-            <a href="/pages/deals-manager.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Deals & Coupons"><i class="fa-solid fa-tags"></i></a>
-            <a href="/pages/events-manager.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Events"><i class="fa-solid fa-champagne-glasses"></i></a>
-            <a href="/pages/leads.html" class="btn btn--ghost btn--sm" title="Lead Marketplace"><i class="fa-solid fa-bullhorn"></i></a>
-            <a href="/pages/health.html?id=${b.id}" class="btn btn--ghost btn--sm" title="Health Score"><i class="fa-solid fa-heart-pulse"></i></a>
-            <a href="/pages/pricing.html?business_id=${b.id}" class="btn btn--ghost btn--sm" title="Manage Plan"><i class="fa-solid fa-credit-card"></i></a>
+            <a href="/messages?id=${b.id}" class="btn btn--ghost btn--sm" title="Messages"><i class="fa-solid fa-comment"></i></a>
+            <a href="/deals-manager?id=${b.id}" class="btn btn--ghost btn--sm" title="Deals & Coupons"><i class="fa-solid fa-tags"></i></a>
+            <a href="/events-manager?id=${b.id}" class="btn btn--ghost btn--sm" title="Events"><i class="fa-solid fa-champagne-glasses"></i></a>
+            <a href="/leads" class="btn btn--ghost btn--sm" title="Lead Marketplace"><i class="fa-solid fa-bullhorn"></i></a>
+            <a href="/health?id=${b.id}" class="btn btn--ghost btn--sm" title="Health Score"><i class="fa-solid fa-heart-pulse"></i></a>
+            <a href="/pricing?business_id=${b.id}" class="btn btn--ghost btn--sm" title="Manage Plan"><i class="fa-solid fa-credit-card"></i></a>
           </div>
         </div>`;
       }).join('');
@@ -872,7 +872,7 @@ document.addEventListener('DOMContentLoaded', () => {
           { target:'.dashboard__title',  title:'Welcome to your Dashboard!', text:'This is your control centre. Track views, manage businesses, and grow your presence across Ghana.' },
           { target:'#statGrid',          title:'Your Stats',                  text:'See your total views, WhatsApp clicks, and ratings at a glance.' },
           { target:'#myBusinessesList',  title:'Your Businesses',             text:'All your listings appear here. Edit, view analytics, or manage gallery and products.' },
-          { target:'a[href="/pages/pricing.html"]', title:'Choose a Plan',    text:'You need an active subscription to go live. Subscribe to start reaching customers!' },
+          { target:'a[href="/pricing"]', title:'Choose a Plan',    text:'You need an active subscription to go live. Subscribe to start reaching customers!' },
         ]), 1500);
       }
     } catch(err) { console.error('loadDashboard failed:', err); toast.error('Failed to load dashboard'); }

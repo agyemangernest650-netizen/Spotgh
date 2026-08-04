@@ -77,7 +77,7 @@ window.openStatusBadge = (hours) => {
 
 // ── Save/favorite toggle (business cards) ──────────────────────────────────
 window.toggleFavorite = async (btn, businessId) => {
-  if (!Auth.getUser()) { window.location.href = '/pages/login.html'; return; }
+  if (!Auth.getUser()) { window.location.href = '/login'; return; }
   const saved = btn.classList.contains('is-saved');
   btn.disabled = true;
   try {
@@ -114,7 +114,7 @@ window.renderBusinessCard = (biz) => {
         <div class="business-card__body" style="display:flex;align-items:flex-end;gap:1rem;flex-wrap:wrap">
           <div style="flex:1;min-width:200px">
             <div class="biz-category">${biz.category_icon || ''} ${biz.category_name || 'Business'}</div>
-            <h3 class="biz-name" style="font-size:1.35rem"><a href="/pages/business.html?slug=${biz.slug}">${biz.name}</a></h3>
+            <h3 class="biz-name" style="font-size:1.35rem"><a href="/business?slug=${biz.slug}">${biz.name}</a></h3>
             ${biz.tagline ? `<p class="biz-tagline">${biz.tagline}</p>` : ''}
             <div class="biz-meta">
               <span class="biz-rating">${biz.avg_rating > 0
@@ -125,7 +125,7 @@ window.renderBusinessCard = (biz) => {
             ${biz.operating_hours ? `<div style="margin-top:.4rem">${window.openStatusBadge(biz.operating_hours)}</div>` : ''}
           </div>
           <div style="display:flex;gap:.5rem;flex-shrink:0">
-            <a href="/pages/business.html?slug=${biz.slug}" class="btn btn--primary btn--sm">Visit Mini-Site</a>
+            <a href="/business?slug=${biz.slug}" class="btn btn--primary btn--sm">Visit Mini-Site</a>
             ${biz.phone ? `<a href="tel:${biz.phone}" class="btn btn--ghost btn--sm btn--icon" title="Call"><i class="fa-solid fa-phone"></i></a>` : ''}
             ${biz.whatsapp ? `<a href="https://wa.me/${biz.whatsapp.replace(/\D/g, '')}" class="btn btn--whatsapp btn--sm btn--icon" target="_blank" rel="noopener" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : ''}
           </div>
@@ -149,7 +149,7 @@ window.renderBusinessCard = (biz) => {
         </div>
         <div class="business-card__body">
           <div class="biz-category">${biz.category_icon || ''} ${biz.category_name || 'Business'}</div>
-          <h3 class="biz-name"><a href="/pages/business.html?slug=${biz.slug}">${biz.name}</a></h3>
+          <h3 class="biz-name"><a href="/business?slug=${biz.slug}">${biz.name}</a></h3>
           ${biz.tagline ? `<p class="biz-tagline">${biz.tagline}</p>` : ''}
           <div class="biz-meta">
             <span class="biz-rating" style="font-weight:700">${biz.avg_rating > 0
@@ -160,7 +160,7 @@ window.renderBusinessCard = (biz) => {
           ${biz.operating_hours ? `<div style="margin-top:.4rem">${window.openStatusBadge(biz.operating_hours)}</div>` : ''}
         </div>
         <div class="business-card__actions">
-          <a href="/pages/business.html?slug=${biz.slug}" class="btn btn--outline btn--sm" style="flex:1">View</a>
+          <a href="/business?slug=${biz.slug}" class="btn btn--outline btn--sm" style="flex:1">View</a>
           ${biz.phone ? `<a href="tel:${biz.phone}" class="btn btn--ghost btn--sm btn--icon" title="Call"><i class="fa-solid fa-phone"></i></a>` : ''}
           ${biz.whatsapp ? `<a href="https://wa.me/${biz.whatsapp.replace(/\D/g, '')}" class="btn btn--whatsapp btn--sm btn--icon" target="_blank" rel="noopener" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : ''}
         </div>
@@ -183,7 +183,7 @@ window.renderBusinessCard = (biz) => {
       </div>
       <div class="business-card__body">
         <div class="biz-category">${biz.category_icon || ''} ${biz.category_name || 'Business'}</div>
-        <h3 class="biz-name"><a href="/pages/business.html?slug=${biz.slug}">${biz.name}</a></h3>
+        <h3 class="biz-name"><a href="/business?slug=${biz.slug}">${biz.name}</a></h3>
         ${biz.tagline ? `<p class="biz-tagline">${biz.tagline}</p>` : ''}
         <div class="biz-meta">
           <span class="biz-rating">${biz.avg_rating > 0
@@ -194,7 +194,7 @@ window.renderBusinessCard = (biz) => {
         ${biz.operating_hours ? `<div style="margin-top:.4rem">${window.openStatusBadge(biz.operating_hours)}</div>` : ''}
       </div>
       <div class="business-card__actions">
-        <a href="/pages/business.html?slug=${biz.slug}" class="btn btn--outline btn--sm" style="flex:1">View</a>
+        <a href="/business?slug=${biz.slug}" class="btn btn--outline btn--sm" style="flex:1">View</a>
         ${biz.phone ? `<a href="tel:${biz.phone}" class="btn btn--ghost btn--sm btn--icon" title="Call"><i class="fa-solid fa-phone"></i></a>` : ''}
         ${biz.whatsapp ? `<a href="https://wa.me/${biz.whatsapp.replace(/\D/g, '')}" class="btn btn--whatsapp btn--sm btn--icon" target="_blank" rel="noopener" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : ''}
       </div>
@@ -219,7 +219,7 @@ window.searchNearMe = () => {
   if (btn) btn.classList.add('loading');
   navigator.geolocation.getCurrentPosition(
     pos => {
-      window.location.href = `/pages/directory.html?lat=${pos.coords.latitude.toFixed(6)}&lng=${pos.coords.longitude.toFixed(6)}`;
+      window.location.href = `/directory?lat=${pos.coords.latitude.toFixed(6)}&lng=${pos.coords.longitude.toFixed(6)}`;
     },
     (err) => {
       const msgs = {
@@ -290,15 +290,15 @@ window.loadComponents = () => {
   if (!document.getElementById('mobileBottomNav')) {
     const path = location.pathname;
     const isActive = (p) => path === p ? 'is-active' : '';
-    const profileHref = user ? '/pages/profile.html' : '/pages/login.html';
+    const profileHref = user ? '/profile' : '/login';
     const nav = document.createElement('nav');
     nav.id = 'mobileBottomNav';
     nav.className = 'mobile-bottom-nav';
     nav.innerHTML = `
       <a href="/" class="mobile-bottom-nav__item ${isActive('/')}"><i class="fa-solid fa-house"></i><span>Home</span></a>
-      <a href="/pages/categories.html" class="mobile-bottom-nav__item ${isActive('/pages/categories.html')}"><i class="fa-solid fa-grip"></i><span>Categories</span></a>
-      <a href="/pages/dashboard.html?tab=new" class="mobile-bottom-nav__item mobile-bottom-nav__item--cta"><i class="fa-solid fa-plus"></i></a>
-      <a href="/pages/deals.html" class="mobile-bottom-nav__item ${isActive('/pages/deals.html')}"><i class="fa-solid fa-tag"></i><span>Deals</span></a>
+      <a href="/categories" class="mobile-bottom-nav__item ${isActive('/categories')}"><i class="fa-solid fa-grip"></i><span>Categories</span></a>
+      <a href="/dashboard?tab=new" class="mobile-bottom-nav__item mobile-bottom-nav__item--cta"><i class="fa-solid fa-plus"></i></a>
+      <a href="/deals" class="mobile-bottom-nav__item ${isActive('/deals')}"><i class="fa-solid fa-tag"></i><span>Deals</span></a>
       <a href="${profileHref}" class="mobile-bottom-nav__item ${isActive(profileHref)}"><i class="fa-solid fa-user"></i><span>Profile</span></a>`;
     document.body.appendChild(nav);
   }
@@ -335,18 +335,17 @@ window.loadComponents = () => {
                <p style="font-weight:700">${user.full_name}</p>
                <p style="font-size:.75rem;opacity:.6">${user.email}</p>
              </div>
-             <a href="/pages/dashboard.html" role="menuitem"><i class="fa-solid fa-gauge"></i> Dashboard</a>
-             <a href="/pages/orders.html" role="menuitem"><i class="fa-solid fa-bag-shopping"></i> My Orders</a>
-             <a href="/pages/profile.html" role="menuitem"><i class="fa-solid fa-user"></i> Profile</a>
-             ${user.role === 'creator' ? '<a href="/pages/admin.html" role="menuitem"><i class="fa-solid fa-shield"></i> Admin</a>' : ''}
-             ${user.role === 'creator' ? '<a href="/pages/creator.html" role="menuitem"><i class="fa-solid fa-crown"></i> Creator</a>' : ''}
-             <a href="/pages/payment-history.html" role="menuitem"><i class="fa-solid fa-receipt"></i> Payment History</a>
+             <a href="/dashboard" role="menuitem"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+             <a href="/orders" role="menuitem"><i class="fa-solid fa-bag-shopping"></i> My Orders</a>
+             <a href="/profile" role="menuitem"><i class="fa-solid fa-user"></i> Profile</a>
+             ${user.role === 'creator' ? '<a href="/creator" role="menuitem"><i class="fa-solid fa-crown"></i> Creator</a>' : ''}
+             <a href="/payment-history" role="menuitem"><i class="fa-solid fa-receipt"></i> Payment History</a>
              <button onclick="Auth.logout()" style="color:var(--clr-danger)" role="menuitem"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
            </div>
          </div>
        </div>`
-      : `<a href="/pages/login.html" class="btn btn--ghost btn--sm hidden-mobile">Login</a>
-         <a href="/pages/register.html" class="btn btn--primary btn--sm">List Business</a>`;
+      : `<a href="/login" class="btn btn--ghost btn--sm hidden-mobile">Login</a>
+         <a href="/register" class="btn btn--primary btn--sm">List Business</a>`;
 
     const menuBtn  = document.getElementById('userMenuBtn');
     const dropdown = document.getElementById('userDropdown');
@@ -431,8 +430,8 @@ window.loadComponents = () => {
   const mobileAuthLinks = document.getElementById('mobileAuthLinks');
   if (mobileAuthLinks) {
     mobileAuthLinks.innerHTML = user
-      ? `<a href="/pages/dashboard.html">Dashboard</a><button onclick="Auth.logout()">Logout</button>`
-      : `<a href="/pages/login.html">Login</a><a href="/pages/register.html">Register Free</a>`;
+      ? `<a href="/dashboard">Dashboard</a><button onclick="Auth.logout()">Logout</button>`
+      : `<a href="/login">Login</a><a href="/register">Register Free</a>`;
   }
 
   // ── Hamburger menu
@@ -462,7 +461,7 @@ window.loadComponents = () => {
   const mobileSearch = document.getElementById('mobileSearch');
   mobileSearch?.addEventListener('keydown', e => {
     if (e.key === 'Enter' && e.target.value.trim()) {
-      window.location.href = `/pages/directory.html?q=${encodeURIComponent(e.target.value.trim())}`;
+      window.location.href = `/directory?q=${encodeURIComponent(e.target.value.trim())}`;
     }
   });
 
@@ -527,12 +526,12 @@ window.loadComponents = () => {
           const data = await API.get(`/search/autocomplete?q=${encodeURIComponent(q)}`);
           const items = [
             ...(data.businesses || []).map(b =>
-              `<a href="/pages/business.html?slug=${b.slug}" class="suggestion-item">
+              `<a href="/business?slug=${b.slug}" class="suggestion-item">
                  ${b.logo_url ? `<img src="${b.logo_url}" style="width:28px;height:28px;border-radius:4px;object-fit:cover" alt="">` : '<span style="font-size:1.2rem">🏢</span>'}
                  <span>${b.name}</span><small>${b.city || ''}</small>
                </a>`),
             ...(data.categories || []).map(c =>
-              `<a href="/pages/directory.html?category=${c.slug}" class="suggestion-item">
+              `<a href="/directory?category=${c.slug}" class="suggestion-item">
                  <span>${c.icon}</span><span>${c.name}</span><small>Category</small>
                </a>`),
           ];
@@ -549,7 +548,7 @@ window.loadComponents = () => {
     navSearch.addEventListener('keydown', e => {
       if (e.key === 'Enter' && navSearch.value.trim()) {
         navSug.hidden = true;
-        window.location.href = `/pages/directory.html?q=${encodeURIComponent(navSearch.value.trim())}`;
+        window.location.href = `/directory?q=${encodeURIComponent(navSearch.value.trim())}`;
       }
     });
 
@@ -567,12 +566,12 @@ window.loadComponents = () => {
   // through the existing ticket system, so it doesn't over-promise.
   if (!document.getElementById('helpWidget')) {
     const HELP_TOPICS = [
-      { q: 'create a listing', a: 'From your dashboard, choose "Add Business", pick a category, and walk through the short wizard. Your listing goes live after a quick review.', link: '/pages/help.html' },
-      { q: 'upgrade my plan', a: 'Head to the Pricing page, or use "Upgrade Plan" on your dashboard. Tell us whether you already have a website — it changes your price.', link: '/pages/pricing.html' },
-      { q: 'connect my website', a: 'When creating a listing (or on the pricing page), choose "I already have a website" and enter its URL — you\'ll pay less than the mini-website plan.', link: '/pages/help.html' },
-      { q: 'edit my business', a: 'Go to Dashboard → your business → Edit to update photos, hours, description, and more.', link: '/pages/help.html' },
-      { q: 'ai tools', a: 'AI can draft a business description or meta title/description for you — you always review and edit before it\'s saved.', link: '/pages/help.html' },
-      { q: 'refund', a: 'See our Refund Policy for what qualifies and how to request one.', link: '/pages/refund-policy.html' },
+      { q: 'create a listing', a: 'From your dashboard, choose "Add Business", pick a category, and walk through the short wizard. Your listing goes live after a quick review.', link: '/help' },
+      { q: 'upgrade my plan', a: 'Head to the Pricing page, or use "Upgrade Plan" on your dashboard. Tell us whether you already have a website — it changes your price.', link: '/pricing' },
+      { q: 'connect my website', a: 'When creating a listing (or on the pricing page), choose "I already have a website" and enter its URL — you\'ll pay less than the mini-website plan.', link: '/help' },
+      { q: 'edit my business', a: 'Go to Dashboard → your business → Edit to update photos, hours, description, and more.', link: '/help' },
+      { q: 'ai tools', a: 'AI can draft a business description or meta title/description for you — you always review and edit before it\'s saved.', link: '/help' },
+      { q: 'refund', a: 'See our Refund Policy for what qualifies and how to request one.', link: '/refund-policy' },
     ];
     const widget = document.createElement('div');
     widget.id = 'helpWidget';
@@ -595,7 +594,7 @@ window.loadComponents = () => {
             <button id="helpWidgetSend" class="btn btn--primary btn--sm" style="width:100%">Send Message</button>
           </div>
         </div>
-        <a href="/pages/help.html" style="display:block;text-align:center;padding:.7rem;font-size:.78rem;color:var(--clr-primary);border-top:1px solid var(--clr-border)">Open full Help Centre →</a>
+        <a href="/help" style="display:block;text-align:center;padding:.7rem;font-size:.78rem;color:var(--clr-primary);border-top:1px solid var(--clr-border)">Open full Help Centre →</a>
       </div>`;
     document.body.appendChild(widget);
 

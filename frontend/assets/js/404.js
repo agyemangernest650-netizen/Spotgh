@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
           <a href="/" class="btn btn--primary"><i class="fa-solid fa-house" style="margin-right:.4rem"></i>Go Home</a>
-          <a href="/pages/directory.html" class="btn btn--outline">Browse Directory</a>
+          <a href="/directory" class="btn btn--outline">Browse Directory</a>
           <button class="btn btn--ghost" onclick="history.back()">← Go Back</button>
         </div>
 
@@ -34,10 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
           <p style="font-size:.8rem;color:var(--clr-text-3);margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.05em">Popular pages</p>
           <div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap">
             ${[
-              { href:'/pages/deals.html',     label:'🎉 Deals' },
-              { href:'/pages/map.html',        label:'🗺️ Map' },
-              { href:'/pages/pricing.html',    label:'💳 Pricing' },
-              { href:'/pages/register.html',   label:'📝 Register' },
+              { href:'/deals',     label:'🎉 Deals' },
+              { href:'/map',        label:'🗺️ Map' },
+              { href:'/pricing',    label:'💳 Pricing' },
+              { href:'/register',   label:'📝 Register' },
             ].map(l => `<a href="${l.href}" style="font-size:.85rem;color:var(--clr-primary);text-decoration:none;padding:.3rem .6rem;border:1px solid var(--clr-primary-20,rgba(78,13,173,.2));border-radius:20px">${l.label}</a>`).join('')}
           </div>
         </div>
@@ -47,6 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('notFoundSearch').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
   window.doSearch = () => {
     const q = document.getElementById('notFoundSearch').value.trim();
-    if (q) window.location.href = `/pages/directory.html?q=${encodeURIComponent(q)}`;
+    if (q) window.location.href = `/directory?q=${encodeURIComponent(q)}`;
   };
 });

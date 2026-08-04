@@ -20,8 +20,8 @@ router.get('/:id/connect', verifyToken, requireOwnership, (req, res) => {
 router.get('/callback', async (req, res) => {
   try {
     const { code, state: businessId, error: oauthError } = req.query;
-    if (oauthError) return res.redirect(`${env.APP_URL}/pages/business-edit.html?id=${businessId}&calendar=denied`);
-    if (!code || !businessId) return res.redirect(`${env.APP_URL}/pages/dashboard.html?calendar=error`);
+    if (oauthError) return res.redirect(`${env.APP_URL}/business-edit?id=${businessId}&calendar=denied`);
+    if (!code || !businessId) return res.redirect(`${env.APP_URL}/dashboard?calendar=error`);
 
     const refreshToken = await gcal.exchangeCodeForRefreshToken(code);
     if (!refreshToken) {
@@ -30,18 +30,18 @@ router.get('/callback', async (req, res) => {
       // revoke access in their Google Account and reconnect to force a new one.
       const { data: biz } = await supabaseAdmin.from('businesses').select('google_calendar_refresh_token').eq('id', businessId).maybeSingle();
       if (!biz?.google_calendar_refresh_token)
-        return res.redirect(`${env.APP_URL}/pages/business-edit.html?id=${businessId}&calendar=reauth_needed`);
+        return res.redirect(`${env.APP_URL}/business-edit?id=${businessId}&calendar=reauth_needed`);
       await supabaseAdmin.from('businesses').update({ google_calendar_connected: true }).eq('id', businessId);
-      return res.redirect(`${env.APP_URL}/pages/business-edit.html?id=${businessId}&calendar=connected`);
+      return res.redirect(`${env.APP_URL}/business-edit?id=${businessId}&calendar=connected`);
     }
 
     await supabaseAdmin.from('businesses').update({
       google_calendar_connected: true,
       google_calendar_refresh_token: refreshToken,
     }).eq('id', businessId);
-    res.redirect(`${env.APP_URL}/pages/business-edit.html?id=${businessId}&calendar=connected`);
+    res.redirect(`${env.APP_URL}/business-edit?id=${businessId}&calendar=connected`);
   } catch (err) {
-    res.redirect(`${env.APP_URL}/pages/dashboard.html?calendar=error`);
+    res.redirect(`${env.APP_URL}/dashboard?calendar=error`);
   }
 });
 

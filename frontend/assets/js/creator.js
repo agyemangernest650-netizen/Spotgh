@@ -237,11 +237,11 @@ document.addEventListener('DOMContentLoaded', () => {
             <div style="font-size:.875rem;margin-bottom:.75rem">
               <strong>Business:</strong> ${biz.name}<br>
               <strong>Owner:</strong> ${result.owner.email}<br>
-              <strong>Live URL:</strong> <a href="/pages/business.html?slug=${biz.slug}" target="_blank" style="color:var(--clr-primary)">/pages/business.html?slug=${biz.slug}</a>
+              <strong>Live URL:</strong> <a href="/business?slug=${biz.slug}" target="_blank" style="color:var(--clr-primary)">/business?slug=${biz.slug}</a>
             </div>
             <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-              <a href="/pages/business.html?slug=${biz.slug}" target="_blank" class="btn btn--success btn--sm"><i class="fa-solid fa-eye"></i> View Live Page</a>
-              <a href="/pages/business-edit.html?id=${biz.id}" target="_blank" class="btn btn--outline btn--sm"><i class="fa-solid fa-pen"></i> Open Editor</a>
+              <a href="/business?slug=${biz.slug}" target="_blank" class="btn btn--success btn--sm"><i class="fa-solid fa-eye"></i> View Live Page</a>
+              <a href="/business-edit?id=${biz.id}" target="_blank" class="btn btn--outline btn--sm"><i class="fa-solid fa-pen"></i> Open Editor</a>
               <button class="btn btn--ghost btn--sm" onclick="document.getElementById('bwResult').innerHTML='';clearBuildForm()">Build Another</button>
             </div>
           </div>`;
@@ -319,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   👁 ${b.view_count||0} · ⭐ ${b.avg_rating||'—'} · 📝 ${b.review_count||0}
                 </td>
                 <td style="padding:.75rem 1rem;display:flex;gap:.4rem;flex-wrap:wrap">
-                  ${b.status==='active'?`<a href="/pages/business.html?slug=${b.slug}" target="_blank" class="btn btn--ghost btn--sm"><i class="fa-solid fa-eye"></i></a>`:''}
+                  ${b.status==='active'?`<a href="/business?slug=${b.slug}" target="_blank" class="btn btn--ghost btn--sm"><i class="fa-solid fa-eye"></i></a>`:''}
                   <button class="btn btn--outline btn--sm" onclick="grantSub('${b.id}')">Grant Sub</button>
                   <button class="btn btn--ghost btn--sm" onclick="toggleFeatured('${b.id}',${!b.is_featured})">${b.is_featured?'Unfeature':'Feature'}</button>
                   <button class="btn btn--ghost btn--sm" onclick="toggleVerified('${b.id}',${!b.is_verified})">${b.is_verified?'Unverify':'Verify'}</button>
@@ -834,12 +834,16 @@ document.addEventListener('DOMContentLoaded', () => {
   async function moderation() {
     const el = document.getElementById('creatorContent');
     el.innerHTML = `<div class="dashboard__header"><h1 class="dashboard__title">Moderation</h1>
-        <p style="color:var(--clr-text-2)">Business listings, claims, and user reports awaiting review</p></div>
+        <p style="color:var(--clr-text-2)">Business listings, claims, reviews, verification, fraud, and support all in one place</p></div>
       <div style="margin-bottom:.75rem;display:flex;gap:.5rem;flex-wrap:wrap">
         <button class="btn btn--sm btn--primary" id="modListingsBtn">Pending Listings</button>
         <button class="btn btn--sm btn--ghost" id="modRejectedBtn">Rejected Listings</button>
         <button class="btn btn--sm btn--ghost" id="modClaimsBtn">Claims</button>
         <button class="btn btn--sm btn--ghost" id="modReportsBtn">Reports</button>
+        <button class="btn btn--sm btn--ghost" id="modFlaggedBtn">Flagged Reviews</button>
+        <button class="btn btn--sm btn--ghost" id="modVerificationBtn">Verification</button>
+        <button class="btn btn--sm btn--ghost" id="modFraudBtn">Fraud</button>
+        <button class="btn btn--sm btn--ghost" id="modTicketsBtn">Tickets</button>
       </div>
       <div id="moderationList"><div class="skeleton" style="height:300px;border-radius:16px"></div></div>`;
 
@@ -847,8 +851,124 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('modRejectedBtn').addEventListener('click', () => { setActive('modRejectedBtn'); loadListings('rejected'); });
     document.getElementById('modClaimsBtn').addEventListener('click', () => { setActive('modClaimsBtn'); loadClaims(); });
     document.getElementById('modReportsBtn').addEventListener('click', () => { setActive('modReportsBtn'); loadReports(); });
+    document.getElementById('modFlaggedBtn').addEventListener('click', () => { setActive('modFlaggedBtn'); loadFlagged(); });
+    document.getElementById('modVerificationBtn').addEventListener('click', () => { setActive('modVerificationBtn'); loadVerification(); });
+    document.getElementById('modFraudBtn').addEventListener('click', () => { setActive('modFraudBtn'); loadFraud(); });
+    document.getElementById('modTicketsBtn').addEventListener('click', () => { setActive('modTicketsBtn'); loadTickets(); });
     function setActive(id) {
-      ['modListingsBtn','modRejectedBtn','modClaimsBtn','modReportsBtn'].forEach(x => document.getElementById(x).className = x === id ? 'btn btn--sm btn--primary' : 'btn btn--sm btn--ghost');
+      ['modListingsBtn','modRejectedBtn','modClaimsBtn','modReportsBtn','modFlaggedBtn','modVerificationBtn','modFraudBtn','modTicketsBtn']
+        .forEach(x => document.getElementById(x).className = x === id ? 'btn btn--sm btn--primary' : 'btn btn--sm btn--ghost');
+    }
+
+    async function loadFlagged() {
+      const list = document.getElementById('moderationList');
+      list.innerHTML = `<div class="skeleton" style="height:300px;border-radius:16px"></div>`;
+      try {
+        const { reviews } = await API.get('/reviews/flagged');
+        if (!reviews.length) { list.innerHTML = `<div class="card" style="padding:2rem;text-align:center;color:var(--clr-text-2)">✅ No flagged reviews</div>`; return; }
+        list.innerHTML = reviews.map(r => `
+          <div class="card" style="padding:1.25rem;margin-bottom:.75rem" id="flag-${r.id}">
+            <div style="display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap">
+              <div style="flex:1;min-width:200px">
+                <div style="font-weight:600;margin-bottom:.25rem">${r.users?.full_name||'Anonymous'} <span style="color:var(--clr-text-3);font-size:.8rem">on</span> ${r.businesses?.name||'—'}</div>
+                <div style="color:var(--clr-gold);margin-bottom:.4rem">${'★'.repeat(r.rating||0)}</div>
+                <p style="font-size:.875rem;color:var(--clr-text-2);margin:0 0 .5rem">${r.content||'—'}</p>
+                <div style="font-size:.78rem;padding:.35rem .6rem;background:rgba(239,68,68,.1);border-radius:6px;color:var(--clr-danger);display:inline-block">🚩 ${r.flag_reason||'Flagged by user'}</div>
+              </div>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:flex-start">
+                <button class="btn btn--ghost btn--sm" onclick="unflagReview('${r.id}')">Clear Flag</button>
+                <button class="btn btn--danger btn--sm" onclick="deleteFlaggedReview('${r.id}')">Delete</button>
+              </div>
+            </div>
+          </div>`).join('');
+      } catch { list.innerHTML = '<p style="color:var(--clr-danger)">Failed to load flagged reviews.</p>'; }
+    }
+    window.unflagReview = async (id) => {
+      try { await API.patch(`/reviews/${id}/unflag`); document.getElementById(`flag-${id}`)?.remove(); toast.success('Flag cleared'); }
+      catch { toast.error('Failed'); }
+    };
+    window.deleteFlaggedReview = async (id) => {
+      if (!confirm('Permanently delete this review?')) return;
+      try { await API.delete(`/reviews/${id}`); document.getElementById(`flag-${id}`)?.remove(); toast.success('Review deleted'); }
+      catch { toast.error('Failed'); }
+    };
+
+    async function loadVerification() {
+      const list = document.getElementById('moderationList');
+      list.innerHTML = `<div class="skeleton" style="height:300px;border-radius:16px"></div>`;
+      try {
+        const { requests } = await API.get('/verification/pending');
+        if (!requests.length) { list.innerHTML = `<div class="card" style="padding:2rem;text-align:center;color:var(--clr-text-2)">✅ No pending verification requests</div>`; return; }
+        list.innerHTML = requests.map(r => `
+          <div class="card" style="padding:1.25rem;margin-bottom:.75rem" id="verif-${r.id}">
+            <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+              <div>
+                <strong>${r.businesses?.name || '—'}</strong> <span style="color:var(--clr-text-3);font-size:.8rem">· ${r.businesses?.city || ''}</span>
+                <div style="font-size:.8rem;color:var(--clr-text-2);margin-top:.25rem">Submitted by ${r.users?.full_name || '—'} (${r.users?.email || '—'})</div>
+                <div style="font-size:.8rem;color:var(--clr-text-2)">Document: ${r.document_type.replace('_',' ')} ${r.document_number ? `· #${r.document_number}` : ''}</div>
+                <a href="${r.document_url}" target="_blank" rel="noopener" style="font-size:.8rem">View document <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+              </div>
+              <div style="display:flex;gap:.5rem;align-items:flex-start">
+                <button class="btn btn--primary btn--sm" onclick="approveVerification('${r.id}')">Approve</button>
+                <button class="btn btn--danger btn--sm" onclick="rejectVerification('${r.id}')">Reject</button>
+              </div>
+            </div>
+          </div>`).join('');
+      } catch { list.innerHTML = '<p style="color:var(--clr-danger)">Failed to load verification requests.</p>'; }
+    }
+    window.approveVerification = async (id) => {
+      try { await API.patch(`/verification/${id}/approve`); document.getElementById(`verif-${id}`)?.remove(); toast.success('Business verified!'); }
+      catch (e) { toast.error(e.message || 'Failed'); }
+    };
+    window.rejectVerification = async (id) => {
+      const reason = prompt('Reason for rejection (shown to the business owner):') || '';
+      try { await API.patch(`/verification/${id}/reject`, { reason }); document.getElementById(`verif-${id}`)?.remove(); toast.success('Request rejected'); }
+      catch (e) { toast.error(e.message || 'Failed'); }
+    };
+
+    async function loadFraud() {
+      const list = document.getElementById('moderationList');
+      list.innerHTML = `<div class="skeleton" style="height:300px;border-radius:16px"></div>`;
+      try {
+        const { flags } = await API.get('/fraud');
+        if (!flags.length) { list.innerHTML = `<div class="card" style="padding:2rem;text-align:center;color:var(--clr-text-2)">✅ No open fraud flags</div>`; return; }
+        const sevColor = { high: 'var(--clr-danger)', medium: 'var(--clr-gold)', low: 'var(--clr-text-3)' };
+        list.innerHTML = flags.map(f => `
+          <div class="card" style="padding:1.25rem;margin-bottom:.75rem" id="fraud-${f.id}">
+            <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+              <div>
+                <span class="badge" style="background:${sevColor[f.severity]}22;color:${sevColor[f.severity]}">${f.severity}</span>
+                <span style="font-size:.8rem;color:var(--clr-text-3);margin-left:.5rem">${f.entity_type} · ${timeAgo(f.created_at)}</span>
+                <p style="margin:.4rem 0 0">${f.reason}</p>
+              </div>
+              <div style="display:flex;gap:.5rem;align-items:flex-start">
+                <button class="btn btn--ghost btn--sm" onclick="reviewFraud('${f.id}','dismissed')">Dismiss</button>
+                <button class="btn btn--danger btn--sm" onclick="reviewFraud('${f.id}','confirmed')">Confirm Issue</button>
+              </div>
+            </div>
+          </div>`).join('');
+      } catch { list.innerHTML = '<p style="color:var(--clr-danger)">Failed to load fraud flags.</p>'; }
+    }
+    window.reviewFraud = async (id, status) => {
+      try { await API.patch(`/fraud/${id}`, { status }); document.getElementById(`fraud-${id}`)?.remove(); toast.success('Updated'); }
+      catch (e) { toast.error(e.message || 'Failed'); }
+    };
+
+    async function loadTickets() {
+      const list = document.getElementById('moderationList');
+      list.innerHTML = `<div class="skeleton" style="height:300px;border-radius:16px"></div>`;
+      try {
+        const { tickets: ticketList } = await API.get('/support?status=open');
+        if (!ticketList.length) { list.innerHTML = `<div class="card" style="padding:2rem;text-align:center;color:var(--clr-text-2)">✅ No open tickets</div>`; return; }
+        list.innerHTML = ticketList.map(t => `
+          <div class="card" style="padding:1.1rem;margin-bottom:.6rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem">
+            <div>
+              <strong>${t.subject}</strong>
+              <div style="font-size:.8rem;color:var(--clr-text-2)">${t.users?.full_name || 'Guest'} · ${t.category} · ${timeAgo(t.created_at)}</div>
+            </div>
+            <a href="/support?id=${t.id}" class="btn btn--outline btn--sm">Open</a>
+          </div>`).join('');
+      } catch { list.innerHTML = '<p style="color:var(--clr-danger)">Failed to load tickets.</p>'; }
     }
 
     async function loadListings(status) {
@@ -874,7 +994,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button class="btn btn--sm btn--success" onclick="approveListing('${b.id}')"><i class="fa-solid fa-check"></i> Approve</button>
                 <button class="btn btn--sm btn--danger" onclick="rejectListing('${b.id}')"><i class="fa-solid fa-xmark"></i> Reject</button>
               ` : `
-                <a href="/pages/business-edit.html?id=${b.id}" class="btn btn--sm btn--ghost"><i class="fa-solid fa-eye"></i> Review</a>
+                <a href="/business-edit?id=${b.id}" class="btn btn--sm btn--ghost"><i class="fa-solid fa-eye"></i> Review</a>
                 <button class="btn btn--sm btn--danger" onclick="deleteRejectedListing('${b.id}','${b.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-trash"></i> Delete</button>
               `}
             </div>

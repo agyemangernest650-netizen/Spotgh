@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const { interpreted, businesses } = await API.post('/search/smart', { query });
       if (!businesses.length) {
-        results.innerHTML = `<div style="text-align:center;padding:3rem 1rem;color:var(--clr-text-2)">No matches found. Try being less specific, or <a href="/pages/directory.html">browse the full directory</a>.</div>`;
+        results.innerHTML = `<div style="text-align:center;padding:3rem 1rem;color:var(--clr-text-2)">No matches found. Try being less specific, or <a href="/directory">browse the full directory</a>.</div>`;
         return;
       }
       const chips = [
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ${chips ? `<p style="font-size:.85rem;color:var(--clr-text-2);margin-bottom:1rem">Understood as: ${chips}</p>` : ''}
         <div style="display:grid;gap:.75rem">
           ${businesses.map(b => `
-            <a href="/pages/business.html?slug=${b.slug}" class="card" style="padding:1rem;display:flex;gap:.75rem;align-items:center;text-decoration:none;color:inherit">
+            <a href="/business?slug=${b.slug}" class="card" style="padding:1rem;display:flex;gap:.75rem;align-items:center;text-decoration:none;color:inherit">
               ${b.logo_url ? `<img src="${b.logo_url}" style="width:52px;height:52px;border-radius:8px;object-fit:cover">` : ''}
               <div style="flex:1">
                 <strong>${b.name}</strong>

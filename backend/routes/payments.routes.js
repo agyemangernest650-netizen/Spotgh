@@ -166,8 +166,8 @@ router.post('/v2/initialize', verifyToken, limits.payments, async (req, res, nex
       if (isTrial) await supabaseAdmin.from('users').update({ website_trial_used: true }).eq('id', req.user.id);
       await notify(req.user.id, 'success', isTrial ? '🎉 Your free Starter Website month has started!' : '🎉 Plan activated with referral credit!',
         isTrial ? 'Your Starter mini-website is live free for the next 30 days — no payment needed.' : `Your ${planName} plan is now active, fully covered by your referral credit.`,
-        '/pages/dashboard.html');
-      return res.json({ fully_covered: true, is_trial: isTrial, redirect: `/pages/dashboard.html?payment=success`, referral_credit_applied: creditApplied, plan: planName, expires_at: exp.toISOString() });
+        '/dashboard');
+      return res.json({ fully_covered: true, is_trial: isTrial, redirect: `/dashboard?payment=success`, referral_credit_applied: creditApplied, plan: planName, expires_at: exp.toISOString() });
     }
 
     await supabaseAdmin.from('payments').insert({
@@ -193,7 +193,7 @@ router.get('/v2/verify/:reference', async (req, res) => {
     if (!payment || payment.status === 'paid') return res.redirect(`${process.env.APP_URL}/?payment=already_processed`);
     if (txn.status !== 'success') {
       await supabaseAdmin.from('payments').update({ status: 'failed' }).eq('paystack_reference', req.params.reference);
-      return res.redirect(`${process.env.APP_URL}/pages/pricing.html?payment=failed`);
+      return res.redirect(`${process.env.APP_URL}/pricing?payment=failed`);
     }
     const meta = payment.metadata;
     const authCode = txn.authorization?.reusable ? txn.authorization.authorization_code : null;
@@ -204,15 +204,15 @@ router.get('/v2/verify/:reference', async (req, res) => {
     const exp = await activateV2Subscription({ resolved, userId: payment.user_id, businessId: meta.business_id || null, billingCycle: meta.billing_cycle, amount: payment.amount, reference: req.params.reference, isTrial: false, bundleId });
 
     const planName = resolved.plan.name;
-    await notify(payment.user_id, 'success', '🎉 Payment Successful!', `Your ${planName} plan is now active.`, '/pages/dashboard.html');
+    await notify(payment.user_id, 'success', '🎉 Payment Successful!', `Your ${planName} plan is now active.`, '/dashboard');
     const { data: u } = await supabaseAdmin.from('users').select('email,full_name').eq('id', payment.user_id).single();
     if (u?.email) {
       await sendEmail(u.email, `Receipt: ${planName} plan — GHS ${payment.amount}`,
         wrap('Payment received', `Hi ${u.full_name || 'there'}, your payment of <strong>GHS ${payment.amount}</strong> for the <strong>${planName}</strong> plan (${meta.billing_cycle}) was successful. Your plan is active until <strong>${exp.toDateString()}</strong>.`,
-        'Go to Dashboard', `${env.APP_URL}/pages/dashboard.html`));
+        'Go to Dashboard', `${env.APP_URL}/dashboard`));
     }
-    return res.redirect(`${process.env.APP_URL}/pages/dashboard.html?payment=success`);
-  } catch (err) { return res.redirect(`${process.env.APP_URL}/pages/pricing.html?payment=error`); }
+    return res.redirect(`${process.env.APP_URL}/dashboard?payment=success`);
+  } catch (err) { return res.redirect(`${process.env.APP_URL}/pricing?payment=error`); }
 });
 
 router.post('/v2/renew', verifyToken, limits.payments, async (req, res, next) => {
@@ -237,7 +237,7 @@ router.post('/v2/renew', verifyToken, limits.payments, async (req, res, next) =>
     await supabaseAdmin.from('payments').update({ status: 'paid', paid_at: new Date().toISOString(), paystack_transaction_id: String(txn.id), channel: txn.channel, authorization_code: authCode }).eq('paystack_reference', reference);
     const bundleId = resolved.kind === 'bundle' ? resolved.plan.id : null;
     const exp = await activateV2Subscription({ resolved, userId: req.user.id, businessId: business_id || null, billingCycle: billing_cycle, amount, reference, isTrial: false, bundleId });
-    await notify(req.user.id, 'success', '🎉 Plan Renewed!', `Your ${resolved.plan.name} plan is active until ${exp.toDateString()}.`, '/pages/dashboard.html');
+    await notify(req.user.id, 'success', '🎉 Plan Renewed!', `Your ${resolved.plan.name} plan is active until ${exp.toDateString()}.`, '/dashboard');
     res.json({ message: 'Renewed successfully', expires_at: exp.toISOString() });
   } catch (err) {
     if (err.response?.data) return res.status(400).json({ error: err.response.data.message || 'Renewal failed' });
@@ -311,8 +311,8 @@ router.post('/initialize', verifyToken, limits.payments, async (req, res, next) 
       if (isTrial) await supabaseAdmin.from('users').update({ trial_used: true }).eq('id', req.user.id);
       const notifTitle = isTrial ? '🎉 Your free Starter month has started!' : '🎉 Plan activated with referral credit!';
       const notifBody = isTrial ? `Your Starter mini-website is live free for the next 30 days — no payment needed.` : `Your ${plan.name} plan is now active — fully covered by your referral credit, no payment needed.`;
-      await notify(req.user.id, 'success', notifTitle, notifBody, '/pages/dashboard.html');
-      return res.json({ fully_covered: true, is_trial: isTrial, redirect: `/pages/dashboard.html?payment=success&plan=${plan_tier}`, referral_credit_applied: creditApplied, plan: plan.name });
+      await notify(req.user.id, 'success', notifTitle, notifBody, '/dashboard');
+      return res.json({ fully_covered: true, is_trial: isTrial, redirect: `/dashboard?payment=success&plan=${plan_tier}`, referral_credit_applied: creditApplied, plan: plan.name });
     }
 
     await supabaseAdmin.from('payments').insert({ user_id: req.user.id, business_id: business_id||null, plan_id: plan.id, amount, currency:'GHS', status:'pending', paystack_reference: reference, description:`SpotGH ${plan.name} - ${billing_cycle}`, metadata:{ plan_tier, billing_cycle, promo_code:promo_code||null, discount_amount:discount, referral_credit_applied:creditApplied, claimed_own_website: business_id ? null : !!has_own_website, claimed_website: business_id ? null : (website || null) } });
@@ -329,7 +329,7 @@ router.get('/verify/:reference', async (req, res) => {
     if (!payment || payment.status==='paid') return res.redirect(`${process.env.APP_URL}/?payment=already_processed`);
     if (txn.status!=='success') {
       await supabaseAdmin.from('payments').update({ status:'failed' }).eq('paystack_reference', req.params.reference);
-      return res.redirect(`${process.env.APP_URL}/pages/pricing.html?payment=failed`);
+      return res.redirect(`${process.env.APP_URL}/pricing?payment=failed`);
     }
     const meta = payment.metadata; const now = new Date(); const exp = new Date(now);
     meta.billing_cycle==='yearly' ? exp.setFullYear(exp.getFullYear()+1) : exp.setMonth(exp.getMonth()+1);
@@ -338,15 +338,15 @@ router.get('/verify/:reference', async (req, res) => {
     const { data: plan } = await supabaseAdmin.from('plans').select('id,name').eq('tier', meta.plan_tier).single();
     await supabaseAdmin.from('subscriptions').insert({ user_id: payment.user_id, business_id: meta.business_id||null, plan_id: plan.id, tier: meta.plan_tier, status:'active', amount_paid: payment.amount, billing_cycle: meta.billing_cycle, paystack_reference: req.params.reference, started_at: now.toISOString(), expires_at: exp.toISOString() });
     if (meta.business_id) await supabaseAdmin.from('businesses').update({ subscription_tier: meta.plan_tier, subscription_expires_at: exp.toISOString(), status:'pending' }).eq('id', meta.business_id);
-    await notify(payment.user_id, 'success', '🎉 Payment Successful!', `Your ${plan.name} plan is now active.`, `/pages/dashboard.html`);
+    await notify(payment.user_id, 'success', '🎉 Payment Successful!', `Your ${plan.name} plan is now active.`, `/dashboard`);
     const { data: u } = await supabaseAdmin.from('users').select('email,full_name').eq('id', payment.user_id).single();
     if (u?.email) {
       await sendEmail(u.email, `Receipt: ${plan.name} plan — GHS ${payment.amount}`,
         wrap('Payment received', `Hi ${u.full_name || 'there'}, your payment of <strong>GHS ${payment.amount}</strong> for the <strong>${plan.name}</strong> plan (${meta.billing_cycle}) was successful. Your plan is active until <strong>${exp.toDateString()}</strong>. It will not auto-renew — we'll remind you before it ends.`,
-        'Go to Dashboard', `${env.APP_URL}/pages/dashboard.html`));
+        'Go to Dashboard', `${env.APP_URL}/dashboard`));
     }
-    return res.redirect(`${process.env.APP_URL}/pages/dashboard.html?payment=success&plan=${meta.plan_tier}`);
-  } catch (err) { return res.redirect(`${process.env.APP_URL}/pages/pricing.html?payment=error`); }
+    return res.redirect(`${process.env.APP_URL}/dashboard?payment=success&plan=${meta.plan_tier}`);
+  } catch (err) { return res.redirect(`${process.env.APP_URL}/pricing?payment=error`); }
 });
 
 router.get('/history', verifyToken, async (req, res, next) => {
@@ -404,7 +404,7 @@ router.post('/renew', verifyToken, limits.payments, async (req, res, next) => {
     await supabaseAdmin.from('payments').update({ status:'paid', paid_at: now.toISOString(), paystack_transaction_id: String(txn.id), channel: txn.channel, authorization_code: authCode }).eq('paystack_reference', reference);
     await supabaseAdmin.from('subscriptions').insert({ user_id: req.user.id, business_id: business_id||null, plan_id: plan.id, tier: plan_tier, status:'active', amount_paid: amount, billing_cycle, paystack_reference: reference, started_at: now.toISOString(), expires_at: exp.toISOString() });
     if (business_id) await supabaseAdmin.from('businesses').update({ subscription_tier: plan_tier, subscription_expires_at: exp.toISOString(), status:'pending' }).eq('id', business_id);
-    await notify(req.user.id, 'success', '🎉 Plan Renewed!', `Your ${plan.name} plan is active until ${exp.toDateString()}.`, '/pages/dashboard.html');
+    await notify(req.user.id, 'success', '🎉 Plan Renewed!', `Your ${plan.name} plan is active until ${exp.toDateString()}.`, '/dashboard');
     res.json({ message: 'Renewed successfully', expires_at: exp.toISOString() });
   } catch (err) {
     if (err.response?.data) return res.status(400).json({ error: err.response.data.message || 'Renewal failed' });

@@ -16,7 +16,7 @@
     <div id="oauthSpinner" style="font-size:2rem"><i class="fa-solid fa-spinner fa-spin" style="color:var(--clr-primary)"></i></div>
     <p id="oauthStatus" style="color:var(--clr-text-2)">Signing you in…</p>
     <div id="oauthError" style="display:none">
-      <a href="/pages/login.html" class="btn btn--primary">Back to Sign In</a>
+      <a href="/login" class="btn btn--primary">Back to Sign In</a>
     </div>
   </div>
 
@@ -51,7 +51,7 @@
         Auth.save(token, user);
 
         statusEl.textContent = 'Success! Redirecting…';
-        const next = sessionStorage.getItem('oauth_next') || '/pages/dashboard.html';
+        const next = sessionStorage.getItem('oauth_next') || '/dashboard';
         sessionStorage.removeItem('oauth_next');
         window.location.href = next;
       } catch (err) {

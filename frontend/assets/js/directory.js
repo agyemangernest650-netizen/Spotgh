@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <h3 style="font-weight:700;margin-bottom:1rem">Recently Viewed</h3>
               <div style="display:flex;gap:.75rem;overflow-x:auto;padding-bottom:.5rem">
                 ${recent.map(r => `
-                  <a href="/pages/business.html?slug=${r.slug}" style="flex-shrink:0;width:140px;text-decoration:none;color:var(--clr-text-1)">
+                  <a href="/business?slug=${r.slug}" style="flex-shrink:0;width:140px;text-decoration:none;color:var(--clr-text-1)">
                     <div class="card" style="padding:.75rem;text-align:center">
                       ${r.logo ? `<img src="${r.logo}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;margin:0 auto .5rem;display:block">` : `<div style="width:40px;height:40px;border-radius:8px;background:var(--clr-primary-10);margin:0 auto .5rem;display:flex;align-items:center;justify-content:center;font-size:1.2rem">🏢</div>`}
                       <div style="font-size:.8rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.name}</div>

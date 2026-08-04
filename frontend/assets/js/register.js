@@ -1,7 +1,7 @@
 // assets/js/register.js
 document.addEventListener('DOMContentLoaded', () => {
   loadComponents();
-  if (Auth.isLoggedIn()) { window.location.href = '/pages/dashboard.html'; return; }
+  if (Auth.isLoggedIn()) { window.location.href = '/dashboard'; return; }
   const ref = new URLSearchParams(window.location.search).get('ref') || '';
 
   document.getElementById('pageMain').innerHTML = `
@@ -36,14 +36,14 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="form-group">
             <label class="form-label" style="display:flex;align-items:flex-start;gap:.5rem;font-weight:400">
               <input type="checkbox" name="agree" required style="width:16px;height:16px;margin-top:3px;accent-color:var(--clr-primary);flex-shrink:0">
-              I agree to the <a href="/pages/terms.html" target="_blank" style="color:var(--clr-primary)">Terms of Service</a> and <a href="/pages/privacy.html" target="_blank" style="color:var(--clr-primary)">Privacy Policy</a>
+              I agree to the <a href="/terms" target="_blank" style="color:var(--clr-primary)">Terms of Service</a> and <a href="/privacy" target="_blank" style="color:var(--clr-primary)">Privacy Policy</a>
             </label>
           </div>
           <div class="h-captcha" data-sitekey="" id="regCaptcha"></div>
           <button type="submit" class="btn btn--primary btn--full btn--lg" id="registerBtn">Create Account Free</button>
         </form>
         <div id="oauthButtons"></div>
-        <div class="auth-footer">Already have an account? <a href="/pages/login.html">Sign in</a></div>
+        <div class="auth-footer">Already have an account? <a href="/login">Sign in</a></div>
       </div>
     </div>`;
 
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         await API.post('/user/referral/apply', { code: fd.get('referral') }).catch(() => {});
       }
       toast.success('Account created! Welcome to SpotGH 🎉');
-      setTimeout(() => window.location.href = '/pages/dashboard.html?tab=new', 1000);
+      setTimeout(() => window.location.href = '/dashboard?tab=new', 1000);
     } catch(err) {
       alert.innerHTML = `<div class="alert alert--error"><i class="fa-solid fa-circle-exclamation"></i> ${err.message || 'Registration failed'}</div>`;
       setLoading(btn, false);

@@ -2,6 +2,7 @@
 const env = require('./config/env'); // validates env vars first
 const express = require('express');
 const path    = require('path');
+const fs      = require('fs');
 const helmet  = require('helmet');
 const cors    = require('cors');
 const morgan  = require('morgan');
@@ -94,7 +95,7 @@ app.use(cookieParser(env.APP_SECRET));
 
 // ── Mini-Website Subdomains ──────────────────────────────
 // Requires a wildcard DNS record (*.{ROOT_DOMAIN}) pointed at this server.
-// buka-restaurant.spotgh.com  →  serves /pages/business.html?slug=buka-restaurant
+// buka-restaurant.spotgh.com  →  serves /business?slug=buka-restaurant
 // spotgh.com / www.spotgh.com / localhost continue to the normal site.
 app.use(async (req, res, next) => {
   const host = (req.headers.host || '').split(':')[0];
@@ -103,7 +104,7 @@ app.use(async (req, res, next) => {
   if (host && host !== root && host.endsWith(`.${root}`)) {
     const sub = host.slice(0, -1 * (root.length + 1));
     if (sub && !reserved.includes(sub) && req.path === '/') {
-      req.url = `/pages/business.html?slug=${sub}`;
+      req.url = `/business?slug=${sub}`;
     }
     return next();
   }
@@ -121,7 +122,7 @@ app.use(async (req, res, next) => {
         .in('website_tier', ['professional', 'business_pro'])
         .gt('website_expires_at', new Date().toISOString())
         .eq('status', 'active').single();
-      if (biz) req.url = `/pages/business.html?slug=${biz.slug}`;
+      if (biz) req.url = `/business?slug=${biz.slug}`;
     } catch {}
   }
   next();
@@ -133,23 +134,23 @@ app.get('/robots.txt', (req, res) => {
 `User-agent: *
 Allow: /
 Disallow: /api/
-Disallow: /pages/dashboard.html
-Disallow: /pages/admin.html
-Disallow: /pages/creator.html
-Disallow: /pages/business-edit.html
-Disallow: /pages/deals-manager.html
-Disallow: /pages/payment-history.html
-Disallow: /pages/subscriptions.html
-Disallow: /pages/analytics.html
-Disallow: /pages/bookings.html
-Disallow: /pages/checkout.html
-Disallow: /pages/orders.html
-Disallow: /pages/business-orders.html
-Disallow: /pages/messages.html
-Disallow: /pages/saved.html
-Disallow: /pages/referrals.html
-Disallow: /pages/profile.html
-Disallow: /pages/oauth-callback.html
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /creator
+Disallow: /business-edit
+Disallow: /deals-manager
+Disallow: /payment-history
+Disallow: /subscriptions
+Disallow: /analytics
+Disallow: /bookings
+Disallow: /checkout
+Disallow: /orders
+Disallow: /business-orders
+Disallow: /messages
+Disallow: /saved
+Disallow: /referrals
+Disallow: /profile
+Disallow: /oauth-callback
 
 Sitemap: ${env.APP_URL}/sitemap.xml
 `);
@@ -161,7 +162,7 @@ Sitemap: ${env.APP_URL}/sitemap.xml
 // to them. This injects the real business name/photo into the static HTML
 // before it's served, for both the ?slug= path and mini-site subdomains
 // (which rewrite req.url to the same path above).
-app.get('/pages/business.html', async (req, res, next) => {
+app.get('/business', async (req, res, next) => {
   const slug = req.query.slug;
   if (!slug) return next();
   const fs = require('fs').promises;
@@ -184,7 +185,7 @@ app.get('/pages/business.html', async (req, res, next) => {
   const title = esc(biz?.meta_title) || (biz ? `${esc(biz.name)} | SpotGH` : 'Business | SpotGH');
   const desc  = esc(biz?.meta_description) || esc(biz?.tagline || biz?.description?.slice(0, 160) || 'Find trusted businesses across Ghana on SpotGH.');
   const image = biz?.cover_url || biz?.logo_url || `${env.APP_URL}/assets/images/og-default.png`;
-  const url   = `${env.APP_URL}/pages/business.html?slug=${biz?.slug || slug}`;
+  const url   = `${env.APP_URL}/business?slug=${biz?.slug || slug}`;
   const out = html
     .replace(/__OG_TITLE__/g, title)
     .replace(/__OG_DESC__/g, desc)
@@ -201,6 +202,34 @@ app.get('/pages/business.html', async (req, res, next) => {
 app.get('/sw.js', (req, res) => {
   res.set('Cache-Control', 'no-cache');
   res.sendFile(path.join(__dirname, '../frontend/sw.js'));
+});
+
+// ── Clean URLs ───────────────────────────────────────────────────────────
+// Canonical pages now live at /name instead of /name. Every
+// internal link in the app was updated to the clean form; the two redirect
+// routes below exist so nothing that already bookmarked or linked to an
+// old /pages/*.html URL breaks — they 301 to the canonical URL instead of
+// serving twice under two different paths (which would just split SEO
+// value and confuse anything indexing the site). These must be registered
+// BEFORE express.static, or static's own file lookup would answer these
+// requests directly and the redirect would never fire.
+const PAGES_DIR = path.join(__dirname, '../frontend/pages');
+
+function withQuery(req, target) {
+  const qIndex = req.originalUrl.indexOf('?');
+  return qIndex === -1 ? target : `${target}${req.originalUrl.slice(qIndex)}`;
+}
+
+// Legacy /pages/name or /name → canonical /name
+app.get(/^\/pages\/([a-z0-9_-]+)(\.html)?$/i, (req, res) => {
+  res.redirect(301, withQuery(req, `/${req.params[0]}`));
+});
+
+// Legacy /name.html → canonical /name
+app.get(/^\/([a-z0-9_-]+)\.html$/i, (req, res, next) => {
+  const filePath = path.join(PAGES_DIR, `${req.params[0]}.html`);
+  if (!fs.existsSync(filePath)) return next();
+  res.redirect(301, withQuery(req, `/${req.params[0]}`));
 });
 
 app.use(express.static(path.join(__dirname, '../frontend'), {
@@ -224,6 +253,15 @@ app.use(express.static(path.join(__dirname, '../frontend'), {
     }
   },
 }));
+
+// Canonical clean URL → serves the actual file, no redirect. Registered
+// after express.static so real static assets (which never match this
+// single-segment, no-extension pattern anyway) keep first priority.
+app.get(/^\/([a-z0-9_-]+)$/i, (req, res, next) => {
+  const filePath = path.join(PAGES_DIR, `${req.params[0]}.html`);
+  if (!fs.existsSync(filePath)) return next(); // falls through to API routes / 404
+  res.sendFile(filePath, { headers: { 'Cache-Control': 'no-cache' } });
+});
 
 const { notify } = require('./services/supabase.service');
 const { sendEmail, wrap } = require('./services/email.service');
@@ -297,7 +335,6 @@ app.use('/api/fraud',        require('./routes/fraud.routes'));
 app.use('/', require('./routes/sitemap.routes'));
 
 // ── Page Routes — explicitly serve HTML files so they always resolve ──────
-const fs = require('fs');
 const pagesDir = path.join(__dirname, '../frontend/pages');
 app.get('/pages/:page', (req, res, next) => {
   const file = path.join(pagesDir, req.params.page);
@@ -336,14 +373,14 @@ cron.schedule('0 1 * * *', async () => {
     for (const s of expiringSoon || []) {
       const daysLeft = Math.max(1, Math.ceil((new Date(s.expires_at) - Date.now()) / 86400000));
       await notify(s.user_id, 'warning', `⏰ Your ${s.tier} plan expires in ${daysLeft} day${daysLeft === 1 ? '' : 's'}`,
-        `Renew now to keep your business visible on SpotGH without interruption.`, '/pages/pricing.html');
+        `Renew now to keep your business visible on SpotGH without interruption.`, '/pricing');
       const { data: u } = await supabaseAdmin.from('users').select('email,full_name,phone').eq('id', s.user_id).single();
       if (u?.email) {
         await sendEmail(u.email, `Your SpotGH plan expires in ${daysLeft} day${daysLeft === 1 ? '' : 's'}`,
           wrap('Your plan is about to expire', `Hi ${u.full_name || 'there'}, your <strong>${s.tier}</strong> plan expires in ${daysLeft} day${daysLeft === 1 ? '' : 's'}. Renew now so your business listing doesn't drop back to the Free tier.`,
-          'Renew Now', `${env.APP_URL}/pages/pricing.html`));
+          'Renew Now', `${env.APP_URL}/pricing`));
       }
-      if (u?.phone) await sendSMS(u.phone, `SpotGH: Your ${s.tier} plan expires in ${daysLeft} day${daysLeft === 1 ? '' : 's'}. Renew at spotgh.com/pages/pricing.html to stay visible.`);
+      if (u?.phone) await sendSMS(u.phone, `SpotGH: Your ${s.tier} plan expires in ${daysLeft} day${daysLeft === 1 ? '' : 's'}. Renew at spotgh.com/pricing to stay visible.`);
       await supabaseAdmin.from('subscriptions').update({ renewal_reminder_sent: true }).eq('id', s.id);
     }
 
@@ -370,12 +407,12 @@ cron.schedule('0 1 * * *', async () => {
         if (s.user_id) {
           await notify(s.user_id, 'warning', '⏰ Your plan has ended',
             `Your ${s.tier} plan has expired. Renew the same plan or upgrade to keep your business live and visible to customers.`,
-            '/pages/pricing.html');
+            '/pricing');
           const { data: u } = await supabaseAdmin.from('users').select('email,full_name').eq('id', s.user_id).single();
           if (u?.email) {
             await sendEmail(u.email, 'Your SpotGH plan has ended',
               wrap('Your plan has ended', `Hi ${u.full_name || 'there'}, your <strong>${s.tier}</strong> plan expired and your business listing has been moved back to the Free tier. Renew the same plan or upgrade any time — it's entirely on your schedule.`,
-              'Renew or Upgrade', `${env.APP_URL}/pages/pricing.html`));
+              'Renew or Upgrade', `${env.APP_URL}/pricing`));
           }
         }
       }

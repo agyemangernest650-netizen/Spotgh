@@ -82,7 +82,7 @@ router.patch('/:id/approve', verifyToken, requireAdmin, async (req, res, next) =
 
     await audit(req.user.id, 'approve_claim', 'business', claim.business_id, null, { requested_by: claim.requested_by }, req);
     const { data: biz } = await supabaseAdmin.from('businesses').select('name').eq('id', claim.business_id).single();
-    await notify(claim.requested_by, 'success', '🎉 Business claimed!', `You now manage ${biz?.name || 'your business'} on SpotGH.`, '/pages/dashboard.html');
+    await notify(claim.requested_by, 'success', '🎉 Business claimed!', `You now manage ${biz?.name || 'your business'} on SpotGH.`, '/dashboard');
 
     res.json({ message: 'Claim approved, ownership transferred' });
   } catch (err) { next(err); }
@@ -102,7 +102,7 @@ router.patch('/:id/reject', verifyToken, requireAdmin, async (req, res, next) =>
     }).eq('id', claim.id);
 
     await audit(req.user.id, 'reject_claim', 'business', claim.business_id, null, { reason }, req);
-    await notify(claim.requested_by, 'warning', 'Claim not approved', reason || 'We could not verify your ownership. Contact support if you believe this is a mistake.', '/pages/dashboard.html');
+    await notify(claim.requested_by, 'warning', 'Claim not approved', reason || 'We could not verify your ownership. Contact support if you believe this is a mistake.', '/dashboard');
 
     res.json({ message: 'Claim rejected' });
   } catch (err) { next(err); }

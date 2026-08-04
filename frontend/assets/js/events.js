@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
       grid.innerHTML = events.map(e => `
-        <a href="/pages/events.html?id=${e.id}" class="card" style="padding:0;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column">
+        <a href="/events?id=${e.id}" class="card" style="padding:0;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column">
           <div style="height:140px;background:${e.cover_url ? `url('${e.cover_url}') center/cover` : 'linear-gradient(135deg,var(--clr-primary),#e55a2b)'};display:flex;align-items:flex-end;padding:.75rem">
             ${!e.is_free ? `<span class="badge" style="background:rgba(0,0,0,.5);color:#fff">GH₵${e.price}</span>` : `<span class="badge" style="background:rgba(0,0,0,.5);color:#fff">Free</span>`}
           </div>
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const { event: ev, interested } = await API.get(`/events/${id}`);
       main.innerHTML = `
         <div class="container" style="padding:2rem 1rem 4rem;max-width:640px">
-          <a href="/pages/events.html" style="font-size:.85rem;color:var(--clr-text-2)"><i class="fa-solid fa-arrow-left"></i> Back to Events</a>
+          <a href="/events" style="font-size:.85rem;color:var(--clr-text-2)"><i class="fa-solid fa-arrow-left"></i> Back to Events</a>
           <div class="card" style="padding:0;overflow:hidden;margin-top:1rem">
             <div style="height:200px;background:${ev.cover_url ? `url('${ev.cover_url}') center/cover` : 'linear-gradient(135deg,var(--clr-primary),#e55a2b)'}"></div>
             <div style="padding:1.5rem">

@@ -100,13 +100,13 @@ router.post('/checkout', optionalAuth, limits.orders, async (req, res, next) => 
         if (newStock <= LOW_STOCK_THRESHOLD && item.products_services.stock_quantity > LOW_STOCK_THRESHOLD) {
           await notify(biz.owner_id, 'warning', `⚠️ Low stock: ${item.products_services.name}`,
             `Only ${newStock} left for "${item.products_services.name}". Restock soon to avoid missing sales.`,
-            `/pages/products.html?id=${business_id}`);
+            `/products?id=${business_id}`);
         }
       }
     }
 
     await supabaseAdmin.from('carts').delete().eq('id', cart.id); // clears cart_items via cascade
-    await notify(biz.owner_id, 'info', `🛒 New order from ${customer_name}`, `Order ${orderNumber} — GHS ${order.total.toFixed(2)}`, `/pages/dashboard.html?tab=orders&biz=${business_id}`);
+    await notify(biz.owner_id, 'info', `🛒 New order from ${customer_name}`, `Order ${orderNumber} — GHS ${order.total.toFixed(2)}`, `/dashboard?tab=orders&biz=${business_id}`);
 
     // First-order referral bonus: if this business's owner was referred by
     // someone, and this is genuinely their first-ever order, award the
@@ -124,7 +124,7 @@ router.post('/checkout', optionalAuth, limits.orders, async (req, res, next) => 
               const { data: referrer } = await supabaseAdmin.from('users').select('referral_credit_ghs').eq('id', owner.referred_by).single();
               if (referrer) {
                 await supabaseAdmin.from('users').update({ referral_credit_ghs: (referrer.referral_credit_ghs || 0) + FIRST_ORDER_REFERRAL_BONUS }).eq('id', owner.referred_by);
-                await notify(owner.referred_by, 'success', '🎉 Referral bonus earned!', `A business you referred just got its first order! GHS ${FIRST_ORDER_REFERRAL_BONUS} credit has been added to your account.`, '/pages/referrals.html');
+                await notify(owner.referred_by, 'success', '🎉 Referral bonus earned!', `A business you referred just got its first order! GHS ${FIRST_ORDER_REFERRAL_BONUS} credit has been added to your account.`, '/referrals');
               }
             }
           }
@@ -225,14 +225,14 @@ router.patch('/:id/status', verifyToken, async (req, res, next) => {
       };
       if (statusMessages[status]) {
         await notify(order.customer_id, status === 'cancelled' ? 'warning' : 'success',
-          `Order ${order.order_number} update`, `${statusMessages[status]} by ${order.businesses.name}.`, '/pages/orders.html');
+          `Order ${order.order_number} update`, `${statusMessages[status]} by ${order.businesses.name}.`, '/orders');
       }
       // Nudge for a review once the order is actually complete — reviews
       // otherwise only happen if a customer thinks to leave one unprompted.
       if (status === 'completed') {
         await notify(order.customer_id, 'info', `How was your order from ${order.businesses.name}?`,
           `Leave a quick review to help other customers — it only takes a moment.`,
-          `/pages/business.html?slug=${order.businesses.slug || ''}#reviews`);
+          `/business?slug=${order.businesses.slug || ''}#reviews`);
       }
     }
     res.json({ order: data });

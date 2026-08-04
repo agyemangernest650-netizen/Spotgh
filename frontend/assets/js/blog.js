@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const grid = document.getElementById('blogGrid');
     if (!posts.length) { grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--clr-text-2)">No articles published yet — check back soon!</div>`; return; }
     grid.innerHTML = posts.map(p => `
-      <a href="/pages/blog-post.html?slug=${p.slug}" class="card" style="padding:0;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column">
+      <a href="/blog-post?slug=${p.slug}" class="card" style="padding:0;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column">
         <div style="height:150px;background:${p.cover_url ? `url('${p.cover_url}') center/cover` : 'linear-gradient(135deg,var(--clr-primary),#e55a2b)'}"></div>
         <div style="padding:1rem;flex:1">
           <strong style="display:block;margin-bottom:.4rem">${p.title}</strong>

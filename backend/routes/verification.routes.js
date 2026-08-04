@@ -61,7 +61,7 @@ router.patch('/:id/approve', verifyToken, requireAdmin, async (req, res, next) =
     await supabaseAdmin.from('verification_requests').update({ status: 'approved', reviewed_by: req.user.id, reviewed_at: new Date().toISOString() }).eq('id', reqRow.id);
     const { data: biz } = await supabaseAdmin.from('businesses').update({ is_verified: true }).eq('id', reqRow.business_id).select('owner_id,name').single();
     await audit(req.user.id, 'approve_verification', 'business', reqRow.business_id, null, { status: 'approved' }, req);
-    if (biz) await notify(biz.owner_id, 'success', '✅ Business verified!', `${biz.name} now has a verified badge.`, `/pages/dashboard.html`);
+    if (biz) await notify(biz.owner_id, 'success', '✅ Business verified!', `${biz.name} now has a verified badge.`, `/dashboard`);
 
     res.json({ message: 'Verification approved' });
   } catch (err) { next(err); }
@@ -79,7 +79,7 @@ router.patch('/:id/reject', verifyToken, requireAdmin, async (req, res, next) =>
     }).eq('id', reqRow.id);
     const { data: biz } = await supabaseAdmin.from('businesses').select('owner_id,name').eq('id', reqRow.business_id).single();
     await audit(req.user.id, 'reject_verification', 'business', reqRow.business_id, null, { status: 'rejected', reason }, req);
-    if (biz) await notify(biz.owner_id, 'warning', 'Verification not approved', reason || 'Please review your documents and try again.', `/pages/dashboard.html`);
+    if (biz) await notify(biz.owner_id, 'warning', 'Verification not approved', reason || 'Please review your documents and try again.', `/dashboard`);
 
     res.json({ message: 'Verification rejected' });
   } catch (err) { next(err); }

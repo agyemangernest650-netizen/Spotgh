@@ -283,7 +283,7 @@ router.post('/build-website', async (req, res, next) => {
     }
 
     await notify(owner.id, 'success', `🎉 Your business "${business_name}" is live!`,
-      `Your SpotGH mini-website has been set up and is ready to share.`, `/pages/business.html?slug=${slug}`);
+      `Your SpotGH mini-website has been set up and is ready to share.`, `/business?slug=${slug}`);
     await audit(req.user.id, 'website_built', 'business', business.id, null, { owner_email, tier, months }, req);
 
     res.status(201).json({ business, owner: { id: owner.id, email: owner.email, full_name: owner.full_name }, message: `Mini-website built and ${tier} plan granted for ${months} month(s)` });

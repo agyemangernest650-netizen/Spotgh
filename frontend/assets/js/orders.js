@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!orders?.length) {
       list.innerHTML = emptyState({
         icon: '📦', title: 'No orders yet', subtitle: "Once you order from a business, you'll see it here.",
-        actionHtml: `<a href="/pages/directory.html" class="btn btn--primary">Browse Businesses</a>`,
+        actionHtml: `<a href="/directory" class="btn btn--primary">Browse Businesses</a>`,
       });
       return;
     }
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (reorderable.length < order.order_items.length) {
         toast.warning(`${order.order_items.length - reorderable.length} item(s) are no longer available and were skipped.`);
       }
-      location.href = `/pages/checkout.html?biz=${order.business_id}`;
+      location.href = `/checkout?biz=${order.business_id}`;
     } catch (e) {
       toast.error(e.message || 'Some items could not be added — they may be out of stock.');
     }

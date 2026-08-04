@@ -13,7 +13,7 @@ window.Auth = {
   },
   requireAuth: (next = window.location.href) => {
     if (!Auth.isLoggedIn()) {
-      window.location.href = '/pages/login.html?next=' + encodeURIComponent(next);
+      window.location.href = '/login?next=' + encodeURIComponent(next);
       return false;
     }
     return true;
@@ -21,7 +21,7 @@ window.Auth = {
   requireRole: (roles) => {
     const user = Auth.getUser();
     if (!user || !roles.includes(user.role)) {
-      window.location.href = '/pages/login.html';
+      window.location.href = '/login';
       return false;
     }
     return true;

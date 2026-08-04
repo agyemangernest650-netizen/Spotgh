@@ -4,25 +4,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!Auth.requireAuth()) return;
 
   const bizId = new URLSearchParams(location.search).get('id');
-  if (!bizId) { location.href = '/pages/dashboard.html'; return; }
+  if (!bizId) { location.href = '/dashboard'; return; }
 
   const main = document.getElementById('pageMain');
   main.innerHTML = `
     <div class="container" style="max-width:900px;margin:0 auto;padding:2rem 1rem 4rem">
-      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:2rem;flex-wrap:wrap">
-        <a href="/pages/dashboard.html" class="btn btn--ghost btn--sm"><i class="fa-solid fa-arrow-left"></i></a>
-        <h1 style="font-size:1.5rem;font-weight:800;margin:0">Bookings</h1>
-        <div style="margin-left:auto;display:flex;gap:.5rem;flex-wrap:wrap">
-          <button class="btn btn--ghost btn--sm" id="calToggle" onclick="toggleCalendar()"><i class="fa-solid fa-calendar-days"></i> Calendar</button>
-          ${['all','pending','confirmed','completed','cancelled'].map(s=>`
-            <button class="btn ${s==='all'?'btn--primary':'btn--ghost'} btn--sm filter-btn" data-status="${s}">
-              ${s.charAt(0).toUpperCase()+s.slice(1)}
-            </button>`).join('')}
-        </div>
+      <div id="bizAdminNav"></div>
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap">
+        <button class="btn btn--ghost btn--sm" id="calToggle" onclick="toggleCalendar()"><i class="fa-solid fa-calendar-days"></i> Calendar</button>
+        ${['all','pending','confirmed','completed','cancelled'].map(s=>`
+          <button class="btn ${s==='all'?'btn--primary':'btn--ghost'} btn--sm filter-btn" data-status="${s}">
+            ${s.charAt(0).toUpperCase()+s.slice(1)}
+          </button>`).join('')}
       </div>
       <div id="calendarView" hidden style="margin-bottom:1.5rem"></div>
       <div id="bookingsList"><div class="skeleton" style="height:200px;border-radius:16px"></div></div>
     </div>`;
+  renderBizAdminNav('bizAdminNav', bizId, 'bookings');
 
   let activeStatus = '';
   let calendarOpen = false;

@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${b.description?`<p style="font-size:.85rem;color:var(--clr-text-2);margin:.5rem 0 0;max-height:60px;overflow:hidden">${b.description}</p>`:''}
               </div>
               <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-self:flex-start">
-                <a href="/pages/business.html?slug=${b.slug}" target="_blank" class="btn btn--ghost btn--sm"><i class="fa-solid fa-eye"></i> Preview</a>
+                <a href="/business?slug=${b.slug}" target="_blank" class="btn btn--ghost btn--sm"><i class="fa-solid fa-eye"></i> Preview</a>
                 <button class="btn btn--success btn--sm" onclick="approveBiz('${b.id}')"><i class="fa-solid fa-check"></i> Approve</button>
                 <button class="btn btn--danger btn--sm" onclick="rejectBiz('${b.id}')"><i class="fa-solid fa-xmark"></i> Reject</button>
               </div>
@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   <td style="padding:.75rem 1rem;display:flex;gap:.4rem;flex-wrap:wrap">
                     ${b.status==='pending'?`<button class="btn btn--success btn--sm" onclick="approveBiz('${b.id}')">Approve</button><button class="btn btn--danger btn--sm" onclick="rejectBiz('${b.id}')">Reject</button>`:''}
                     ${b.status==='active'?`<button class="btn btn--ghost btn--sm" onclick="suspendBiz('${b.id}')">Suspend</button>`:''}
-                    ${b.status==='active'?`<a href="/pages/business.html?slug=${b.slug}" target="_blank" class="btn btn--ghost btn--sm"><i class="fa-solid fa-eye"></i></a>`:''}
+                    ${b.status==='active'?`<a href="/business?slug=${b.slug}" target="_blank" class="btn btn--ghost btn--sm"><i class="fa-solid fa-eye"></i></a>`:''}
                     <button class="btn btn--ghost btn--sm" onclick="toggleFeatured('${b.id}',${!b.is_featured})">${b.is_featured?'Unfeature':'Feature'}</button>
                   </td>
                 </tr>`).join('')}
@@ -355,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <strong>${t.subject}</strong>
             <div style="font-size:.8rem;color:var(--clr-text-2)">${t.users?.full_name || 'Guest'} · ${t.category} · ${formatDate(t.created_at)}</div>
           </div>
-          <a href="/pages/support.html?id=${t.id}" class="btn btn--outline btn--sm">Open</a>
+          <a href="/support?id=${t.id}" class="btn btn--outline btn--sm">Open</a>
         </div>`).join('');
     } catch { document.getElementById('ticketsAdminList').innerHTML = '<p style="color:var(--clr-danger)">Failed to load.</p>'; }
   }

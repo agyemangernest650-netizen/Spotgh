@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <div style="font-size:.78rem;color:var(--clr-text-2);margin-bottom:.5rem">${p.category_name||''} ${p.city?' · '+p.city:''}</div>
           ${p.avg_rating ? `<div style="color:var(--clr-gold);font-size:.8rem;margin-bottom:.5rem">${'★'.repeat(Math.round(p.avg_rating))} <span style="color:var(--clr-text-2)">${parseFloat(p.avg_rating).toFixed(1)} (${p.review_count||0})</span></div>` : ''}
           <div style="display:flex;gap:.5rem">
-            <a href="/pages/business.html?slug=${p.slug}" class="btn btn--primary btn--sm">View Page</a>
+            <a href="/business?slug=${p.slug}" class="btn btn--primary btn--sm">View Page</a>
             ${p.whatsapp ? `<a href="https://wa.me/${p.whatsapp.replace(/\D/g,'')}" target="_blank" class="btn btn--ghost btn--sm" style="color:#25D366"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
             ${p.latitude && p.longitude ? `<a href="https://www.google.com/maps/dir/?api=1&destination=${p.latitude},${p.longitude}" target="_blank" class="btn btn--ghost btn--sm"><i class="fa-solid fa-diamond-turn-right"></i></a>` : ''}
           </div>

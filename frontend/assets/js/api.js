@@ -33,8 +33,8 @@ window.API = {
         if (res.status === 401 && token) {
           Auth.clear();
           // Only redirect if not already on an auth page
-          if (!['/pages/login.html', '/pages/register.html', '/pages/forgot-password.html'].some(p => location.pathname.includes(p))) {
-            window.location.href = '/pages/login.html?next=' + encodeURIComponent(location.href);
+          if (!['/login', '/register', '/forgot-password'].some(p => location.pathname.includes(p))) {
+            window.location.href = '/login?next=' + encodeURIComponent(location.href);
           }
         }
         const err = new Error(data.error || data.message || 'Request failed');

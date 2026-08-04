@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const slug = params.get('slug') || params.get('category');
   const main = document.getElementById('pageMain');
 
-  if (!slug) { window.location.href = '/pages/categories.html'; return; }
+  if (!slug) { window.location.href = '/categories'; return; }
 
   main.innerHTML = `
     <div style="height:280px;background:var(--clr-surface-2)" class="skel-card"></div>
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     businesses = catRes.businesses || [];
     allCategories = allCatRes.categories || [];
   } catch (e) {
-    main.innerHTML = `<div class="container" style="padding:5rem 1rem;text-align:center"><h2>Category not found</h2><p style="color:var(--clr-text-3);margin:1rem 0">${e.message||''}</p><a href="/pages/categories.html" class="btn btn--primary">Browse Categories</a></div>`;
+    main.innerHTML = `<div class="container" style="padding:5rem 1rem;text-align:center"><h2>Category not found</h2><p style="color:var(--clr-text-3);margin:1rem 0">${e.message||''}</p><a href="/categories" class="btn btn--primary">Browse Categories</a></div>`;
     return;
   }
 
@@ -47,13 +47,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       <div class="container cat-hero__inner">
         <div class="cat-breadcrumb">
           <a href="/">Home</a><i class="fa-solid fa-chevron-right" style="font-size:.6rem"></i>
-          <a href="/pages/categories.html">Categories</a><i class="fa-solid fa-chevron-right" style="font-size:.6rem"></i>
+          <a href="/categories">Categories</a><i class="fa-solid fa-chevron-right" style="font-size:.6rem"></i>
           <span>${category.name}</span>
         </div>
         <div class="cat-hero__icon">${category.icon || '🏷️'}</div>
         <h1 class="cat-hero__title">${category.name}</h1>
         <p class="cat-hero__desc">${category.description || `Discover trusted ${category.name.toLowerCase()} businesses across Ghana, rated and reviewed by real customers.`}</p>
-        <form class="cat-hero__search" onsubmit="event.preventDefault(); window.location.href='/pages/directory.html?category=${category.slug}&q='+encodeURIComponent(document.getElementById('catSearch').value)">
+        <form class="cat-hero__search" onsubmit="event.preventDefault(); window.location.href='/directory?category=${category.slug}&q='+encodeURIComponent(document.getElementById('catSearch').value)">
           <i class="fa-solid fa-magnifying-glass"></i>
           <input id="catSearch" type="text" placeholder="Search ${category.name.toLowerCase()}...">
           <button type="submit" class="btn btn--primary btn--sm">Search</button>
@@ -70,15 +70,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       ${subcats.length ? `
         <div class="subcat-row">
           ${subcats.map(s => `
-            <a href="/pages/category.html?slug=${s.slug}" class="subcat-pill">
+            <a href="/category?slug=${s.slug}" class="subcat-pill">
               <span class="icon">${s.icon||'🏷️'}</span><span>${s.name}</span>
             </a>`).join('')}
-          <a href="/pages/categories.html" class="subcat-pill"><span class="icon">⋯</span><span>More</span></a>
+          <a href="/categories" class="subcat-pill"><span class="icon">⋯</span><span>More</span></a>
         </div>` : ''}
 
       <div class="section-head">
         <h2>${subcats.length ? 'Popular' : 'Top Rated'} ${category.name}</h2>
-        <a href="/pages/directory.html?category=${category.slug}">View All <i class="fa-solid fa-arrow-right"></i></a>
+        <a href="/directory?category=${category.slug}">View All <i class="fa-solid fa-arrow-right"></i></a>
       </div>
       <div class="biz-grid" id="bizGrid">
         ${businesses.length ? businesses.map(b => bizCard(b, favIds)).join('') : `<p style="color:var(--clr-text-3);grid-column:1/-1">No businesses listed in this category yet — be the first!</p>`}
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <h3>Own a ${category.name.replace(/s$/,'')}?</h3>
           <p>Get your own mini-website, WhatsApp button, and reach new customers searching on SpotGH.</p>
         </div>
-        <a href="/pages/pricing.html" class="btn btn--primary">List Your Business</a>
+        <a href="/pricing" class="btn btn--primary">List Your Business</a>
       </div>
 
       <h2 style="margin-bottom:.25rem">Why Choose Local?</h2>
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         <p style="color:var(--clr-text-3);font-size:.85rem;margin-bottom:1rem">Find ${category.name.toLowerCase()} in your city.</p>
         <div class="loc-grid">
           ${topLocations.map(([city,count])=>`
-            <a href="/pages/directory.html?category=${category.slug}&city=${encodeURIComponent(city)}" class="loc-pill">
+            <a href="/directory?category=${category.slug}&city=${encodeURIComponent(city)}" class="loc-pill">
               <div class="name"><i class="fa-solid fa-location-dot" style="color:var(--clr-primary)"></i>${city}</div>
               <div class="count">${count} listing${count>1?'s':''}</div>
             </a>`).join('')}
@@ -135,7 +135,7 @@ function bizCard(b, favIds) {
   const isFav = favIds.has(b.id);
   const img = b.logo_url || b.cover_image || '/assets/images/placeholder-business.png';
   return `
-    <a href="/pages/business.html?slug=${b.slug}" class="biz-card">
+    <a href="/business?slug=${b.slug}" class="biz-card">
       <div class="biz-card__img">
         <img src="${img}" alt="${b.name}" loading="lazy" onerror="this.src='/assets/images/placeholder-business.png'">
         <div class="biz-card__badges">

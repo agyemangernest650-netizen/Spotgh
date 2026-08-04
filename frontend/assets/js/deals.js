@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <div style="font-size:3rem;margin-bottom:1rem">😢</div>
           <h3>No active deals right now</h3>
           <p style="color:var(--clr-text-2)">Check back soon or browse our directory.</p>
-          <a href="/pages/directory.html" class="btn btn--primary" style="margin-top:1rem">Browse Businesses</a>
+          <a href="/directory" class="btn btn--primary" style="margin-top:1rem">Browse Businesses</a>
         </div>`;
         return;
       }
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               </div>
             </div>
             <div style="padding:.75rem 1rem;border-top:1px solid var(--clr-border);display:flex;gap:.5rem">
-              ${biz.slug ? `<a href="/pages/business.html?slug=${biz.slug}" class="btn btn--outline btn--sm" style="flex:1">View Business</a>` : ''}
+              ${biz.slug ? `<a href="/business?slug=${biz.slug}" class="btn btn--outline btn--sm" style="flex:1">View Business</a>` : ''}
               ${biz.whatsapp ? `<a href="https://wa.me/${biz.whatsapp.replace(/\D/g,'')}" class="btn btn--whatsapp btn--sm" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i></a>` : ''}
               ${!biz.whatsapp && biz.phone ? `<a href="tel:${biz.phone}" class="btn btn--ghost btn--sm"><i class="fa-solid fa-phone"></i></a>` : ''}
             </div>

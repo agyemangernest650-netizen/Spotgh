@@ -5,12 +5,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const bizId = new URLSearchParams(location.search).get('id');
   const openCustomer = new URLSearchParams(location.search).get('customer');
-  if (!bizId) { location.href = '/pages/dashboard.html'; return; }
+  if (!bizId) { location.href = '/dashboard'; return; }
 
   document.getElementById('pageMain').innerHTML = `
     <div class="container" style="max-width:900px;margin:0 auto;padding:2rem 1rem 4rem">
       <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem">
-        <a href="/pages/dashboard.html" class="btn btn--ghost btn--sm"><i class="fa-solid fa-arrow-left"></i></a>
+        <a href="/dashboard" class="btn btn--ghost btn--sm"><i class="fa-solid fa-arrow-left"></i></a>
         <h1 style="font-size:1.5rem;font-weight:800;margin:0">Messages</h1>
       </div>
       <div style="display:grid;grid-template-columns:260px 1fr;gap:1.25rem;min-height:500px" id="msgLayout">

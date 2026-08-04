@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const budget = l.budget_min && l.budget_max ? `GH₵${l.budget_min}–${l.budget_max}` : (l.budget_max ? `Up to GH₵${l.budget_max}` : 'Budget flexible');
     const quotes = l.lead_quotes?.[0]?.count ?? 0;
     return `
-      <a href="/pages/leads.html?id=${l.id}" class="card" style="padding:1.1rem;display:block;text-decoration:none;color:inherit">
+      <a href="/leads?id=${l.id}" class="card" style="padding:1.1rem;display:block;text-decoration:none;color:inherit">
         <div style="display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap">
           <strong style="font-size:1.05rem">${l.title}</strong>
           <span class="badge" style="background:var(--clr-surface-2);color:var(--clr-text-2)">${quotes} quote${quotes===1?'':'s'}</span>
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
       body.innerHTML = `<div style="display:grid;gap:1rem">${leads.map(l => `
-        <a href="/pages/leads.html?id=${l.id}" class="card" style="padding:1.1rem;display:block;text-decoration:none;color:inherit">
+        <a href="/leads?id=${l.id}" class="card" style="padding:1.1rem;display:block;text-decoration:none;color:inherit">
           <div style="display:flex;justify-content:space-between;gap:.5rem">
             <strong>${l.title}</strong>
             <span class="badge badge--${l.status === 'open' ? 'success' : l.status === 'awarded' ? 'primary' : 'warning'}">${l.status}</span>
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       try {
         const { lead } = await API.post('/leads', payload);
         toast.success('Request posted! Nearby businesses have been notified.');
-        location.href = `/pages/leads.html?id=${lead.id}`;
+        location.href = `/leads?id=${lead.id}`;
       } catch (err) { toast.error(err.message); setLoading(btn, false); }
     });
   };
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       main.innerHTML = `
         <div class="container" style="padding:2rem 1rem 4rem;max-width:720px">
-          <a href="/pages/leads.html" style="font-size:.85rem;color:var(--clr-text-2)"><i class="fa-solid fa-arrow-left"></i> Back to Leads</a>
+          <a href="/leads" style="font-size:.85rem;color:var(--clr-text-2)"><i class="fa-solid fa-arrow-left"></i> Back to Leads</a>
           <div class="card" style="padding:1.5rem;margin-top:1rem">
             <div style="display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap">
               <h2 style="margin:0">${lead.title}</h2>

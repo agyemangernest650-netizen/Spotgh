@@ -36,10 +36,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('pageMain').innerHTML = `
     <div class="container" style="max-width:760px;margin:0 auto;padding:2rem 1rem 4rem">
+      ${isEdit ? `<div id="bizAdminNav"></div>` : `
       <div style="display:flex;align-items:center;gap:1rem;margin-bottom:2rem">
-        <a href="/pages/dashboard.html" class="btn btn--ghost btn--sm"><i class="fa-solid fa-arrow-left"></i></a>
-        <h1 style="font-size:1.5rem;font-weight:800;margin:0" id="pageTitle">${isEdit?'Edit Business':'Add Business'}</h1>
-      </div>
+        <a href="/dashboard" class="btn btn--ghost btn--sm"><i class="fa-solid fa-arrow-left"></i></a>
+        <h1 style="font-size:1.5rem;font-weight:800;margin:0" id="pageTitle">Add Business</h1>
+      </div>`}
 
       <!-- AI Helper -->
       ${isEdit?`<div class="card" style="padding:1rem 1.25rem;margin-bottom:1.5rem;background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(246,160,18,.08));border:1px solid rgba(99,102,241,.2)">
@@ -198,11 +199,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div id="enterpriseToolsCard"></div>
 
         <div style="display:flex;gap:.75rem;justify-content:flex-end;flex-wrap:wrap">
-          <a href="/pages/dashboard.html" class="btn btn--ghost">Cancel</a>
+          <a href="/dashboard" class="btn btn--ghost">Cancel</a>
           <button id="saveBtn" class="btn btn--primary" onclick="saveBusiness()">${isEdit?'Save Changes':'Create Listing'}</button>
         </div>
       </div>
     </div>`;
+  if (isEdit) renderBizAdminNav('bizAdminNav', bizId, 'edit');
 
   // Char counter
   document.getElementById('beDesc').addEventListener('input', e => {
@@ -729,7 +731,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else {
         const { business } = await API.post('/businesses', body);
         toast.success('Business created! Pending review.');
-        setTimeout(() => { window.location.href = '/pages/dashboard.html'; }, 1500);
+        setTimeout(() => { window.location.href = '/dashboard'; }, 1500);
       }
     } catch(e) {
       toast.error(e.message || 'Failed to save business');

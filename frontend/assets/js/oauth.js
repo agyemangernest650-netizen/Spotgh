@@ -26,11 +26,11 @@ window.OAuth = (() => {
 
   async function signIn(provider) {
     const client = await getClient();
-    const next = new URLSearchParams(location.search).get('next') || '/pages/dashboard.html';
+    const next = new URLSearchParams(location.search).get('next') || '/dashboard';
     sessionStorage.setItem('oauth_next', next);
     await client.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${location.origin}/pages/oauth-callback.html` },
+      options: { redirectTo: `${location.origin}/oauth-callback` },
     });
   }
 

@@ -270,7 +270,7 @@ exports.forgotPassword = async (req, res, next) => {
       const hash = crypto.createHash('sha256').update(rawToken).digest('hex');
       const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
       await supabaseAdmin.from('users').update({ reset_token_hash: hash, reset_token_expires: expires.toISOString() }).eq('id', user.id);
-      const link = `${env.APP_URL}/pages/forgot-password.html?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
+      const link = `${env.APP_URL}/forgot-password?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
       await sendEmail(user.email, 'Reset your SpotGH password',
         wrap('Reset your password', `Hi ${user.full_name || 'there'}, click below to set a new password. This link expires in 1 hour. If you didn't request this, you can ignore this email.`,
         'Reset Password', link));

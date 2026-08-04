@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const bizId = params.get('business_id') || null;
 
     if (subscriptionType === 'directory' && planKey === 'free' && !bizId) {
-      window.location.href = Auth.isLoggedIn() ? '/pages/dashboard.html?tab=new&signup_type=directory' : '/pages/register.html';
+      window.location.href = Auth.isLoggedIn() ? '/dashboard?tab=new&signup_type=directory' : '/register';
       return;
     }
     if (!Auth.requireAuth()) return;
@@ -272,7 +272,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!bizId) {
       sessionStorage.setItem('spotgh_pending_plan', JSON.stringify({ subscription_type: subscriptionType, plan_key: planKey, billing }));
       const signupType = subscriptionType === 'directory' ? 'directory' : subscriptionType === 'website' ? 'website' : 'both';
-      window.location.href = `/pages/dashboard.html?tab=new&signup_type=${signupType}`;
+      window.location.href = `/dashboard?tab=new&signup_type=${signupType}`;
       return;
     }
 

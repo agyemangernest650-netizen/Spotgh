@@ -368,16 +368,16 @@ exports.create = async (req, res, next) => {
         ownWebsiteVerified
           ? `We confirmed ${website} is live and linked it to your SpotGH listing.`
           : `We saved ${website} on your listing, but couldn't confirm it responded — double check the link still works.`,
-        `/pages/dashboard.html?tab=businesses`);
+        `/dashboard?tab=businesses`);
     } else if (wantsWebsite) {
       await notify(req.user.id, 'info', '🌐 Your SpotGH mini-website is being generated',
         `${business.name} will get its own SpotGH mini-website once approved — no external site needed.`,
-        `/pages/dashboard.html?tab=businesses`);
+        `/dashboard?tab=businesses`);
     }
 
     await notify(req.user.id, 'info', '📋 Business submitted!',
       `${business.name} is under review. Usually approved within 24 hours.`,
-      `/pages/dashboard.html?tab=businesses`);
+      `/dashboard?tab=businesses`);
 
     await audit(req.user.id, 'business_created', 'business', business.id, null, { name, slug }, req);
 

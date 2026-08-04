@@ -32,7 +32,7 @@ router.post('/:businessId', verifyToken, limits.messages, async (req, res, next)
     }).select().single();
     if (error) throw error;
 
-    await notify(biz.owner_id, 'info', `💬 New message about ${biz.name}`, body.trim().slice(0, 100), `/pages/messages.html?id=${req.params.businessId}&customer=${req.user.id}`);
+    await notify(biz.owner_id, 'info', `💬 New message about ${biz.name}`, body.trim().slice(0, 100), `/messages?id=${req.params.businessId}&customer=${req.user.id}`);
     res.status(201).json({ message: data });
   } catch (err) { next(err); }
 });
@@ -67,7 +67,7 @@ router.post('/business/:id/reply', verifyToken, requireOwnership, limits.message
     }).select().single();
     if (error) throw error;
 
-    await notify(customer_id, 'info', `💬 ${biz?.name || 'A business'} replied`, body.trim().slice(0, 100), `/pages/business.html?id=${req.params.id}`);
+    await notify(customer_id, 'info', `💬 ${biz?.name || 'A business'} replied`, body.trim().slice(0, 100), `/business?id=${req.params.id}`);
     res.status(201).json({ message: data });
   } catch (err) { next(err); }
 });

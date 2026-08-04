@@ -59,7 +59,7 @@ router.post('/:id/reply', verifyToken, async (req, res, next) => {
     await supabaseAdmin.from('support_ticket_messages').insert({ ticket_id: ticket.id, sender_role: isAdmin ? 'admin' : 'user', sender_id: req.user.id, body: message });
     if (isAdmin) {
       await supabaseAdmin.from('support_tickets').update({ status: 'in_progress' }).eq('id', ticket.id);
-      if (ticket.user_id) await notify(ticket.user_id, 'info', 'Support replied', `New reply on "${ticket.subject}"`, `/pages/support.html?id=${ticket.id}`);
+      if (ticket.user_id) await notify(ticket.user_id, 'info', 'Support replied', `New reply on "${ticket.subject}"`, `/support?id=${ticket.id}`);
     }
     res.status(201).json({ message: 'Reply sent' });
   } catch (err) { next(err); }

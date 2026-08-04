@@ -84,7 +84,7 @@ router.patch ('/:id',                     verifyToken, requireOwnership, ctrl.up
 router.delete('/:id',                     verifyToken, requireOwnership, ctrl.remove);
 router.get   ('/:id/health',              verifyToken, requireOwnership, ctrl.healthScore);
 
-// Owner-only weekly stats teaser for the mini-website (full breakdown lives on /pages/analytics.html)
+// Owner-only weekly stats teaser for the mini-website (full breakdown lives on /analytics)
 router.get('/:id/views-summary', verifyToken, requireOwnership, async (req, res, next) => {
   try {
     const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -126,7 +126,7 @@ router.post('/:id/reviews', verifyToken, async (req, res, next) => {
       .select('*,users:reviewer_id(full_name,avatar_url)').single();
     if (error) throw error;
     const { data: biz } = await supabaseAdmin.from('businesses').select('name,owner_id,slug').eq('id', req.params.id).single();
-    if (biz) await notify(biz.owner_id, 'success', `⭐ New ${rating}-star review for ${biz.name}`, (comment || '').slice(0, 100) || `${rating} star review received`, `/pages/business.html?slug=${biz.slug}`);
+    if (biz) await notify(biz.owner_id, 'success', `⭐ New ${rating}-star review for ${biz.name}`, (comment || '').slice(0, 100) || `${rating} star review received`, `/business?slug=${biz.slug}`);
     res.status(201).json({ review: data });
   } catch (err) { next(err); }
 });

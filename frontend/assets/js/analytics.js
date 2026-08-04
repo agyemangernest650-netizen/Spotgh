@@ -64,17 +64,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!Auth.requireAuth()) return;
 
   const bizId = new URLSearchParams(location.search).get('id');
-  if (!bizId) { location.href = '/pages/dashboard.html'; return; }
+  if (!bizId) { location.href = '/dashboard'; return; }
 
   let days = 30;
 
   const main = document.getElementById('pageMain');
   main.innerHTML = `
     <div class="container" style="max-width:960px;margin:0 auto;padding:2rem 1rem 4rem">
-      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:2rem;flex-wrap:wrap">
-        <a href="/pages/dashboard.html" class="btn btn--ghost btn--sm"><i class="fa-solid fa-arrow-left"></i></a>
-        <h1 style="font-size:1.5rem;font-weight:800;margin:0">Analytics</h1>
-        <div style="margin-left:auto;display:flex;gap:.5rem">
+      <div id="bizAdminNav"></div>
+      <div style="display:flex;align-items:center;justify-content:flex-end;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap">
+        <div style="display:flex;gap:.5rem">
           ${[7,14,30,90].map(d=>`<button class="btn btn--sm ${d===30?'btn--primary':'btn--ghost'} period-btn" data-days="${d}">${d}d</button>`).join('')}
         </div>
       </div>
@@ -86,6 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="skeleton" style="height:200px;border-radius:16px"></div>
       </div>
     </div>`;
+  renderBizAdminNav('bizAdminNav', bizId, 'analytics');
 
   document.querySelectorAll('.period-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <h3 style="font-weight:700;margin-bottom:.5rem">Basic analytics only</h3>
             <p style="color:var(--clr-text-2);margin-bottom:1rem">Total views: <strong>${(data.summary?.total_views||0).toLocaleString()}</strong> · WhatsApp clicks: <strong>${(data.summary?.whatsapp_clicks||0).toLocaleString()}</strong> · Orders: <strong>${(data.summary?.orders_period||0).toLocaleString()}</strong> · Revenue: <strong>GHS ${Number(data.summary?.order_revenue_period||0).toLocaleString()}</strong> · Avg rating: <strong>${data.summary?.avg_rating?parseFloat(data.summary.avg_rating).toFixed(1):'—'}</strong></p>
             <p style="color:var(--clr-text-2);font-size:.875rem;margin-bottom:1rem">Upgrade to Pro for the daily views chart, click breakdown, and rating distribution.</p>
-            <a href="/pages/pricing.html" class="btn btn--primary">Upgrade to Pro</a>
+            <a href="/pricing" class="btn btn--primary">Upgrade to Pro</a>
           </div>`;
         return;
       }
@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <div style="font-size:2rem;margin-bottom:1rem">📊</div>
           <h3>Analytics Unavailable</h3>
           <p style="color:var(--clr-text-2)">Upgrade to a Pro plan to unlock detailed analytics.</p>
-          <a href="/pages/pricing.html" class="btn btn--primary" style="margin-top:1rem">View Plans</a>
+          <a href="/pricing" class="btn btn--primary" style="margin-top:1rem">View Plans</a>
         </div>`;
     }
   }

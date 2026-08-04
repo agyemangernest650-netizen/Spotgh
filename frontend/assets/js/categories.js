@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const grid = document.getElementById('allcatsGrid');
     if (!top.length) { grid.innerHTML = '<p style="color:var(--clr-text-3)">No categories available yet.</p>'; return; }
     grid.innerHTML = top.map(c => `
-      <a href="/pages/category.html?slug=${c.slug}" class="allcat-card">
+      <a href="/category?slug=${c.slug}" class="allcat-card">
         <div class="ic">${c.icon || '🏷️'}</div>
         <h3>${c.name}</h3>
         <p>${c.description || `Browse ${c.name.toLowerCase()} businesses near you.`}</p>

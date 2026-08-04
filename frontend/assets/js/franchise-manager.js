@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const { franchise } = await API.post('/franchises', { name, description: document.getElementById('fDesc').value.trim() || undefined });
       toast.success('Franchise created!');
-      location.href = `/pages/franchise-manager.html?id=${franchise.id}`;
+      location.href = `/franchise-manager?id=${franchise.id}`;
     } catch (err) { toast.error(err.message || 'Failed to create franchise'); }
   };
 
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   window.deleteFranchise = async () => {
     if (!confirm('Delete this franchise? Locations will not be deleted, just ungrouped.')) return;
-    try { await API.delete(`/franchises/${franchiseId}`); toast.success('Franchise deleted'); location.href = '/pages/franchise-manager.html'; }
+    try { await API.delete(`/franchises/${franchiseId}`); toast.success('Franchise deleted'); location.href = '/franchise-manager'; }
     catch { toast.error('Failed to delete'); }
   };
 
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function franchiseCard(f) {
     return `
-      <a href="/pages/franchise-manager.html?id=${f.id}" class="card" style="padding:1.25rem;text-decoration:none;color:inherit;display:block">
+      <a href="/franchise-manager?id=${f.id}" class="card" style="padding:1.25rem;text-decoration:none;color:inherit;display:block">
         <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
           ${f.logo_url
             ? `<img src="${f.logo_url}" alt="${f.name}" style="width:44px;height:44px;border-radius:10px;object-fit:cover">`
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     main.innerHTML = `
       <div class="container" style="max-width:900px;margin:0 auto;padding:2rem 1rem 4rem">
-        <a href="/pages/franchise-manager.html" class="btn btn--ghost btn--sm" style="margin-bottom:1rem"><i class="fa-solid fa-arrow-left"></i> All Franchises</a>
+        <a href="/franchise-manager" class="btn btn--ghost btn--sm" style="margin-bottom:1rem"><i class="fa-solid fa-arrow-left"></i> All Franchises</a>
 
         <div class="card" style="padding:1.5rem;margin-bottom:1.5rem;display:flex;gap:1.25rem;align-items:center;flex-wrap:wrap">
           <div style="text-align:center">
@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <span>👁 ${b.view_count || 0}</span>
           <span>★ ${b.avg_rating || '—'}</span>
         </div>
-        <a href="/pages/business-edit.html?id=${b.id}" class="btn btn--outline btn--sm" style="width:100%;margin-top:.75rem;justify-content:center">Manage</a>
+        <a href="/business-edit?id=${b.id}" class="btn btn--outline btn--sm" style="width:100%;margin-top:.75rem;justify-content:center">Manage</a>
       </div>`;
   }
 

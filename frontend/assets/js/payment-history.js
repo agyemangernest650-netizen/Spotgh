@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('pageMain').innerHTML = `
     <div class="container" style="max-width:860px;margin:0 auto;padding:2rem 1rem 4rem">
       <div style="display:flex;align-items:center;gap:1rem;margin-bottom:2rem;flex-wrap:wrap">
-        <a href="/pages/dashboard.html" class="btn btn--ghost btn--sm"><i class="fa-solid fa-arrow-left"></i></a>
+        <a href="/dashboard" class="btn btn--ghost btn--sm"><i class="fa-solid fa-arrow-left"></i></a>
         <h1 style="font-size:1.5rem;font-weight:800;margin:0">Payment History</h1>
         <button class="btn btn--ghost btn--sm" style="margin-left:auto" onclick="downloadCSV()">
           <i class="fa-solid fa-download"></i> Export CSV
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <div style="font-size:3rem;margin-bottom:1rem">🧾</div>
           <h3>No payments yet</h3>
           <p style="color:var(--clr-text-2)">Your payment receipts will appear here after you subscribe to a plan.</p>
-          <a href="/pages/pricing.html" class="btn btn--primary" style="margin-top:1rem">View Plans</a>
+          <a href="/pricing" class="btn btn--primary" style="margin-top:1rem">View Plans</a>
         </div>`;
       return;
     }
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       <div class="card" style="padding:3rem;text-align:center">
         <div style="font-size:3rem;margin-bottom:1rem">⚠️</div>
         <h3>Failed to load payments</h3>
-        <a href="/pages/dashboard.html" class="btn btn--primary" style="margin-top:1rem">Go to Dashboard</a>
+        <a href="/dashboard" class="btn btn--primary" style="margin-top:1rem">Go to Dashboard</a>
       </div>`;
   }
 });

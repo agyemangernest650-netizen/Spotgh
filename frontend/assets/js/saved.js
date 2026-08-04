@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('pageMain').innerHTML = `
     <div class="container" style="max-width:900px;margin:0 auto;padding:2rem 1rem 4rem">
       <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap">
-        <a href="/pages/dashboard.html" class="btn btn--ghost btn--sm"><i class="fa-solid fa-arrow-left"></i></a>
+        <a href="/dashboard" class="btn btn--ghost btn--sm"><i class="fa-solid fa-arrow-left"></i></a>
         <h1 style="font-size:1.5rem;font-weight:800;margin:0">❤️ Saved</h1>
       </div>
       <div style="display:flex;gap:.5rem;margin-bottom:1.5rem;border-bottom:1px solid var(--clr-border)">
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!businesses.length) {
         grid.innerHTML = `<div style="grid-column:1/-1">${emptyState({
           icon: '💔', title: 'No saved businesses yet', subtitle: 'Tap the ❤️ on any business to save it here for later.',
-          actionHtml: `<a href="/pages/directory.html" class="btn btn--primary">Browse Directory</a>`,
+          actionHtml: `<a href="/directory" class="btn btn--primary">Browse Directory</a>`,
         })}</div>`;
         return;
       }
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!products.length) {
         grid.innerHTML = emptyState({
           icon: '📦', title: 'No saved products yet', subtitle: 'Tap the ❤️ on any product to save it here for quick reordering.',
-          actionHtml: `<a href="/pages/directory.html" class="btn btn--primary">Browse Businesses</a>`,
+          actionHtml: `<a href="/directory" class="btn btn--primary">Browse Businesses</a>`,
         });
         return;
       }
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       await API.post(`/cart/${businessId}/items`, { product_id: productId, quantity: 1 });
       toast.success('Added to cart');
-      location.href = `/pages/checkout.html?biz=${businessId}`;
+      location.href = `/checkout?biz=${businessId}`;
     } catch (e) { toast.error(e.message || 'Could not add to cart'); }
   };
   window.unsaveProduct = async (productId) => {
